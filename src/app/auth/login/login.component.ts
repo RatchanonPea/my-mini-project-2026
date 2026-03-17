@@ -12,6 +12,8 @@ export class LoginComponent {
   constructor(private router: Router) {}
 
   login() {
+    console.log(this.datalogin);
+
     if (this.datalogin.username === 'Pea01' && this.datalogin.password === '1234') {
       localStorage.setItem('isLoggedIn', 'true');
       this.router.navigate(['/main-conten-mng/main-page']);
