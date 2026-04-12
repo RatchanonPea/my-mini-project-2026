@@ -1,0 +1,18 @@
+<app-navbar></app-navbar>
+
+<div class="main-content">
+  <app-sidebar [collapsed]="sidebarCollapsed"></app-sidebar>
+
+  <div class="content-wrapper" [class.sidebar-collapsed]="sidebarCollapsed">
+    <div class="content-header">
+      <button class="btn btn-outline-secondary btn-sm toggle-sidebar" (click)="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <h4 class="mb-0">Dashboard</h4>
+    </div>
+
+    <div class="content-body">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

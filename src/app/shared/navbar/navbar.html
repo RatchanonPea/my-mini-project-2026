@@ -1,0 +1,16 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-rocket"></i> MiniProject Angular
+    </a>
+
+    <div class="d-flex align-items-center">
+      <span class="navbar-text me-3" *ngIf="currentUser">
+        <i class="fas fa-user"></i> ยินดีต้อนรับ: {{ currentUser }}
+      </span>
+      <button class="btn btn-outline-light btn-sm" (click)="logout()" *ngIf="currentUser">
+        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+      </button>
+    </div>
+  </div>
+</nav>

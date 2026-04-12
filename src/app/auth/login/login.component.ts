@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-login',
@@ -9,13 +10,12 @@ import { Router } from '@angular/router';
 })
 export class LoginComponent {
   datalogin: any = {};
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   login() {
     console.log(this.datalogin);
 
-    if (this.datalogin.username === 'Pea01' && this.datalogin.password === '1234') {
-      localStorage.setItem('isLoggedIn', 'true');
+    if (this.authService.login(this.datalogin.username, this.datalogin.password)) {
       this.router.navigate(['/main-conten-mng/main-page']);
     } else {
       alert('Username หรือ Password ไม่ถูกต้อง');

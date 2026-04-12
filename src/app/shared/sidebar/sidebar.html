@@ -1,0 +1,30 @@
+<div class="sidebar" [class.collapsed]="collapsed">
+  <div class="sidebar-header">
+    <h5 *ngIf="!collapsed">เมนูหลัก</h5>
+    <i *ngIf="collapsed" class="fas fa-bars" title="เมนูหลัก"></i>
+  </div>
+
+  <ul class="sidebar-menu">
+    <li *ngFor="let item of menuItems" class="menu-item">
+      <a [routerLink]="item.path" routerLinkActive="active" class="menu-link"
+         [class.has-children]="item.children && item.children.length > 0"
+         (click)="toggleSubmenu(item)">
+        <i [class]="item.icon" class="menu-icon"></i>
+        <span class="menu-text" *ngIf="!collapsed">{{ item.label }}</span>
+        <i *ngIf="item.children && item.children.length > 0 && !collapsed"
+           class="fas fa-chevron-down submenu-toggle"
+           [class.rotated]="item.expanded"></i>
+      </a>
+
+      <ul *ngIf="item.children && item.children.length > 0 && item.expanded && !collapsed"
+          class="submenu">
+        <li *ngFor="let child of item.children" class="submenu-item">
+          <a [routerLink]="child.path" routerLinkActive="active" class="submenu-link">
+            <i [class]="child.icon" class="submenu-icon"></i>
+            <span class="submenu-text">{{ child.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>

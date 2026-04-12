@@ -1,0 +1,23 @@
+.navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+
+.navbar-text {
+  color: rgba(255,255,255,.8) !important;
+  font-size: 0.9rem;
+}
+
+.btn-outline-light {
+  border-color: rgba(255,255,255,.5);
+  color: rgba(255,255,255,.8);
+
+  &:hover {
+    background-color: rgba(255,255,255,.1);
+    border-color: rgba(255,255,255,.8);
+    color: white;
+  }
+}
