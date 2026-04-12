@@ -1,0 +1,145 @@
+/* Small Icon */
+.dc-dropdown.small .dx-icon {
+    width: 32px;
+    height: 20px;
+    font-size: 16px; /* Adjust icon font size */
+}
+
+/* Medium Icon */
+.dc-dropdown.medium .dx-icon {
+    width: 36px;
+    height: 24px;
+    font-size: 24px; /* Adjust icon font size */
+}
+.dc-dropdown.medium .dx-texteditor {
+    height: 36px !important;
+    line-height: 36px !important;
+}
+
+.dc-dropdown.medium .dx-texteditor-input {
+    height: 36px !important;
+    line-height: 36px !important;
+}
+
+.dc-dropdown.medium .dx-dropdowneditor-button {
+    height: 36px !important;
+}
+
+/* Large Icon */
+.dc-dropdown.large .dx-icon {
+    width: 40px;
+    height: 24px;
+    font-size: 24px; /* Adjust icon font size */
+}
+.dc-dropdown.large .dx-texteditor {
+    height: 48px !important;
+    line-height: 48px !important;
+}
+
+.dc-dropdown.large .dx-texteditor-input {
+    height: 48px !important;
+    line-height: 48px !important;
+}
+
+.dc-dropdown.large .dx-dropdowneditor-button {
+    height: 48px !important;
+}
+
+/* Container Styles */
+.dc-dropdown .dx-texteditor-container {
+    border-radius: 4px !important;
+}
+
+/* Outlined Editor */
+.dc-dropdown .dx-texteditor.dx-editor-outlined {
+    border-color: var(--dc-border-info) !important;
+}
+
+.dc-dropdown .dx-texteditor.dx-editor-outlined::before {
+    border-bottom-color: transparent !important;
+}
+
+/* Focused and Active State */
+.dc-dropdown .dx-texteditor.dx-editor-outlined.dx-state-active,
+.dc-dropdown .dx-texteditor.dx-editor-outlined.dx-state-focused {
+    border-color: var(--dc-blue-60) !important;
+}
+
+/* Read-Only State */
+.dc-dropdown .dx-selectbox .dx-texteditor-input:read-only {
+    background-color: var(--dc-gray-20) !important;
+    color: var(--dc-gray-90) !important;
+}
+
+.dc-dropdown .dx-selectbox .dx-dropdowneditor-button:read-only {
+    background-color: var(--dc-gray-20) !important;
+}
+
+/* Disabled State */
+.dc-dropdown .dx-selectbox .dx-texteditor-input:disabled {
+    background-color: var(--dc-gray-20) !important;
+    color: var(--dc-gray-30) !important;
+}
+
+.dc-dropdown .dx-texteditor.dx-editor-outlined.dx-state-disabled {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    color: var(--dc-gray-30) !important;
+}
+
+.dc-dropdown .dx-selectbox.dx-state-disabled .dx-dropdowneditor-button {
+    background-color: var(--dc-gray-20) !important;
+}
+
+/* Default State */
+.dc-dropdown .dx-selectbox:not(.dx-state-disabled):not(.dx-state-readonly) .dx-texteditor-input {
+    background-color: var(--dc-gray-10) !important;
+    color: var(--dc-gray-90) !important;
+}
+
+.dc-dropdown .dx-selectbox:not(.dx-state-disabled):not(.dx-state-readonly) .dx-dropdowneditor-button {
+    background-color: var(--dc-gray-10) !important;
+}
+
+/* Open State */
+.dc-dropdown .dx-selectbox.dx-state-focused .dx-dropdowneditor-button {
+    background-color: var(--dc-gray-10) !important;
+}
+
+/* Error State */
+.dc-dropdown .dx-selectbox.dx-state-invalid .dx-texteditor-input {
+    background-color: var(--dc-gray-10) !important;
+    color: var(--dc-gray-90) !important;
+}
+
+.dc-dropdown .dx-texteditor.dx-editor-outlined.dx-invalid {
+    border-color: var(--dc-error) !important;
+    color: var(--dc-gray-10) !important;
+}
+
+.dc-dropdown .dx-invalid-message > .dx-overlay-content {
+    background-color: var(--dc-error) !important;
+    color: var(--dc-gray-10) !important;}
+
+.dc-dropdown .dx-invalid.dx-texteditor.dx-show-invalid-badge .dx-texteditor-input-container::after {
+    background-color: var(--dc-error) !important;
+}
+
+.dc-dropdown .dx-selectbox.dx-state-invalid .dx-dropdowneditor-button {
+    background-color: var(--dc-gray-10) !important;
+}
+
+/* Selected State */
+.dc-dropdown .dx-selectbox.dx-item-selected .dx-dropdowneditor-button {
+    background-color: var(--dc-gray-10) !important;
+}
+
+/* Selected (Required) State */
+.dc-dropdown .dx-selectbox.dx-item-selected:required .dx-texteditor-input {
+    border-color: var(--dc-blue-60) !important; /* Set border to Blue60 */
+    color: var(--dc-gray-90) !important;
+}
+
+.dc-dropdown .dx-selectbox.dx-item-selected:required .dx-dropdowneditor-button {
+    background-color: var(--dc-gray-10) !important;
+}

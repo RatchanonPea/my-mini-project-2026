@@ -1,0 +1,22 @@
+.dc-c-modal-custom {
+    position: absolute;
+    width: 100vw;
+    margin: 0;
+    bottom: 0;
+}
+
+.dc-c-modal-custom :is(.dc-u-rounded) {
+    border-bottom-left-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+}
+
+@media (min-width: 768px) {
+    .dc-c-modal-custom {
+       position: relative;
+       margin: .5rem auto;
+    }
+
+    .dc-c-modal-custom :is(.dc-u-rounded) {
+        border-radius: var(--dc-radius-2) !important;
+    }
+}

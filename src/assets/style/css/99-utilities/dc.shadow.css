@@ -1,0 +1,27 @@
+.dc-u-shadow-1 {
+  box-shadow: var(--dc-shadow-1);
+}
+
+.dc-u-shadow-2 {
+  box-shadow: var(--dc-shadow-2);
+}
+
+.dc-u-shadow-3 {
+  box-shadow: var(--dc-shadow-3);
+}
+
+.dc-u-shadow-4 {
+  box-shadow: var(--dc-shadow-4);
+}
+
+.dc-u-shadow-e0{
+    box-shadow: var(--dc-shadow-7);
+}
+.dc-u-shadow-e1{
+    box-shadow: var(--dc-shadow-8);
+}
+.dc-u-shadow-e2{
+    box-shadow: var(--dc-shadow-9);
+}
+
+

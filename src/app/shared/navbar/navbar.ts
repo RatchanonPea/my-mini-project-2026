@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import { Subscription } from 'rxjs';
+import { ConfirmDialog } from '../../common/helper';
 
 @Component({
   selector: 'app-navbar',
@@ -28,6 +29,11 @@ export class Navbar implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    this.authService.logout();
+     ConfirmDialog('ยืนยันการออกจากระบบ',"คุณต้องการออกจากระบบใช่หรือไม่")
+        .then(async emit => {
+          if (emit) {
+            this.authService.logout();
+          }
+        });
   }
 }

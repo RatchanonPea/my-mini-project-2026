@@ -1,0 +1,15 @@
+:where(html) {
+  --dc-spacing-01: .125rem;
+  --dc-spacing-02: .25rem;
+  --dc-spacing-03: .5rem;
+  --dc-spacing-04: .75rem;
+  --dc-spacing-05: 1rem;
+  --dc-spacing-06: 1.5rem;
+  --dc-spacing-07: 2rem;
+  --dc-spacing-08: 2.5rem;
+  --dc-spacing-09: 3rem;
+  --dc-spacing-10: 4rem;
+  --dc-spacing-11: 5rem;
+  --dc-spacing-12: 6rem;
+  --dc-spacing-13: 10rem;
+}

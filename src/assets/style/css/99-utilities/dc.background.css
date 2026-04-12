@@ -1,0 +1,143 @@
+.dc-u-bg--primary-100 {
+  background-color: var(--dc-primary-100);
+}
+
+.dc-u-bg--primary-75 {
+  background-color: var(--dc-primary-75);
+}
+
+.dc-u-bg--primary-50 {
+  background-color: var(--dc-primary-50);
+}
+
+.dc-u-bg--primary-25 {
+  background-color: var(--dc-primary-25);
+}
+
+.dc-u-bg--primary-5 {
+  background-color: var(--dc-primary-5);
+}
+
+.dc-u-bg--secondary-100 {
+  background-color: var(--dc-secondary-100);
+}
+
+.dc-u-bg--secondary-50 {
+  background-color: var(--dc-secondary-50);
+}
+
+.dc-u-bg--secondary-25 {
+  background-color: var(--dc-secondary-25);
+}
+
+.dc-u-bg--secondary-5 {
+  background-color: var(--dc-secondary-5);
+}
+
+.dc-u-bg--care-100 {
+  background-color: var(--dc-care-100);
+}
+
+.dc-u-bg--care-50 {
+  background-color: var(--dc-care-50);
+}
+
+.dc-u-bg--care-25 {
+  background-color: var(--dc-care-25);
+}
+
+.dc-u-bg--care-5 {
+  background-color: var(--dc-care-5);
+}
+
+.dc-u-bg--positive-100 {
+  background-color: var(--dc-care-100);
+}
+
+.dc-u-bg--positive-50 {
+  background-color: var(--dc-positive-50);
+}
+
+.dc-u-bg--positive-25 {
+  background-color: var(--dc-positive-25);
+}
+
+.dc-u-bg--positive-5 {
+  background-color: var(--dc-positive-5);
+}
+
+.dc-u-bg--negative-100 {
+  background-color: var(--dc-negative-100);
+}
+
+.dc-u-bg--negative-50 {
+  background-color: var(--dc-negative-50);
+}
+
+.dc-u-bg--negative-25 {
+  background-color: var(--dc-negative-25);
+}
+
+.dc-u-bg--negative-5 {
+  background-color: var(--dc-negative-5);
+}
+
+.dc-u-bg--warning-100 {
+  background-color: var(--dc-warning-100);
+}
+
+.dc-u-bg--warning-50 {
+  background-color: var(--dc-warning-50);
+}
+
+.dc-u-bg--warning-25 {
+  background-color: var(--dc-warning-25);
+}
+
+.dc-u-bg--warning-5 {
+  background-color: var(--dc-warning-5);
+}
+
+.dc-u-bg--black-100 {
+  background-color: var(--dc-black-100);
+}
+
+.dc-u-bg--black-50 {
+  background-color: var(--dc-black-50);
+}
+
+.dc-u-bg--black-25 {
+  background-color: var(--dc-black-25);
+}
+
+.dc-u-bg--black-5 {
+  background-color: var(--dc-black-5);
+}
+
+.dc-u-bg--link {
+  background-color: var(--dc-link-100);
+}
+
+.dc-u-bg--white {
+  background-color: var(--dc-theme-1);
+}
+
+.dc-u-bg--theme-2 {
+  background-color: var(--dc-theme-2);
+}
+
+.dc-u-bg--theme-3 {
+  background-color: var(--dc-theme-3);
+}
+
+.dc-u-bg--gray-20 {
+  background-color: var(--dc-gray-20);
+}
+
+.dc-u-bg--gray-30 {
+  background-color: var(--dc-gray-30);
+}
+
+.dc-u-bg--blue-20 {
+  background-color: var(--dc-blue-20);
+}

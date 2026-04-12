@@ -1,0 +1,14 @@
+:where(html) {
+  --dc-border-size-1: 1px;
+  --dc-border-size-2: 2px;
+  --dc-border-size-3: 5px;
+  --dc-border-size-4: 10px;
+  --dc-border-size-5: 25px;
+  --dc-radius-1: 4px;
+  --dc-radius-2: 12px;
+  --dc-radius-3: 1rem;
+  --dc-radius-4: 2rem;
+  --dc-radius-5: 4rem;
+  --dc-radius-6: 8rem;
+  --dc-radius-round: 1e5px;
+}

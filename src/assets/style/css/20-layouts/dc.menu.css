@@ -1,0 +1,24 @@
+.w-menu-bar
+{
+  width: 100% !important;
+}
+
+@media (min-width: 1200px) {
+  .w-menu-bar
+  {
+    width: 85% !important;
+  }
+
+}
+@media (min-width: 1400px) {
+  .w-menu-bar
+  {
+    width: 75% !important;
+  }
+
+}
+
+.sidebar
+{
+  font-size: var(--dc-font-size-7) !important;
+}

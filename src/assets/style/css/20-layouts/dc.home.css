@@ -1,0 +1,42 @@
+
+
+/* navbar */
+/* 
+@media (min-width: 768px) {
+  .bc-l-img-logo {
+    height: 45px;
+  }
+
+  .header-space-tablet{
+    margin-top: 10px;
+  }
+  
+  .header-space-2-tablet{
+    padding-top: 22px !important;
+  }
+
+  .menu-space-tablet{
+    padding-bottom: 12px;
+  }
+}
+
+
+.bc-c-menu--mobile {
+  background-color: white;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  padding-top: var(--bc-spacing-05);
+  transition: all 1s ease-in;
+  z-index: 1029;
+}
+@media (min-width: 768px) {
+  .bc-c-menu--mobile {
+    top:60px;
+  }
+}
+
+.readonly-white {
+  background-color: white !important;
+} */
+

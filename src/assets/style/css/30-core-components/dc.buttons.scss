@@ -1,0 +1,386 @@
+.dx-button.dx-state-disabled.dx-button-mode-contained {
+  background-color: var(--dc-gray-20) !important;
+  color: var(--dc-gray-30) !important;
+  border-color: var(--dc-gray-30) !important;
+
+  .dx-icon {
+    color: var(--dc-gray-30) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+    filter: invert(97%) sepia(3%) saturate(1297%) hue-rotate(187deg) brightness(93%) contrast(20%) !important;
+  }
+}
+
+.dx-button.dx-state-disabled.dx-button-mode-text {
+  // background-color: var(--dc-gray-20) !important;
+  color: var(--dc-gray-30) !important;
+  border-color: var(--dc-gray-30) !important;
+
+  .dx-icon {
+    color: var(--dc-gray-30) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+    filter: invert(97%) sepia(3%) saturate(1297%) hue-rotate(187deg) brightness(93%) contrast(20%) !important;
+  }
+}
+
+.dx-button-mode-contained.dx-button-normal {
+  box-shadow: none !important;
+}
+
+/*#region Primary Button 1 - Normal Type*/
+
+.dc-c-btn-primary-1 {
+  background-color: var(--dc-blue-60) !important;
+  color: var(--dc-blue-10) !important;
+  border-radius: var(--dc-radius-1) !important;
+  font-size: var(--dc-font-size-20) !important;
+  font-weight: var(--dc-font-weight-7) !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  height: 48px !important;
+  min-width: 454px !important;
+}
+
+.dc-c-btn-primary-1:hover {
+  background-color: var(--dc-blue-80) !important;
+}
+
+/*#endregion Primary Button 1 - Normal Type*/
+
+/*#region Primary Button 2 - Normal Type*/
+.dc-c-btn-primary-2 {
+  background-color: var(--dc-blue-60) !important;
+  color: var(--dc-blue-10) !important;
+  border-radius: var(--dc-radius-1) !important;
+  font-size: var(--dc-font-size-14) !important;
+  font-weight: var(--dc-font-weight-7) !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  height: 32px !important;
+  min-width: 60px !important;
+
+  .dx-icon {
+    color: var(--dc-blue-10) !important;
+    font-size: var(--dc-font-size-20) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+  }
+}
+
+.dc-c-btn-primary-2:hover {
+  background-color: var(--dc-blue-80) !important;
+}
+
+/*#endregion Primary Button 2 - Normal Type*/
+
+/*#region Primary Button 2 - Error Type*/
+
+.dc-c-btn-primary-2--error {
+  background-color: var(--dc-error) !important;
+  color: var(--dc-blue-10) !important;
+  border-radius: var(--dc-radius-1) !important;
+  font-size: var(--dc-font-size-14) !important;
+  font-weight: var(--dc-font-weight-7) !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  height: 32px !important;
+  min-width: 60px !important;
+
+  .dx-icon {
+    color: var(--dc-blue-10) !important;
+    font-size: var(--dc-font-size-20) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+  }
+}
+
+.dc-c-btn-primary-2--error:hover {
+  background-color: #BF3634 !important;
+}
+
+/*#endregion Primary Button 2 - Error Type*/
+
+/*#region Secondary Button 1 - Normal Type*/
+.dc-c-btn-secondary-1 {
+  background-color: var(--dc-blue-10) !important;
+  border: 1px solid var(--dc-blue-60) !important;
+  color: var(--dc-blue-60) !important;
+  border-radius: var(--dc-radius-1) !important;
+  font-size: var(--dc-font-size-14) !important;
+  font-weight: var(--dc-font-weight-7) !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  height: 32px !important;
+  min-width: 60px !important;
+
+  .dx-icon {
+    color: var(--dc-blue-60) !important;
+    font-size: var(--dc-font-size-20) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+  }
+}
+
+.dc-c-btn-secondary-1:hover {
+  background-color: var(--dc-blue-20) !important;
+}
+
+/*#endregion Secondary Button 1 - Normal Type*/
+
+/*#region Secondary Button 1 - Error Type*/
+
+.dc-c-btn-secondary-1--error {
+  background-color: transparent !important;
+  border: 1px solid var(--dc-error) !important;
+  color: var(--dc-error) !important;
+  border-radius: var(--dc-radius-1) !important;
+  font-size: var(--dc-font-size-14) !important;
+  font-weight: var(--dc-font-weight-7) !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  height: 32px !important;
+  min-width: 60px !important;
+
+  .dx-icon {
+    color: var(--dc-error) !important;
+    font-size: var(--dc-font-size-20) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+  }
+
+}
+
+.dc-c-btn-secondary-1--error:hover {
+  background-color: var(--dc-error-light) !important;
+}
+
+/*#endregion Secondary Button 1 - Error Type*/
+
+/*#region Secondary Button 2 - Normal Type*/
+
+.dc-c-btn-secondary-2 {
+  background-color: transparent !important;
+  color: var(--dc-blue-60) !important;
+  border-radius: var(--dc-radius-1) !important;
+  font-size: var(--dc-font-size-14) !important;
+  font-weight: var(--dc-font-weight-7) !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  height: 32px !important;
+  min-width: 60px !important;
+
+  .dx-icon {
+    color: var(--dc-blue-60) !important;
+    font-size: var(--dc-font-size-20) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+  }
+}
+
+.dc-c-btn-secondary-2:hover {
+  background-color: var(--dc-blue-20) !important;
+}
+
+/*#endregion Secondary Button 2 - Normal Type*/
+
+
+/*#region Secondary Button 2 - Error Type*/
+
+.dc-c-btn-secondary-2--error {
+  background-color: transparent !important;
+  color: var(--dc-error) !important;
+  border-radius: var(--dc-radius-1) !important;
+  font-size: var(--dc-font-size-14) !important;
+  font-weight: var(--dc-font-weight-7) !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  height: 32px !important;
+  min-width: 60px !important;
+
+  .dx-icon {
+    color: var(--dc-error) !important;
+    font-size: var(--dc-font-size-20) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+  }
+}
+
+.dc-c-btn-secondary-2--error:hover {
+  background-color: var(--dc-error-light) !important;
+}
+
+/*#endregion Secondary Button 2 - Error Type*/
+
+/*#region Secondary Button 2 - Normal Type*/
+
+.dc-c-btn-secondary-3 {
+  background-color: transparent !important;
+  color: var(--dc-gray-60) !important;
+  border-radius: var(--dc-radius-1) !important;
+  font-size: var(--dc-font-size-14) !important;
+  font-weight: var(--dc-font-weight-7) !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  height: 32px !important;
+  min-width: 60px !important;
+
+  .dx-icon {
+    color: var(--dc-gray-60) !important;
+    font-size: var(--dc-font-size-20) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+  }
+}
+
+.dc-c-btn-secondary-3:hover {
+  background-color: var(--dc-gray-30) !important;
+}
+
+/*#endregion Secondary Button 2 - Normal Type*/
+
+/* Default State */
+.dc-icon-default-32.dx-button {
+  color: var(--dc-gray-60) !important;
+  background-color: transparent !important;
+  border-radius: var(--dc-radius-1) !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+
+  .dx-icon {
+    color: var(--dc-gray-30) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+    font-size: var(--dc-font-size-20) !important;
+  }
+}
+
+.dc-icon-default-40.dx-button {
+  color: var(--dc-gray-60) !important;
+  background-color: transparent !important;
+  border-radius: var(--dc-radius-1) !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+
+  .dx-icon {
+    color: var(--dc-gray-30) !important;
+    font-weight: var(--dc-font-weight-7) !important;
+    font-size: var(--dc-font-size-20) !important;
+  }
+}
+
+/* Hover State */
+.dc-icon-default-32:hover {
+  background-color: var(--dc-gray-20) !important;
+  color: var(--dc-gray-60) !important;
+}
+
+.dc-icon-default-40:hover {
+  background-color: var(--dc-gray-20) !important;
+  color: var(--dc-gray-60) !important;
+}
+
+/* icon-button-2 with icon on top */
+.icon-button-2 {
+  width: 72px !important;
+  height: 96px !important;
+  background-color: var(--dc-gray-10) !important;
+  border-radius: var(--dc-radius-1) !important;
+  box-shadow: var(--dc-shadow-8) !important;
+}
+
+.icon-button-2 .dx-button-content {
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.icon-button-2 .dx-icon {
+  font-size: 32px !important;
+  color: var(--dc-blue-60) !important;
+  margin: 0 auto 4px auto !important;
+}
+
+.icon-button-2 .dx-button-text {
+  font-size: 12px !important;
+  color: var(--dc-gray-90) !important;
+  margin-top: 10px !important;
+}
+
+.icon-button-2:hover {
+  background-color: var(--dc-blue-10) !important;
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+}
+
+/* Unselected state */
+.dc-radio-button .dx-radiobutton-icon {
+  border-color: var(--dc-border-info) !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.dc-radio-button .dx-item-content {
+  font-size: var(--dc-font-size-14) !important;
+  /* Body 2 font size */
+  color: var(--dc-gray-90) !important;
+  font-weight: var(--dc-font-weight-4) !important;
+  /* Regular weight */
+  line-height: var(--dc-font-lineheight-22) !important;
+  /* Body 2 line height */
+}
+
+/* Selected state */
+.dc-radio-button .dx-radiobutton-icon-checked {
+  border-color: var(--dc-blue-90) !important;
+  background-color: var(--dc-border-info) !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.dc-radio-button .dx-radiobutton-icon-checked .dx-radiobutton-icon-dot {
+  background-color: var(--dc-blue-60) !important;
+}
+
+/* Disabled Selected state */
+.dc-radio-button.dx-state-disabled .dx-radiobutton-icon-checked {
+  border-color: var(--dc-gray-30) !important;
+  background-color: var(--dc-gray-30) !important;
+}
+
+.dc-radio-button.dx-state-disabled .dx-item-content {
+  font-size: var(--dc-font-size-14) !important;
+  color: var(--dc-gray-30) !important;
+  font-weight: var(--dc-font-weight-4) !important;
+  line-height: var(--dc-font-lineheight-22) !important;
+}
+
+/* Disabled Unselected state */
+.dc-radio-button.dx-state-disabled .dx-radiobutton-icon {
+  border-color: var(--dc-gray-30) !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.dc-radio-button.dx-state-disabled .dx-item-content {
+  font-size: var(--dc-font-size-14) !important;
+  color: var(--dc-gray-30) !important;
+  font-weight: var(--dc-font-weight-4) !important;
+  line-height: var(--dc-font-lineheight-22) !important;
+}

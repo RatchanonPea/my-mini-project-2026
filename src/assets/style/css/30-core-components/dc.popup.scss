@@ -1,0 +1,28 @@
+.dx-popup-normal .dx-popup-title {
+  background-color: var(--dc-blue-20) !important;
+}
+
+.dx-popup-normal .dx-popup-title.dx-toolbar .dx-toolbar-label {
+  font-size: var(--dc-font-size-18);
+  line-height: var(--dc-font-lineheight-26);
+  font-weight: var(--dc-font-weight-7);
+}
+
+.dx-popup-normal .dx-popup-content {
+  padding: 0px !important;
+}
+
+.dx-popup-normal .dx-box-item-content {
+  font-size: var(--dc-font-size-1);
+  line-height: var(--dc-font-lineheight-1);
+  font-weight: var(--dc-font-weight-4);
+}
+
+
+.dc-swal-container {
+  padding: 0px !important;
+}
+
+.dc-swal-button{
+  min-width: 85px !important;
+}

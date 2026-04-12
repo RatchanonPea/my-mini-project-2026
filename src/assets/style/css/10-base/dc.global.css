@@ -1,0 +1,456 @@
+html {
+  font-size: var(--dc-type-base-size);
+}
+
+body {
+  font-size: var(--dc-font-size-3);
+  font-family: var(--dc-primary-font-family);
+}
+
+.dx-widget {
+  font-size: var(--dc-font-size-1);
+  font-family: var(--dc-primary-font-family);
+}
+
+.dc-main-content {
+  min-height: calc(100vh - 175px);
+  background-color: var(--dc-gray-20);
+}
+
+.dc-main-content-freeze-breadcrumbs {
+  height: calc(100vh - 116px);
+}
+
+.dc-menu-bar-bottom {
+  height: calc(100vh - 175px);
+}
+
+.dc-menu-bar-top {
+  height: calc(100vh - 175px);
+}
+/* 
+
+p {
+  margin-bottom: 4px;
+}
+
+.overflow-ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.text-ellipsis--3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
+
+
+
+.overflow-string {
+  text-overflow: " [..]";
+}
+
+a {
+  text-decoration: none;
+  cursor: pointer;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.c-logo {
+  height: 1.5em;
+}
+
+main>.container {
+  padding: 60px 15px 0;
+} */
+
+/* footer */
+/* .dc-l-footer-logo {
+  background-color: var(--dc-theme-1);
+  border-radius: var(--dc-radius-2);
+  padding: var(--dc-spacing-05) var(--dc-spacing-07);
+}
+
+.footer-logo {
+  height: 32px;
+}
+
+.modal-header {
+  border-bottom: 0px;
+}
+
+.modal--footer {
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+}
+
+.input__with-icon {
+  position: relative;
+}
+
+.input__with-icon input {
+  text-indent: 2rem;
+}
+
+.input__with-icon input:focus {
+  box-shadow: none;
+}
+
+.end--100 {
+  right: -50px;
+} */
+
+/* Tooltip */
+/* .dc-u-tooltip .dc-u-tooltiptext {
+  background-color: rgba(64, 102, 185, 0.95);
+  border-end-end-radius: 0;
+  border-radius: 8px;
+  bottom: 120%;
+  color: var(--dc-theme-1);
+  left: 50%;
+  margin-left: -75px;
+  opacity: 0.95;
+  padding: 6px 6px;
+  position: absolute;
+  text-align: center;
+  transition: opacity 1s;
+  visibility: hidden;
+  width: 160px;
+  z-index: 1;
+  text-align: left;
+}
+
+.dc-u-tooltip .dc-u-tooltiptext::after {
+  border-color: rgba(64, 102, 185, 0.95) transparent transparent transparent;
+  border-style: solid;
+  border-width: 5px;
+  content: "";
+  margin-left: -5px;
+  position: absolute;
+  right: 10%;
+  top: 100%;
+}
+
+.dc-u-tooltip:hover .dc-u-tooltiptext {
+  opacity: 1;
+  visibility: visible;
+} */
+
+/* Tooltip */
+/* .dc-u-tooltip-productcompare-section .dc-u-tooltiptext-productcompare-section {
+  background-color:var(--dc-primary-25) ;
+  border-end-end-radius: 0;
+  border-radius: 8px;
+  bottom: 120%;
+  color: rgba(0, 0, 0, 0.95);
+  left: 50%;
+  margin-left: 5px;
+  opacity: 0.95;
+  padding: 6px 6px;
+  position: absolute;
+  text-align: center;
+  transition: opacity 1s;
+  visibility: hidden;
+  z-index: 1;
+  text-align: left;
+}
+
+.dc-u-tooltip-productcompare-section .dc-u-tooltiptext-productcompare-section::after {
+  border-color: var(--dc-primary-25) transparent transparent transparent;
+  border-style: solid;
+  border-width: 5px;
+  content: "";
+  margin-left: -5px;
+  position: absolute;
+  right: 10%;
+  top: 100%;
+}
+
+.dc-u-tooltip-productcompare-section:hover .dc-u-tooltiptext-productcompare-section {
+  opacity: 1;
+  visibility: visible;
+}
+
+.dc-l-form-check-input--lg {
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.dc-l-form-check--lg .dc-l-form-check-input--lg {
+  margin-left: -2em;
+}
+
+.dc-l-form-check-label {
+  margin-top: .4em;
+}
+
+.dc-l-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  left: 0;
+  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  border-bottom-left-radius: 1em;
+  border-bottom-right-radius: 1em;
+  min-height: 300px;
+}
+
+.dc-l-dropdown-content__single {
+  min-width: 250px;
+  min-height: 170px;
+}
+
+.dc-l-dropdown-icon {
+  height: 24px;
+  ;
+}
+
+.dc-u-dropdown:hover .dc-l-dropdown-content {
+  display: block;
+}
+
+.dc-l-dropdown--sub-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  top: 0;
+  right: 0;
+  z-index: 10;
+  height: 100%;
+  border-bottom-right-radius: 1em;
+}
+
+.dc-l-dropdown__active {
+  display: block;
+}
+
+.dc-l-dropdown--sub:hover {
+  background-color: var(--dc-primary-25);
+}
+
+.dc-l-dropdown--sub:hover .dc-c-nav-link:hover {
+  color: var(--dc-primary-100);
+} */
+
+/* .dc-l-dropdown--sub:hover .dc-l-dropdown-icon {
+  filter: invert(31%) sepia(35%) saturate(2533%) hue-rotate(197deg) brightness(107%) contrast(96%);
+} */
+
+.dc-l-dropdown--sub:hover .dc-l-dropdown--sub-content {
+  display: block;
+}
+
+.dc-u-dropdown-link.dropdown-toggle::after {
+  vertical-align: 0;
+}
+
+.dropdown-toggle::after {
+  content: "";
+  border-top: 0.3em solid transparent;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-left: auto;
+  background-image: url('/assets/icon/standard/Down.svg');
+  background-repeat: no-repeat;
+  background-size: 1.25rem;
+}
+
+/* for autocomplete search on nav bar*/
+.ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus {
+  border: 1px solid #74b2e2;
+  background-image: none;
+  background-color: white;
+  font-weight: bold;
+  color: #0070a3;
+}
+
+.tag-btn {
+  word-break: keep-all;
+}
+
+.tag-btn:hover {
+  color: var(--dc-secondary-100);
+}
+
+.thin-btn {
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.card-body {
+  padding: 1rem 0.4rem;
+}
+
+.card-body-blog {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 1rem 0.8rem;
+
+}
+
+.dc-c-cookie-alert {
+  background: var(--dc-primary-50);
+  border-radius: 0;
+  bottom: 0;
+  color: var(--dc-black-100);
+  left: 0;
+  margin: 0 !important;
+  opacity: 0;
+  position: fixed;
+  transform: translateY(100%);
+  transition: all 250ms ease-out;
+  visibility: hidden;
+  width: 100%;
+  z-index: var(--layer-important);
+  box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dc-c-cookie-alert.show {
+  opacity: 1;
+  transform: translateY(0%);
+  transition-delay: 500ms;
+  visibility: visible;
+}
+
+.dc-c-cookie-alert a {
+  color: var(--dc-primary-100);
+  text-decoration: none;
+}
+
+.dc-c-cookie-alert .dc-c-cookie-alert--accept-cookies {
+  vertical-align: baseline;
+}
+
+.field-validation-error {
+  color: red;
+}
+
+.dc-menu-shadow {
+  box-shadow: 0px -4px 12px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 575.98px) {
+  .dc-l-footer-logo {
+    background-color: var(--dc-theme-1);
+    border-radius: 0;
+    padding: var(--dc-spacing-05) var(--dc-spacing-07);
+  }
+}
+
+.color-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--dc-black-100);
+  opacity: 0.3;
+}
+
+.color-overlay-widget {
+  position: absolute;
+  top: 0;
+  left: -1px;
+  width: 101%;
+  height: 101%;
+  background-color: var(--dc-black-100);
+  border-radius: 12px 12px;
+  opacity: 0.5;
+}
+
+.pull-right {
+  float: right !important;
+}
+
+@media (max-width: 767.98px) {
+  .w-sm-100 {
+    width: 100% !important;
+  }
+
+}
+
+.dc-nav-tag1 {
+  background-color: #FEE2E2;
+  color: #FF0000;
+}
+
+.dc-nav-tag2 {
+  background-color: #285FD8;
+  color: #FFF;
+}
+
+.dc-nav-tag3 {
+  background-color: #EF4444;
+  color: #FFF;
+}
+
+.dc-nav-tag4 {
+  background-color: #FCAF17;
+  color: #FFF;
+}
+
+.dc-nav-tag5 {
+  background-color: #A59174;
+  color: #FFF;
+}
+
+.dc-nav-tag6 {
+  background-color: #5A9486;
+  color: #FFF;
+}
+
+/* 
+:host ::ng-deep .bg-primaryK { */
+
+.bg-primaryk {
+  /* background-color: #002F87; */
+  background-color: #dee8f6 !important;
+}
+
+.dx-icon-drug-allergy {
+  width: 24px;
+  height: 24px;
+  background-image: url('../../../../assets/images/ico/drug-allergy.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.dx-icon-med-admin {
+  width: 24px;
+  height: 24px;
+  background-image: url('../../../../assets/images/ico/med-admin.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.dx-icon-drug-profile {
+  width: 24px;
+  height: 24px;
+  background-image: url('../../../../assets/images/ico/drug-profile.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.dx-icon-patient-history {
+  width: 24px;
+  height: 24px;
+  background-image: url('../../../../assets/images/ico/patient-history.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}

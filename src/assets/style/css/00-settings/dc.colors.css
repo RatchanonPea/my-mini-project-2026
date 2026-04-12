@@ -1,0 +1,83 @@
+:where(html) {
+  /* Primary */
+  --dc-primary-100: #003185;
+  --dc-primary-95: #0033A2;
+  --dc-primary-75: #4066B9;
+  --dc-primary-60: #0C5D9F;
+  --dc-primary-50: #BACBF0;
+  --dc-primary-25: #C1E3F6;
+  --dc-primary-5: #F5F8FF;
+  /* Secondary */
+  --dc-secondary-100: #FCAF17;
+  --dc-secondary-50: #FFCD67;
+  --dc-secondary-25: #FFE5B0;
+  --dc-secondary-5: #FFF8EB;
+  /* Care */
+  --dc-care-100: #5A9468;
+  --dc-care-50: #90C79D;
+  --dc-care-25: #CBE1DB;
+  --dc-care-5: #EEF8F0;
+  /* Semantic */
+  --dc-positive-100: #1FAE86;
+  --dc-positive-50: #91E2B4;
+  --dc-positive-25: #C6F2D9;
+  --dc-positive-5: #E6F5ED;
+  --dc-negative-100: #EF4444;
+  --dc-negative-50: #FF7171;
+  --dc-negative-25: #Fdc8C8;
+  --dc-negative-5: #FEE2E2;
+  --dc-warning-100: #FFC400;
+  --dc-warning-50: #FFD340;
+  --dc-warning-25: #FFE5A7;
+  --dc-warning-5: #FEEFCD;
+  /* Text */
+  --dc-black-100: #232323;
+  --dc-black-50: #454249;
+  --dc-black-25: #8D8D94;
+  --dc-black-5: #B3B5C0;
+  --dc-link-100: #285FD8;
+  /* Theme */
+  --dc-theme-1: #FFFFFF;
+  --dc-theme-2: #E0E3EB;
+  --dc-theme-3: #F3F3F3;
+
+  /* Blue Palette */
+  --dc-blue-90:#0D3770;
+  --dc-blue-80:#114A98;
+  --dc-blue-70:#165CBD;
+  --dc-blue-60:#1A6DDF;
+  --dc-blue-50:#428BEF;
+  --dc-blue-40:#70A7F3;
+  --dc-blue-30:#97BFF6;
+  --dc-blue-20:#DEE8F6;
+  --dc-blue-10:#F7FAFE;
+
+ /* Gray Palette */
+ --dc-gray-90:#23292C;
+ --dc-gray-80:#2F373C;
+ --dc-gray-70:#4D565C;
+ --dc-gray-60:#636B70;
+ --dc-gray-50:#81898E;
+ --dc-gray-40:#A0A6AA;
+ --dc-gray-30:#CFCFCF;
+ --dc-gray-20:#F5F5F5;
+ --dc-gray-10:#FFFFFF;
+
+ /* Border */
+ --dc-indicator : #DFE3E6;
+ --dc-border-info : #C5C8CB;
+ --dc-error : #E53935;
+ --dc-error-light : #F8D4D4;
+ --dc-success : #4CB64C;
+ --dc-success-light : #BBF2D3;
+ --dc-warning   : #F48C2D;
+ --dc-warning-light : #FAD8B7;
+
+  /* Shadow */
+  --dc-shadow-color-1: #1D272E1A;
+  --dc-shadow-color-2: #1D272E33;
+
+  /* Data Grid */
+  --dc-data-grid-header-color: #C4DBFA;
+
+}

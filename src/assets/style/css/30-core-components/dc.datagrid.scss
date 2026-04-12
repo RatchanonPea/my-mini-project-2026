@@ -1,0 +1,445 @@
+:host::ng-deep .dx-datagrid-headers {
+  background-color: var(--dc-data-grid-header-color) !important;
+}
+
+:host::ng-deep .dx-datagrid-headers .dx-col-fixed {
+  background-color: var(--dc-data-grid-header-color) !important;
+}
+
+:host::ng-deep .subgrid .dx-datagrid-headers {
+  background-color: var(--dc-gray-20) !important;
+}
+
+:host::ng-deep .subgrid .dx-datagrid-headers .dx-col-fixed {
+  background-color: var(--dc-gray-20) !important;
+}
+
+:host::ng-deep .dx-datagrid-headers .dx-row>td {
+  padding: 10px 4px !important;
+  text-align: center !important;
+}
+
+:host::ng-deep .dx-datagrid-header .dx-column-lines>td {
+  border-left: 1px solid #ffffff !important;
+}
+
+:host::ng-deep .dx-datagrid-header .dx-column-lines>td:nth-child(1) {
+  border-left: 1px transparent !important;
+}
+
+:host::ng-deep .dx-datagrid .dx-row>td {
+  padding: 8px 8px;
+  line-height: 20px;
+}
+
+:host::ng-deep .dx-datagrid-borders>.dx-datagrid-rowsview,
+.dx-datagrid-borders>.dx-datagrid-total-footer {
+  border-bottom: 1px solid var(--dc-border-info);
+  border-left: 1px solid var(--dc-border-info);
+  border-right: 1px solid var(--dc-border-info);
+  box-shadow: var(--dc-shadow-7);
+}
+
+:host::ng-deep .dx-datagrid-borders>.dx-datagrid-headers,
+.dx-datagrid-borders>.dx-datagrid-rowsview,
+.dx-datagrid-borders>.dx-datagrid-total-footer {
+  border-left: 1px solid var(--dc-border-info);
+  border-right: 1px solid var(--dc-border-info);
+  border-top: 1px solid var(--dc-border-info);
+}
+
+
+:host::ng-deep .dx-datagrid .dx-column-lines>td {
+  border-left: 1px solid #f5f5f5;
+}
+
+:host::ng-deep .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon {
+  color: #21293b;
+}
+
+:host::ng-deep .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon.dx-state-disabled {
+  color: #b7c1d7;
+}
+
+:host::ng-deep .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon {
+  color: red;
+}
+
+:host::ng-deep .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon.dx-state-disabled {
+  color: #b7c1d7;
+}
+
+:host::ng-deep img.dx-icon.dx-link-icon {
+  cursor: pointer;
+}
+
+:host::ng-deep img.dx-icon.dx-link-icon.dx-state-disabled {
+  opacity: 0.0 !important;
+}
+
+:host::ng-deep .dx-data-row.dx-state-hover>td {
+  cursor: pointer;
+  background-color: var(--dc-blue-20) !important;
+
+  .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon {
+    color: #21293b !important;
+  }
+
+  .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon.dx-state-disabled {
+    color: #b7c1d7 !important;
+  }
+
+  .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon {
+    color: red !important;
+  }
+
+  .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon.dx-state-disabled {
+    color: #b7c1d7 !important;
+  }
+
+  img.dx-icon.dx-link-icon.dx-state-disabled {
+    opacity: 0.0 !important;
+  }
+}
+
+:host::ng-deep .dx-datagrid-rowsview .dx-row>td,
+.dx-datagrid-rowsview .dx-row>tr>td {
+  background-color: var(dc-gray-10);
+}
+
+:host::ng-deep .dx-datagrid .dx-row-alt>td,
+.dx-datagrid .dx-row-alt>tr>td {
+  background-color: #fafafa;
+}
+
+:host::ng-deep .dx-checkbox-checked .dx-checkbox-icon::before {
+  content: "\f005";
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  margin-top: -0.5em;
+  left: 50%;
+  margin-left: -0.5em;
+
+  background-color: var(--dc-blue-60);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 19px;
+  border-radius: 2px;
+}
+
+//remove Cancel Changes button
+:host::ng-deep .cls .dx-datagrid-revert-tooltip {
+  display: none;
+}
+
+:host::ng-deep .dx-datagrid-revert-tooltip {
+  display: none;
+}
+
+::ng-deep .dc-custom-popup-wrapper {
+  .dx-datagrid-headers {
+    background-color: var(--dc-gray-20) !important;
+  }
+
+  .dx-datagrid-headers .dx-col-fixed {
+    background-color: var(--dc-gray-20) !important;
+  }
+
+  .dx-datagrid-headers .dx-row>td {
+    padding: 10px 4px !important;
+    text-align: center !important;
+  }
+
+  .dx-datagrid .dx-row>td {
+    padding: 8px 8px;
+    line-height: 20px;
+  }
+
+  .dx-datagrid-header .dx-column-lines>td {
+    border-left: 1px solid #ffffff !important;
+  }
+
+  .dx-datagrid-header .dx-column-lines>td:nth-child(1) {
+    border-left: 1px transparent !important;
+  }
+
+  .dx-datagrid .dx-row>td {
+    padding: 8px 8px;
+    line-height: 20px;
+  }
+
+  .dx-datagrid-borders>.dx-datagrid-rowsview,
+  .dx-datagrid-borders>.dx-datagrid-total-footer {
+    border-bottom: 1px solid var(--dc-border-info);
+    border-left: 1px solid var(--dc-border-info);
+    border-right: 1px solid var(--dc-border-info);
+    box-shadow: var(--dc-shadow-7);
+  }
+
+  .dx-datagrid-borders>.dx-datagrid-headers,
+  .dx-datagrid-borders>.dx-datagrid-rowsview,
+  .dx-datagrid-borders>.dx-datagrid-total-footer {
+    border-left: 1px solid var(--dc-border-info);
+    border-right: 1px solid var(--dc-border-info);
+    border-top: 1px solid var(--dc-border-info);
+  }
+
+  .dx-datagrid .dx-column-lines>td {
+    border-left: 1px solid #f5f5f5;
+  }
+
+  .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon {
+    color: #21293b;
+  }
+
+  .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon.dx-state-disabled {
+    color: #b7c1d7;
+  }
+
+  .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon {
+    color: red;
+  }
+
+  .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon.dx-state-disabled {
+    color: #b7c1d7;
+  }
+
+  img.dx-icon.dx-link-icon {
+    cursor: pointer;
+  }
+
+  img.dx-icon.dx-link-icon.dx-state-disabled {
+    opacity: 0.0 !important;
+  }
+
+
+  img.dx-icon.dx-link-icon {
+    cursor: pointer;
+  }
+
+  img.dx-icon.dx-link-icon.dx-state-disabled {
+    opacity: 0.0 !important;
+  }
+
+  .dx-data-row.dx-state-hover>td {
+    cursor: pointer;
+    background-color: var(--dc-blue-20) !important;
+
+    .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon {
+      color: #21293b !important;
+    }
+
+    .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon.dx-state-disabled {
+      color: #b7c1d7 !important;
+    }
+
+    .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon {
+      color: red !important;
+    }
+
+    .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon.dx-state-disabled {
+      color: #b7c1d7 !important;
+    }
+
+    img.dx-icon.dx-link-icon.dx-state-disabled {
+      opacity: 0.0 !important;
+    }
+  }
+
+  .dx-datagrid-rowsview .dx-row>td,
+  .dx-datagrid-rowsview .dx-row>tr>td {
+    background-color: var(dc-gray-10);
+  }
+
+  .dx-datagrid .dx-row-alt>td,
+  .dx-datagrid .dx-row-alt>tr>td {
+    background-color: #fafafa;
+  }
+
+  .dx-checkbox-checked .dx-checkbox-icon::before {
+    content: "\f005";
+    position: relative;
+    display: block;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    margin-top: -0.5em;
+    left: 50%;
+    margin-left: -0.5em;
+
+    background-color: var(--dc-blue-60) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 19px;
+    border-radius: 2px;
+  }
+
+  .cls .dx-datagrid-revert-tooltip {
+    display: none;
+  }
+
+  .dx-datagrid-revert-tooltip {
+    display: none;
+  }
+
+}
+
+::ng-deep .dc-custom-popup-wrapper2 {
+  .dx-datagrid-headers {
+    background-color: var(--dc-gray-20) !important;
+  }
+
+  .dx-datagrid-headers .dx-col-fixed {
+    background-color: var(--dc-gray-20) !important;
+  }
+
+  .dx-datagrid-headers .dx-row>td {
+    padding: 2px !important;
+    text-align: center !important;
+  }
+
+  .dx-datagrid .dx-row>td {
+    padding: 2px;
+    line-height: 20px;
+  }
+
+  .dx-datagrid-header .dx-column-lines>td {
+    border-left: 1px solid #ffffff !important;
+  }
+
+  .dx-datagrid-header .dx-column-lines>td:nth-child(1) {
+    border-left: 1px transparent !important;
+  }
+
+  .dx-datagrid-borders>.dx-datagrid-rowsview,
+  .dx-datagrid-borders>.dx-datagrid-total-footer {
+    border-bottom: 1px solid var(--dc-border-info);
+    border-left: 1px solid var(--dc-border-info);
+    border-right: 1px solid var(--dc-border-info);
+    box-shadow: var(--dc-shadow-7);
+  }
+
+  .dx-datagrid-borders>.dx-datagrid-headers,
+  .dx-datagrid-borders>.dx-datagrid-rowsview,
+  .dx-datagrid-borders>.dx-datagrid-total-footer {
+    border-left: 1px solid var(--dc-border-info);
+    border-right: 1px solid var(--dc-border-info);
+    border-top: 1px solid var(--dc-border-info);
+  }
+
+  .dx-datagrid .dx-column-lines>td {
+    border-left: 1px solid #f5f5f5;
+  }
+
+  .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon {
+    color: #21293b;
+  }
+
+  .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon.dx-state-disabled {
+    color: #b7c1d7;
+  }
+
+  .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon {
+    color: red;
+  }
+
+  .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon.dx-state-disabled {
+    color: #b7c1d7;
+  }
+
+  img.dx-icon.dx-link-icon {
+    cursor: pointer;
+  }
+
+  img.dx-icon.dx-link-icon.dx-state-disabled {
+    opacity: 0.0 !important;
+  }
+
+  img.dx-icon.dx-link-icon {
+    cursor: pointer;
+  }
+
+  img.dx-icon.dx-link-icon.dx-state-disabled {
+    opacity: 0.0 !important;
+  }
+
+  .dx-data-row.dx-state-hover>td {
+    cursor: pointer;
+    background-color: var(--dc-blue-20) !important;
+
+    .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon {
+      color: #21293b !important;
+    }
+
+    .dx-link.dx-link-edit.dx-icon-edit.dx-link-icon.dx-state-disabled {
+      color: #b7c1d7 !important;
+    }
+
+    .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon {
+      color: red !important;
+    }
+
+    .dx-link.dx-link-delete.dx-icon-trash.dx-link-icon.dx-state-disabled {
+      color: #b7c1d7 !important;
+    }
+
+    img.dx-icon.dx-link-icon.dx-state-disabled {
+      opacity: 0.0 !important;
+    }
+  }
+
+  .dx-datagrid-rowsview .dx-row>td,
+  .dx-datagrid-rowsview .dx-row>tr>td {
+    background-color: var(dc-gray-10);
+  }
+
+  .dx-datagrid .dx-row-alt>td,
+  .dx-datagrid .dx-row-alt>tr>td {
+    background-color: #fafafa;
+  }
+
+  .dx-checkbox-checked .dx-checkbox-icon::before {
+    content: "\f005";
+    position: relative;
+    display: block;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    margin-top: -0.5em;
+    left: 50%;
+    margin-left: -0.5em;
+
+    background-color: var(--dc-blue-60) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 19px;
+    border-radius: 2px;
+  }
+
+  .cls .dx-datagrid-revert-tooltip {
+    display: none;
+  }
+
+  .dx-datagrid-revert-tooltip {
+    display: none;
+  }
+}
+
+:host::ng-deep .dx-datagrid .dx-column-lines>td {
+  white-space: pre !important;
+}
+
+:host::ng-deep .dx-datagrid-content .dx-datagrid-table .dx-row>td {
+  white-space: pre !important;
+}
+
+:host::ng-deep.dx-datagrid-rowsview .dx-selection.dx-row.highlighted-row:not(.dx-row-focused):not(.dx-row-removed) > td {
+   background-color: #ffffe7 !important;
+   color: unset;
+}

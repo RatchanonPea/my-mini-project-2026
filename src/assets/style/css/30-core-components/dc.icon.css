@@ -1,0 +1,52 @@
+.dc-c-icon--white {
+  filter: invert(89%) sepia(99%) saturate(2%) hue-rotate(333deg) brightness(110%) contrast(97%);
+}
+
+.dc-c-icon--red {
+  filter: invert(50%) sepia(81%) saturate(3242%) hue-rotate(332deg) brightness(94%) contrast(100%);
+}
+
+.dc-c-icon--green {
+  filter: invert(54%) sepia(54%) saturate(4793%) hue-rotate(133deg) brightness(102%) contrast(76%);
+}
+
+.dc-c-icon--black {
+  filter: invert(8%) sepia(5%) saturate(21%) hue-rotate(314deg) brightness(102%) contrast(87%);
+}
+
+.dc-c-icon--primary {
+  filter: invert(14%) sepia(39%) saturate(5053%) hue-rotate(210deg) brightness(96%) contrast(107%);
+}
+
+.dc-c-icon--blue {
+  filter: invert(38%) sepia(41%) saturate(778%) hue-rotate(182deg) brightness(96%) contrast(99%);
+}
+
+.dc-c-icon--yellow {
+  filter: invert(81%) sepia(56%) saturate(2825%) hue-rotate(344deg) brightness(105%) contrast(93%);
+}
+
+.dc-c-icon--gray {
+  filter: invert(97%) sepia(3%) saturate(1297%) hue-rotate(187deg) brightness(93%) contrast(97%);
+}
+
+
+.dc-c-icon--1 {
+  height: 16px;
+}
+
+.dc-c-icon--2 {
+  height: 24px;
+}
+
+.dc-c-icon--3 {
+  height: 32px;
+}
+
+.dc-c-icon--4 {
+  height: 40px;
+}
+
+.dc-c-icon--5 {
+  height: 48px;
+}

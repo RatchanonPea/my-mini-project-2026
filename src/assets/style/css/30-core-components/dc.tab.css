@@ -1,0 +1,188 @@
+.dc-c-tab .dx-tab-text {
+    font-size: var(--dc-font-size-3);
+}
+
+.patinet-info-tab .dx-tab-text {
+    font-size: 30px !important;
+}
+
+.dx-tabpanel-tabs-position-top .dx-tabs {
+    border: none !important;
+}
+
+/*#region Selected Tab Style */
+
+.dc-c-tab-main .dx-tabs .dx-tab {
+    border: 1px solid var(--dc-indicator);
+}
+
+.dc-c-tab-main .dx-tab.dx-tab-selected {
+    background-color: var(--dc-gray-10) !important;
+    border-top-left-radius: var(--dc-radius-1) !important;
+    border-top-right-radius: var(--dc-radius-1) !important;
+    border: 1px solid var(--dc-indicator) !important;
+    border-bottom: none !important;
+    font-size: var(--dc-font-size-14) !important;
+    padding: 8px 16px !important;
+    margin-left: 4px !important;
+
+    .dx-icon {
+        color: var(--dc-blue-60) !important;
+        font-size: var(--dc-font-size-24) !important;
+        font-weight: var(--dc-font-weight-7) !important;
+    }
+}
+
+.dc-c-tab-main.dx-tabpanel .dx-tabpanel-tabs .dx-tabs {
+    background-color: transparent !important;
+}
+
+.dc-c-tab-main .dx-tabs-wrapper .dx-tab:first-of-type {
+    margin-left: 0 !important;
+}
+
+/* Style for Text Inside Selected Tab */
+.dc-c-tab-main .dx-tab.dx-tab-selected .dx-tab-content .dx-tab-text span {
+    color: var(--dc-blue-60) !important;
+    /* font-weight: bold !important; */
+}
+
+/* General Tab Styles - Unselected Tabs */
+.dc-c-tab-main .dx-tab:not(.dx-tab-selected) {
+    background-color: #E7E7E7 !important;
+    border-top-left-radius: var(--dc-radius-1) !important;
+    border-top-right-radius: var(--dc-radius-1) !important;
+    border: 1px solid var(--dc-indicator) !important;
+    border-bottom: none !important;
+    font-size: var(--dc-font-size-14) !important;
+    color: var(--dc-gray-40) !important;
+    padding: 4px 16px !important;
+    margin-left: 4px !important;
+
+    .dx-icon {
+        color: var(--dc-gray-40) !important;
+        font-size: var(--dc-font-size-24) !important;
+        font-weight: var(--dc-font-weight-7) !important;
+    }
+}
+
+.dc-c-tab-main .dx-tabs-wrapper .dx-tab:not(.dx-tab-selected):first-of-type {
+    margin-left: 0 !important;
+}
+
+.dc-c-tab-main .dx-tab:not(.dx-tab-selected) .dx-tab-text-span-pseudo {
+    color: var(--dc-gray-40) !important;
+    /* font-size: var(--dc-font-size-14) !important;
+    font-weight: bold !important; */
+}
+
+.dc-c-tab-main .dx-tabpanel-container {
+    padding: 16px 16px !important;
+    border-radius: 0% !important;
+    background-color: var(--dc-gray-10) !important;
+    border: 1px solid var(--dc-indicator) !important;
+}
+
+.dc-c-tab-main .dx-tabs-icon-position-top .dx-tab-text {
+    flex-direction: row !important;
+}
+
+.dc-c-tab-main .dx-tabs-wrapper {
+    background-color: transparent !important;
+}
+
+.dc-c-tab-main .dx-tab-content::after,
+.dc-c-tab-main .dx-tab.dx-tab-selected.dx-state-focused {
+    content: none !important;
+    /* border: none !important; */
+    box-shadow: none !important;
+}
+
+.dc-c-tab-main.dx-tabpanel .dx-tabpanel-tab {
+    padding: 4px 16px !important;
+}
+
+/*#endregion Selected Tab Style*/
+
+
+.dc-c-tab-secondary .dx-tab.dx-tab-selected {
+    background-color: transparent !important;
+    border: none !important;
+    border-top-left-radius: var(--dc-radius-1) !important;
+    border-top-right-radius: var(--dc-radius-1) !important;
+    font-size: var(--dc-font-size-14) !important;
+    padding: 4px 16px !important;
+    margin-left: 4px !important;
+    border-bottom: 2px solid var(--dc-blue-60) !important;
+    /* font-weight: bold !important; */
+
+    .dx-icon {
+        color: var(--dc-blue-60) !important;
+        font-size: var(--dc-font-size-24) !important;
+        font-weight: var(--dc-font-weight-7) !important;
+    }
+}
+
+.dc-c-tab-secondary .dx-tabs-wrapper .dx-tab:first-of-type {
+    margin-left: 0 !important;
+}
+
+/* Style for Text Inside Selected Tab */
+.dc-c-tab-secondary .dx-tab.dx-tab-selected .dx-tab-content .dx-tab-text span {
+    color: var(--dc-blue-60) !important;
+    /* font-size: var(--dc-font-size-14) !important; */
+    /* font-weight: bold !important; */
+}
+
+/* General Tab Styles - Unselected Tabs */
+.dc-c-tab-secondary .dx-tab:not(.dx-tab-selected) {
+    background-color: transparent !important;
+    border: none !important;
+    border-top-left-radius: var(--dc-radius-1) !important;
+    border-top-right-radius: var(--dc-radius-1) !important;
+    font-size: var(--dc-font-size-14) !important;
+    color: var(--dc-gray-40) !important;
+    padding: 4px 16px !important;
+    margin-left: 4px !important;
+    /* font-weight: bold !important; */
+
+    .dx-icon {
+        color: var(--dc-gray-40) !important;
+        font-size: var(--dc-font-size-24) !important;
+        font-weight: var(--dc-font-weight-7) !important;
+    }
+}
+
+/* Remove left margin for the first unselected tab */
+.dc-c-tab-secondary .dx-tabs-wrapper .dx-tab:not(.dx-tab-selected):first-of-type {
+    margin-left: 0 !important;
+}
+
+.dc-c-tab-secondary .dx-tab:not(.dx-tab-selected) .dx-tab-text-span-pseudo {
+    color: var(--dc-gray-40) !important;
+}
+
+.dc-c-tab-secondary .dx-tabpanel-container {
+    border-radius: 0%;
+    padding: 32px 32px !important;
+    background-color: var(--dc-gray-10) !important;
+}
+
+.dc-c-tab-secondary .dx-tabs-wrapper {
+    background-color: transparent !important;
+}
+
+.dx-tab-content::after,
+.dx-tab.dx-tab-selected.dx-state-focused {
+    content: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.dc-c-tab-secondary .dx-tabs-icon-position-top .dx-tab-text {
+    flex-direction: row !important;
+}
+
+.dc-c-tab-secondary .dx-tab:not(.dx-tab-selected) .dx-tab-text-span-pseudo {
+    color: var(--dc-gray-40) !important;
+}

@@ -1,0 +1,84 @@
+@font-face {
+  font-family: "Arial";
+  src: url("../../../font/arial/ARIAL.TTF") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Arial";
+  src: url("../../../font/arial/ARIAL.TTF") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Arial";
+  src: url("../../../font/arial/ARIALBD.TTF") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+:where(html) {
+  /* Set font */
+  --dc-primary-font: 'Arial';
+  --dc-primary-font-family: var(--dc-primary-font), sans-serif;
+  /* Typo starting point */
+  --dc-type-base-size: 16px;
+  --dc-scale-ratio: 1.25;
+
+  --dc-font-weight-1: 100;
+  --dc-font-weight-2: 200;
+  --dc-font-weight-3: 300;
+  --dc-font-weight-4: 400;
+  --dc-font-weight-5: 500;
+  --dc-font-weight-6: 600;
+  --dc-font-weight-7: 700;
+  --dc-font-weight-8: 800;
+  --dc-font-weight-9: 900;
+  --dc-font-lineheight-00: .95;
+  --dc-font-lineheight-0: 1.1;
+  --dc-font-lineheight-1: 1.25;
+  --dc-font-lineheight-2: 1.375;
+  --dc-font-lineheight-3: 1.5;
+  --dc-font-lineheight-4: 1.75;
+  --dc-font-lineheight-5: 2;
+  --dc-font-lineheight-38: 38px;
+  --dc-font-lineheight-28: 28px;
+  --dc-font-lineheight-26: 26px;
+  --dc-font-lineheight-24: 24px;
+  --dc-font-lineheight-22: 22px;
+  --dc-font-letterspacing-0: -.05em;
+  --dc-font-letterspacing-1: .025em;
+  --dc-font-letterspacing-2: .050em;
+  --dc-font-letterspacing-3: .075em;
+  --dc-font-letterspacing-4: .150em;
+  --dc-font-letterspacing-5: .500em;
+  --dc-font-letterspacing-6: .750em;
+  --dc-font-letterspacing-7: 1em;
+  --dc-font-size-00: .5rem;
+  --dc-font-size-0: .875rem;
+  --dc-font-size-1: 1rem;
+  --dc-font-size-2: 1.1rem;
+  --dc-font-size-3: 1.25rem;
+  --dc-font-size-4: 1.375rem;
+  --dc-font-size-5: 1.5rem;
+  --dc-font-size-6: 1.625rem;
+  --dc-font-size-7: 2rem;
+  --dc-font-size-8: 2.5rem;
+  --dc-font-size-9: 3rem;
+  --dc-font-size-10: 3.75rem;
+  --dc-font-size-30: 30px;
+  --dc-font-size-24: 24px;
+  --dc-font-size-20: 20px;
+  --dc-font-size-18: 18px;
+  --dc-font-size-16: 16px;
+  --dc-font-size-14: 14px;
+  --dc-font-size-fluid-0: clamp(.75rem, 2vw, 1rem);
+  --dc-font-size-fluid-1: clamp(1rem, 4vw, 1.5rem);
+  --dc-font-size-fluid-2: clamp(1.5rem, 6vw, 2.5rem);
+  --dc-font-size-fluid-3: clamp(2rem, 9vw, 3.5rem);
+
+
+
+}

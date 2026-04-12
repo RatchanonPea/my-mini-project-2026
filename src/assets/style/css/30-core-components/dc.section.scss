@@ -1,0 +1,22 @@
+/* Custom card styling */
+.dc-card {
+    border-radius: 8px !important;
+    background-color: var(--dc-gray-10) !important;;
+}
+
+/* Custom card header styling */
+.dc-card-header {
+    background-color: #C4DBFA !important;;
+    color: var(--dc-gray-90 ) !important;;
+    padding: 16px !important;;
+    font-weight: bold !important;;
+    border-bottom: 1px solid var(--dc-border-info) !important;;
+}
+
+/* Custom card body styling */
+.dc-card-body {
+    padding: 16px !important;;
+    background-color: var(--dc-gray-10) !important;;
+    color: var(--dc-gray-90) !important;
+    border-radius: 8px !important;
+}

@@ -1,0 +1,11 @@
+:where(html) {
+    --layer-lower-important: -9999;
+    --layer-lower: -1;
+    --layer-0: 0;
+    --layer-1: 1;
+    --layer-2: 2;
+    --layer-3: 3;
+    --layer-4: 4;
+    --layer-5: 5;
+    --layer-important: 2147483647;
+  }
