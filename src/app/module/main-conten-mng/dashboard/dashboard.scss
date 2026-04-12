@@ -1,0 +1,337 @@
+.dashboard-page {
+  padding: 1.5rem;
+  color: #1f2937;
+}
+
+.dashboard-header {
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-header h4 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+.dashboard-header .subtitle {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stats-panel {
+  display: block;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  border-radius: 16px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  }
+}
+
+.card-stats {
+  min-height: 140px;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.stat-label {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.bg-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #fff;
+}
+
+.bg-warn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #fff;
+}
+
+.bg-accent {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: #fff;
+}
+
+.bg-info {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: #fff;
+}
+.calendar-panel {
+  width: 100%;
+
+  .calendar-card {
+    width: 100%;
+    border-radius: 20px !important;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08) !important;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+
+    mat-card-header {
+      padding: 1rem 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    mat-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0;
+    }
+
+    mat-card-subtitle {
+      color: #64748b;
+      font-size: 0.82rem;
+    }
+
+    mat-card-content {
+      padding: 0 0.75rem 1rem;
+      display: flex;
+      justify-content: center; // 👈 เพิ่ม
+    }
+
+    mat-calendar {
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.95rem;
+      border-radius: 18px;
+      background: #ffffff;
+
+      transform: scale(0.9); // 👈 ลดนิดเดียว (พอ)
+      transform-origin: top center;
+
+      /* ❌ ลบของเดิม */
+      /* max-height */
+      /* min-height */
+      /* overflow */
+    }
+  }
+}
+
+// .calendar-panel {
+//   width: 100%;
+
+//   .calendar-card {
+//     width: 100%;
+//     border-radius: 20px !important;
+//     box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08) !important;
+//     overflow: hidden;
+//     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+
+//     mat-card-header {
+//       padding: 1rem 1rem 0.75rem;
+//       display: flex;
+//       flex-direction: column;
+//       gap: 0.15rem;
+//     }
+
+//     mat-card-title {
+//       font-size: 1rem;
+//       font-weight: 600;
+//       margin-bottom: 0;
+//     }
+
+//     mat-card-subtitle {
+//       color: #64748b;
+//       font-size: 0.82rem;
+//     }
+
+//     mat-card-content {
+//       padding: 0 0.75rem 1rem;
+//     }
+
+//     mat-calendar {
+//       width: 100%;
+//       font-family: inherit;
+//       font-size: 0.95rem;
+//       border-radius: 18px;
+//       background: #ffffff;
+//       max-height: 300px;
+//       min-height: 270px;
+//       overflow: hidden;
+//     }
+//   }
+// }
+.demo-inline-calendar-card {
+  width: 300px;
+}
+
+.dashboard-table {
+  width: 100%;
+
+  mat-card {
+    border-radius: 16px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    width: 100%;
+  }
+
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+
+    mat-card-title {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    mat-card-subtitle {
+      color: #6b7280;
+      font-size: 0.85rem;
+      margin-bottom: 0;
+    }
+
+    .tab-buttons {
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+
+  .custom-tabs {
+    ::ng-deep {
+      .mat-mdc-tab-header {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      .mat-mdc-tab {
+        min-width: auto;
+        padding: 0 1rem;
+      }
+
+      .mdc-tab__content {
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .table-container {
+    padding: 0 1.5rem 1.5rem;
+    overflow-x: auto;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+
+      ::ng-deep {
+        .mat-mdc-header-cell {
+          background: #f8fafc;
+          color: #374151;
+          font-weight: 600;
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          padding: 0.75rem 1rem;
+        }
+
+        .mat-mdc-cell {
+          padding: 0.85rem 1rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .mat-mdc-row:hover {
+          background: #f9fafb;
+        }
+      }
+    }
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+
+    &.allowed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    &.blocked {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  }
+}
+
+@media (max-width: 992px) {
+  .grid-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-page {
+    padding: 1rem;
+  }
+
+  .stat-card {
+    .card-stats {
+      min-height: 120px;
+      padding: 1rem;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-page {
+    padding: 1rem;
+  }
+}
+

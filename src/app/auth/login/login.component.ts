@@ -16,7 +16,7 @@ export class LoginComponent {
     console.log(this.datalogin);
 
     if (this.authService.login(this.datalogin.username, this.datalogin.password)) {
-      this.router.navigate(['/main-conten-mng/main-page']);
+      this.router.navigate(['/main-conten-mng/dashboard']);
     } else {
       alert('Username หรือ Password ไม่ถูกต้อง');
     }

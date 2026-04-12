@@ -1,1 +1,86 @@
-<p>dashboard works!</p>
+<section class="dashboard-page">
+  <div class="dashboard-header">
+    <div>
+      <h4>Dashboard</h4>
+      <p class="subtitle">ภาพรวมสถานะล่าสุด พร้อมปฏิทินตารางงาน</p>
+    </div>
+  </div>
+
+  <div class="dashboard-top grid-layout">
+    <div class="stats-panel">
+      <div class="dashboard-cards">
+        <mat-card class="dashboard-card stat-card" *ngFor="let stat of stats">
+          <mat-card-content class="card-stats" [ngClass]="'bg-' + stat.color">
+            <div class="stat-number">{{ stat.value }}</div>
+            <div class="stat-label">{{ stat.title }}</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="calendar-panel">
+      <mat-card class="calendar-card">
+        <mat-card-header>
+          <mat-card-title>Calendar</mat-card-title>
+          <mat-card-subtitle>{{ selectedDate | date:'MMMM yyyy' }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-calendar
+            [selected]="selectedDate"
+            (selectedChange)="onDateSelected($event)">
+          </mat-calendar>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <div class="dashboard-table">
+    <mat-card>
+      <mat-card-header class="table-header">
+        <mat-card-title>LATEST WEB SITES</mat-card-title>
+        <mat-card-subtitle>รายงานเว็บล่าสุด</mat-card-subtitle>
+        <div class="tab-buttons">
+          <mat-tab-group class="custom-tabs">
+            <mat-tab label="Last Web Sites">
+              <div class="table-container">
+                <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+                  <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef> ID </th>
+                    <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="website">
+                    <th mat-header-cell *matHeaderCellDef> Website </th>
+                    <td mat-cell *matCellDef="let element"> {{element.website}} </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef> Status </th>
+                    <td mat-cell *matCellDef="let element">
+                      <span class="status-badge" [ngClass]="element.status.toLowerCase()">
+                        {{element.status}}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="user">
+                    <th mat-header-cell *matHeaderCellDef> User </th>
+                    <td mat-cell *matCellDef="let element"> {{element.user}} </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+              </div>
+            </mat-tab>
+            <mat-tab label="LATEST MEDIAS">
+              <div class="table-container">
+                <p>Media reports will be displayed here.</p>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+        </div>
+      </mat-card-header>
+    </mat-card>
+  </div>
+</section>
