@@ -5,9 +5,10 @@ import { MenuService, MenuItem } from '../../services/menu';
 
 @Component({
   selector: 'app-sidebar',
+  standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './sidebar.html',
-  styleUrl: './sidebar.scss',
+  styleUrls: ['./sidebar.scss'],
 })
 export class Sidebar implements OnInit {
   @Input() collapsed = false;

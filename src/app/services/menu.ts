@@ -28,24 +28,31 @@ export class MenuService {
     const menuItems: MenuItem[] = [];
 
     routes.forEach(route => {
-      if (route.path && route.path !== '' && !route.path.includes('*') && route.path !== 'auth') {
-        const fullPath = parentPath ? `${parentPath}/${route.path}` : route.path;
-        const label = this.generateLabelFromPath(route.path);
-
-        const menuItem: MenuItem = {
-          path: fullPath,
-          label: label,
-          icon: this.getIconForPath(route.path)
-        };
-
-        // ถ้ามี loadChildren แสดงว่าเป็น lazy loaded module
-        if (route.loadChildren) {
-          // สำหรับ lazy loaded modules เราจะเพิ่มเมนูย่อยในภายหลัง
-          menuItem.children = [];
+      if (!route.path || route.path.includes('*') || route.path === 'auth') {
+        if (route.children) {
+          menuItems.push(...this.processRoutes(route.children, parentPath));
         }
-
-        menuItems.push(menuItem);
+        return;
       }
+
+      const fullPath = parentPath ? `${parentPath}/${route.path}` : route.path;
+      const label = this.generateLabelFromPath(route.path);
+
+      const menuItem: MenuItem = {
+        path: fullPath,
+        label: label,
+        icon: this.getIconForPath(route.path)
+      };
+
+      if (route.children) {
+        menuItem.children = this.processRoutes(route.children, fullPath);
+      }
+
+      if (route.loadChildren) {
+        menuItem.children = menuItem.children || this.getLazyLoadedMenuChildren(fullPath);
+      }
+
+      menuItems.push(menuItem);
     });
 
     return menuItems;
@@ -57,6 +64,30 @@ export class MenuService {
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
+  }
+
+  private getLazyLoadedMenuChildren(parentPath: string): MenuItem[] {
+    if (parentPath === 'main-conten-mng') {
+      return [
+        {
+          path: 'main-conten-mng/main-page',
+          label: 'Main Page',
+          icon: this.getIconForPath('main-page')
+        },
+        {
+          path: 'main-conten-mng/dashboard',
+          label: 'Dashboard',
+          icon: this.getIconForPath('dashboard')
+        },
+        {
+          path: 'main-conten-mng/users',
+          label: 'Users',
+          icon: this.getIconForPath('users')
+        }
+      ];
+    }
+
+    return [];
   }
 
   private getIconForPath(path: string): string {

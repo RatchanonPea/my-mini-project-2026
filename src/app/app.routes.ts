@@ -5,7 +5,7 @@ import { LayoutComponent } from './layout/layout.component';
 export const routes: Routes = [
 	{
 		path: '',
-		redirectTo: 'auth/login',
+		redirectTo: 'main-conten-mng/dashboard',
 		pathMatch: 'full',
 	},
 	{

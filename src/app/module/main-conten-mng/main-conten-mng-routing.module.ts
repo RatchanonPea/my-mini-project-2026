@@ -10,6 +10,11 @@ const routes: Routes = [
     data: { breadcrumb: 'Main Content' },
     children: [
       {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
         path: 'main-page', data: { breadcrumb: 'Main Page' }, component: MainPage
       },
       {

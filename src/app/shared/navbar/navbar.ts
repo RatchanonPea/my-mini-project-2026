@@ -6,9 +6,10 @@ import { ConfirmDialog } from '../../common/helper';
 
 @Component({
   selector: 'app-navbar',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './navbar.html',
-  styleUrl: './navbar.scss',
+  styleUrls: ['./navbar.scss'],
 })
 export class Navbar implements OnInit, OnDestroy {
   currentUser: string | null = null;
