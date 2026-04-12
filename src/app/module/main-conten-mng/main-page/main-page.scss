@@ -95,3 +95,9 @@ mat-paginator {
 .text-center {
   text-align: center !important;
 }
+
+td.mat-mdc-cell {
+  button {
+    margin: 0 4px;
+  }
+}

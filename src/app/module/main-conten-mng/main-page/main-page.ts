@@ -8,11 +8,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCard } from "@angular/material/card";
 import { ConfirmDelete, ConfirmDialog, DialogSuccess } from '../../../common/helper';
+import { MatIconModule } from '@angular/material/icon';
 
 interface GridItem {
   No?: number;
   id: number;
-  code?:string;
+  code?: string;
   title: string;
   description: string;
   price?: number;
@@ -21,7 +22,7 @@ interface GridItem {
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatPaginatorModule],
+  imports: [CommonModule, FormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatPaginatorModule, MatIconModule],
   templateUrl: './main-page.html',
   styleUrls: ['./main-page.scss'],
 })
@@ -44,7 +45,7 @@ export class MainPage {
     price: 0
   };
 
-  displayedColumns = ['No', 'id','code', 'title', 'description', 'price', 'action'];
+  displayedColumns = ['No', 'id', 'code', 'title', 'description', 'price', 'action'];
 
   constructor() {
     this.dataSource.data = this.items;
@@ -65,22 +66,113 @@ export class MainPage {
       return;
     }
 
-    const nextId = this.items.length > 0 ? Math.max(...this.items.map(item => item.id)) + 1 : 1;
-    this.items = [
-      ...this.items,
-      {
-        id: nextId,
-        title: this.newItem.title.trim(),
-        description: this.newItem.description.trim(),
-        price: this.newItem.price
+    const existingIndex = this.items.findIndex(item => item.id === this.newItem.id);
+    const existingItem = this.items[existingIndex];
+
+    if (existingItem) {
+
+      const isChanged =
+        existingItem.title !== this.newItem.title ||
+        existingItem.description !== this.newItem.description ||
+        existingItem.price !== this.newItem.price;
+
+      // 🔥 ถ้ามีการเปลี่ยน → ค่อย confirm
+      if (isChanged) {
+        ConfirmDialog('ยืนยันการแก้ไข', 'คุณต้องการอัปเดตรายการนี้ใช่หรือไม่')
+          .then((confirm) => {
+            if (confirm) {
+              this.updateItem(existingIndex, existingItem);
+            }
+          });
+      } else {
+        // 🔥 ไม่มีการเปลี่ยน → update เลย (ไม่ต้องถาม)
+        this.updateItem(existingIndex, existingItem);
       }
+    }
 
-    ];
-    this.updateTable(); // 👈 สำคัญ
-    this.newItem.title = '';
-    this.newItem.description = '';
-    this.newItem.price = 0;
+    // if (existingIndex !== -1) {
+    //   ConfirmDialog('ยืนยันการแก้ไข', 'คุณต้องการอัปเดตรายการนี้ใช่หรือไม่')
+    //     .then((confirm) => {
+    //       if (confirm) {
+    //         this.items[existingIndex] = {
+    //           ...this.items[existingIndex]!, // 👈 ใส่ !
+    //           title: this.newItem.title!.trim(),
+    //           description: this.newItem.description!.trim(),
+    //           price: this.newItem.price
+    //         };
 
+    //         this.updateTable();
+    //         DialogSuccess('อัปเดตรายการสำเร็จ');
+
+    //         this.resetForm();
+    //       }
+    //     });
+
+    // } else {
+    //   // 🔥 ADD NEW
+    //   const nextId = this.items.length > 0
+    //     ? Math.max(...this.items.map(item => item.id)) + 1
+    //     : 1;
+
+    //   const newCode = this.generateCode();
+
+    //   this.items = [
+    //     ...this.items,
+    //     {
+    //       id: nextId,
+    //       code: newCode,
+    //       title: this.newItem.title.trim(),
+    //       description: this.newItem.description.trim(),
+    //       price: this.newItem.price
+    //     }
+    //   ];
+
+    //   this.updateTable();
+    //   DialogSuccess('เพิ่มรายการสำเร็จ');
+
+    //   this.resetForm();
+    // }
+  }
+  updateItem(index: number, existingItem: any) {
+    this.items[index] = {
+      ...existingItem,
+      title: this.newItem.title!.trim(),
+      description: this.newItem.description!.trim(),
+      price: this.newItem.price
+    };
+
+    this.updateTable();
+    DialogSuccess('อัปเดตรายการสำเร็จ');
+    this.resetForm();
+  }
+  generateCode(): string {
+    const prefix = 'A';
+
+    // ดึงเลขทั้งหมดที่มี
+    const numbers = this.items
+      .map(item => item.code)
+      .filter(code => code) // กัน undefined
+      .map(code => Number(code!.replace(prefix, '')));
+
+    const max = numbers.length > 0 ? Math.max(...numbers) : 0;
+
+    const next = max + 1;
+
+    return prefix + next.toString().padStart(3, '0');
+  }
+  resetForm() {
+    this.newItem = {
+      title: '',
+      description: '',
+      price: 0
+    };
+  }
+
+  editItem(item: any) {
+    console.log('edit:', item);
+
+    // ตัวอย่าง: เอาค่ามาใส่ form
+    this.newItem = { ...item };
   }
 
   removeItem(id: number): void {
