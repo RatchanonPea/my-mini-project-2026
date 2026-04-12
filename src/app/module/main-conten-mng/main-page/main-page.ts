@@ -7,9 +7,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCard } from "@angular/material/card";
+import { ConfirmDelete, ConfirmDialog, DialogSuccess } from '../../../common/helper';
 
 interface GridItem {
+  No?: number;
   id: number;
+  code?:string;
   title: string;
   description: string;
   price?: number;
@@ -26,11 +29,13 @@ export class MainPage {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   pageEvent: any;
+  pageIndex = 0;
+  pageSize = 5;
   dataSource = new MatTableDataSource<any>([]);
   items: GridItem[] = [
-    { id: 1, title: 'สินค้า A', description: 'รายละเอียดสินค้าชิ้นที่ 1', price: 100 },
-    { id: 2, title: 'สินค้า B', description: 'รายละเอียดสินค้าชิ้นที่ 2', price: 200 },
-    { id: 3, title: 'สินค้า C', description: 'รายละเอียดสินค้าชิ้นที่ 3', price: 300 }
+    { id: 1, code: 'A001', title: 'สินค้า A', description: 'รายละเอียดสินค้าชิ้นที่ 1', price: 100 },
+    { id: 2, code: 'A002', title: 'สินค้า B', description: 'รายละเอียดสินค้าชิ้นที่ 2', price: 200 },
+    { id: 3, code: 'A003', title: 'สินค้า C', description: 'รายละเอียดสินค้าชิ้นที่ 3', price: 300 }
   ];
 
   newItem: Partial<GridItem> = {
@@ -39,7 +44,7 @@ export class MainPage {
     price: 0
   };
 
-  displayedColumns = ['id', 'title', 'description', 'price', 'action'];
+  displayedColumns = ['No', 'id','code', 'title', 'description', 'price', 'action'];
 
   constructor() {
     this.dataSource.data = this.items;
@@ -79,12 +84,20 @@ export class MainPage {
   }
 
   removeItem(id: number): void {
-    this.items = this.items.filter(item => item.id !== id);
-    this.updateTable(); // 👈 สำคัญ
+    ConfirmDelete('ยืนยันการลบ', "คุณต้องการลบรายการนี้ใช่หรือไม่")
+      .then(async emit => {
+        if (emit) {
+          this.items = this.items.filter(item => item.id !== id);
+          DialogSuccess('ลบรายการสำเร็จ');
+          this.updateTable(); // 👈 สำคัญ
+        }
+      });
   }
 
   onPageChange(event: any) {
     this.pageEvent = event;
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
 
     console.log('หน้า:', event.pageIndex + 1); // 👈 หน้า (เริ่ม 1)
     console.log('ต่อหน้า:', event.pageSize);
@@ -93,4 +106,5 @@ export class MainPage {
   getTotalPrice(): number {
     return this.items.reduce((sum, item) => sum + (item.price || 0), 0);
   }
+
 }
