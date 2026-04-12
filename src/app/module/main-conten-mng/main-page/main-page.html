@@ -30,7 +30,7 @@
 
     <!-- 🔻 ACTION -->
     <div class="form-action p-3"  fxLayout="row" fxLayoutAlign="end center">
-      <button mat-flat-button color="primary"  style="margin-left: auto;" (click)="addItem()" [disabled]="!newItem.title || !newItem.description">
+      <button mat-flat-button color="primary"  style="margin-left: auto;" (click)="addItem()" [disabled]="!newItem.title || !newItem.description || newItem.price == 0 || !newItem.price">
         Add Item
       </button>
     </div>
