@@ -1,0 +1,43 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<h2 mat-dialog-title class="dialog-header">
+  <mat-icon>person</mat-icon>
+  <span>Add New Item</span>
+</h2>
+
+<div mat-dialog-content class="dialog-body">
+
+  <div class="form-card">
+
+    <mat-form-field appearance="outline">
+      <mat-label>ID</mat-label>
+      <!-- <mat-icon matPrefix>badge</mat-icon> -->
+      <input matInput [(ngModel)]="newItem.id">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Title</mat-label>
+      <!-- <mat-icon matPrefix>title</mat-icon> -->
+      <input matInput [(ngModel)]="newItem.title">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <!-- <mat-icon matPrefix>notes</mat-icon> -->
+      <input matInput [(ngModel)]="newItem.description">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Price</mat-label>
+      <!-- <mat-icon matPrefix>payments</mat-icon> -->
+      <input matInput type="number" [(ngModel)]="newItem.price">
+    </mat-form-field>
+
+  </div>
+
+</div>
+
+<div mat-dialog-actions class="dialog-footer">
+  <button mat-stroked-button (click)="cancel()">Cancel</button>
+  <button matButton="filled" [disabled]="!newItem.id || !newItem.title || !newItem.description || newItem.price <= 0"
+    (click)="save()">Save</button>
+</div>

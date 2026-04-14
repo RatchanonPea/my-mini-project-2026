@@ -4,6 +4,8 @@ import { MainContentMngRoutingModule } from './main-conten-mng-routing.module';
 import { MainContentMngComponent } from './main-conten-mng.component';
 import { Dashboard } from './dashboard/dashboard';
 import { Users } from './users/users';
+import { AddUserItemDialog } from './users/add-user-item-dialog/add-user-item-dialog';
+import { MatInputModule } from "@angular/material/input";
 
 @NgModule({
   declarations: [MainContentMngComponent],
@@ -11,7 +13,9 @@ import { Users } from './users/users';
     CommonModule,
     MainContentMngRoutingModule,
     Dashboard,
-    Users
-  ]
+    Users,
+    AddUserItemDialog,
+    MatInputModule
+]
 })
 export class MainContenMngModule { }
