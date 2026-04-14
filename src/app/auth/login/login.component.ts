@@ -10,7 +10,10 @@ import { AuthService } from '../../services/auth';
 })
 export class LoginComponent {
   datalogin: any = {};
-  constructor(private router: Router, private authService: AuthService) {}
+  hidePassword = true;
+  constructor(private router: Router, private authService: AuthService) { }
+
+
 
   login() {
     console.log(this.datalogin);
