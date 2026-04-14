@@ -61,7 +61,8 @@ export class MainPage {
     this.dataSource.data = this.items;
   }
 
-  addItem(): void {
+
+  addItem() {
     if (!this.newItem.title || !this.newItem.description) {
       return;
     }
@@ -69,25 +70,57 @@ export class MainPage {
     const existingIndex = this.items.findIndex(item => item.id === this.newItem.id);
     const existingItem = this.items[existingIndex];
 
-    if (existingItem) {
+    if (existingIndex !== -1) {
+
+      // ======================
+      // 🟡 EDIT เท่านั้น
+      // ======================
+      const current = this.items[existingIndex];
 
       const isChanged =
-        existingItem.title !== this.newItem.title ||
-        existingItem.description !== this.newItem.description ||
-        existingItem.price !== this.newItem.price;
+        current.title !== this.newItem.title?.trim() ||
+        current.description !== this.newItem.description?.trim() ||
+        current.price !== this.newItem.price;
 
-      // 🔥 ถ้ามีการเปลี่ยน → ค่อย confirm
-      if (isChanged) {
-        ConfirmDialog('ยืนยันการแก้ไข', 'คุณต้องการอัปเดตรายการนี้ใช่หรือไม่')
-          .then((confirm) => {
-            if (confirm) {
-              this.updateItem(existingIndex, existingItem);
-            }
-          });
-      } else {
-        // 🔥 ไม่มีการเปลี่ยน → update เลย (ไม่ต้องถาม)
-        this.updateItem(existingIndex, existingItem);
+      if (!isChanged) {
+        // ไม่มีการเปลี่ยน → ไม่ต้องถาม
+        this.updateItem2(existingIndex);
+        return;
       }
+
+      // มีการเปลี่ยน → ค่อย confirm
+      ConfirmDialog('ยืนยันการแก้ไข', 'คุณต้องการอัปเดตรายการนี้ใช่หรือไม่')
+        .then(confirm => {
+          if (confirm) {
+            this.updateItem2(existingIndex);
+          }
+        });
+
+    } else {
+
+      // ======================
+      // 🟢 ADD (ไม่ต้องเช็ค isChanged)
+      // ======================
+      const nextId = this.items.length > 0
+        ? Math.max(...this.items.map(item => item.id)) + 1
+        : 1;
+
+      const newCode = this.generateCode();
+
+      this.items = [
+        ...this.items,
+        {
+          id: nextId,
+          code: newCode,
+          title: this.newItem.title!.trim(),
+          description: this.newItem.description!.trim(),
+          price: this.newItem.price
+        }
+      ];
+
+      this.updateTable();
+      DialogSuccess('เพิ่มรายการสำเร็จ');
+      this.resetForm();
     }
 
     // if (existingIndex !== -1) {
@@ -133,6 +166,19 @@ export class MainPage {
     //   this.resetForm();
     // }
   }
+
+  updateItem2(index: number) {
+    this.items[index] = {
+      ...this.items[index],
+      title: this.newItem.title!.trim(),
+      description: this.newItem.description!.trim(),
+      price: this.newItem.price
+    };
+
+    this.updateTable();
+    DialogSuccess('อัปเดตรายการสำเร็จ');
+    this.resetForm();
+  }
   updateItem(index: number, existingItem: any) {
     this.items[index] = {
       ...existingItem,
@@ -162,6 +208,8 @@ export class MainPage {
   }
   resetForm() {
     this.newItem = {
+      id: 0,
+      code: '',
       title: '',
       description: '',
       price: 0
