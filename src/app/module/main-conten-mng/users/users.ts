@@ -8,20 +8,27 @@ import { CommonModule } from '@angular/common';
 import { ConfirmDialog } from '../../../common/helper';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from "@angular/material/icon";
+import { MatIconModule } from '@angular/material/icon';
+import { MatChip } from '@angular/material/chips';
+import { MatChipsModule } from '@angular/material/chips';
 
 
 interface GridItem {
-  No?: number;
   id: number;
   code?: string;
-  title: string;
-  description: string;
-  price?: number;
+  username: string;
+  // fullname : string;
+  firstName: string;
+  lastName: string;
+
+  email?: string;
+  role: string;
+  status: string;
 }
 
 @Component({
   selector: 'app-users',
-  imports: [MatPaginatorModule, MatTableModule, CommonModule, MatButtonModule, MatIcon],
+  imports: [MatPaginatorModule, MatTableModule, CommonModule, MatButtonModule, MatIcon, MatChipsModule, MatIconModule, MatChip],
   templateUrl: './users.html',
   styleUrl: './users.scss',
 })
@@ -34,12 +41,77 @@ export class Users {
   pageIndex = 0;
   pageSize = 5;
   dataSource = new MatTableDataSource<GridItem>([]);
-  items: GridItem[] = [
-    { id: 1, code: 'A001', title: 'สินค้า A', description: 'รายละเอียดสินค้าชิ้นที่ 1', price: 100 },
-    { id: 2, code: 'A002', title: 'สินค้า B', description: 'รายละเอียดสินค้าชิ้นที่ 2', price: 200 },
-    { id: 3, code: 'A003', title: 'สินค้า C', description: 'รายละเอียดสินค้าชิ้นที่ 3', price: 300 }
+
+  items : GridItem[] = this.generateMockData(20);
+  // items: GridItem[] = [
+  //   {
+  //     id: 1,
+  //     code: 'U001',
+  //     username: 'admin01',
+  //     fullname: 'สมชาย ใจดี',
+  //     firstName: 'สมชาย',
+  //     lastName: 'ใจดี',
+  //     email: 'somchai@example.com',
+  //     role: 'admin',
+  //     status: 'active'
+  //   },
+  //   {
+  //     id: 2,
+  //     code: 'U002',
+  //     username: 'user02',
+  //     // fullname: 'สมหญิง รักดี',
+  //     firstName: 'สมหญิง',
+  //     lastName: 'รักดี',
+  //     email: 'somying@example.com',
+  //     role: 'user',
+  //     status: 'active'
+  //   },
+  //   {
+  //     id: 3,
+  //     code: 'U003',
+  //     username: 'manager01',
+  //     // fullname: 'ประยุทธ์ เก่งงาน',
+  //     firstName: 'ประยุทธ์',
+  //     lastName: 'เก่งงาน',
+  //     email: 'manager@example.com',
+  //     role: 'manager',
+  //     status: 'inactive'
+  //   },
+  //   {
+  //     id: 4,
+  //     code: 'U004',
+  //     username: 'staff01',
+  //     // fullname: 'กิตติพงษ์ ทำดี',
+  //     firstName: 'กิตติพงษ์',
+  //     lastName: 'ทำดี',
+  //     email: 'kitti@example.com',
+  //     role: 'user',
+  //     status: 'active'
+  //   },
+  //   {
+  //     id: 5,
+  //     code: 'U005',
+  //     username: 'guest01',
+  //     // fullname: 'ทดสอบ ระบบ',
+  //     firstName: 'ทดสอบ',
+  //     lastName: 'ระบบ',
+  //     email: 'guest@example.com',
+  //     role: 'guest',
+  //     status: 'inactive'
+  //   }
+  // ];
+  // displayedColumns = ['No', 'id', 'code', 'title', 'description', 'price', 'action'];
+  displayedColumns = [
+    'No',
+    'id',
+    'code',
+    'username',
+    'fullname',
+    'email',
+    'role',
+    'status',
+    'action'
   ];
-  displayedColumns = ['No', 'id', 'code', 'title', 'description', 'price', 'action'];
   totalItems: any = 0;
 
   constructor(
@@ -48,11 +120,45 @@ export class Users {
     this.dataSource.data = this.items;
   }
   ngOnInit() {
-
+    this.items = this.generateMockData(20);
   }
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
+
+ generateMockData(count: number): GridItem[] {
+  const roles = ['admin', 'user', 'manager'];
+  const statuses = ['active', 'inactived'];
+
+  const firstNames = [
+    'สมชาย', 'สมหญิง', 'กิตติ', 'ณัฐ', 'วิชัย',
+    'อนันต์', 'พงษ์ศักดิ์', 'ศิริพร', 'สุดา', 'นภา'
+  ];
+
+  const lastNames = [
+    'ใจดี', 'รักดี', 'ทองสุข', 'มีชัย', 'เจริญสุข',
+    'บุญมี', 'ศรีสุข', 'แซ่ลิ้ม', 'ตั้งใจ', 'รุ่งเรือง'
+  ];
+
+  return Array.from({ length: count }, (_, i) => {
+    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+
+    return {
+      id: i + 1,
+      code: 'U' + (i + 1).toString().padStart(3, '0'),
+      username: `user${i + 1}`,
+
+      firstName,
+      lastName,
+
+      email: `${firstName}.${lastName}${i + 1}@example.com`,
+
+      role: roles[Math.floor(Math.random() * roles.length)],
+      status: statuses[Math.floor(Math.random() * statuses.length)]
+    };
+  });
+}
 
   openAddDialog() {
     const dialogRef = this.dialog.open(AddUserItemDialog, {
@@ -63,6 +169,9 @@ export class Users {
       if (result) {
         // เพิ่มข้อมูลเข้า table
         result.code = this.generateCode();
+        // 🔥 set audit
+        result.createdBy = 'admin'; // หรือเอาจาก login user
+        result.createdAt = new Date();
         this.dataSource.data = [...this.dataSource.data, result];
         this.totalItems++;
       }
@@ -86,26 +195,28 @@ export class Users {
   }
 
   editItem(item: any) {
-  const dialogRef = this.dialog.open(AddUserItemDialog, {
-    width: '400px',
-    data: item // 🔥 ส่งข้อมูลไป
-  });
+    const dialogRef = this.dialog.open(AddUserItemDialog, {
+      width: '400px',
+      data: item
+    });
 
-  dialogRef.afterClosed().subscribe(result => {
-    if (result) {
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
 
-      // 🔥 update แทน add
-      const index = this.dataSource.data.findIndex(x => x.id === result.id);
+        const index = this.dataSource.data.findIndex(x => x.id === result.id);
 
-      if (index !== -1) {
-        const updatedData = [...this.dataSource.data];
-        updatedData[index] = result;
+        if (index !== -1) {
+          result.updatedBy = 'admin'; // 🔥 ใครแก้
+          result.updatedAt = new Date();
 
-        this.dataSource.data = updatedData;
+          const updatedData = [...this.dataSource.data];
+          updatedData[index] = result;
+
+          this.dataSource.data = updatedData;
+        }
       }
-    }
-  });
-}
+    });
+  }
 
   removeItem(id: number): void {
     ConfirmDialog('ยืนยันการลบ', "คุณต้องการลบรายการนี้ใช่หรือไม่")

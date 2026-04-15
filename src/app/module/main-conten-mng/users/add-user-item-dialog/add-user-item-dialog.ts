@@ -10,12 +10,14 @@ import { MatButton } from '@angular/material/button';
 
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Inject } from '@angular/core';
+import { MatOption } from "@angular/material/core";
+import { MatSelectModule } from '@angular/material/select';
 
 
 @Component({
   selector: 'app-add-user-item-dialog',
   standalone: true,
-  imports: [MatDialogModule, CommonModule, FormsModule, MatInputModule, MatFormFieldModule, MatIcon, MatButton],
+  imports: [MatDialogModule, CommonModule, FormsModule, MatInputModule, MatFormFieldModule, MatIcon, MatButton, MatOption, MatSelectModule ],
   templateUrl: './add-user-item-dialog.html',
   styleUrl: './add-user-item-dialog.scss',
 })
@@ -23,9 +25,25 @@ export class AddUserItemDialog {
   newItem = {
     id: '',
     code: '',
-    title: '',
-    description: '',
-    price: 0
+
+    username: '',
+    password: '',
+
+    firstName: '',
+    lastName: '',
+
+    email: '',
+    phone: '',
+
+    role: '',
+    status: 'active',
+
+    // 🔥 audit fields
+    createdBy: '',
+    createdAt: new Date(),
+
+    updatedBy: '',
+    updatedAt: new Date()
   };
   isEdit = false;
   constructor(
@@ -35,8 +53,9 @@ export class AddUserItemDialog {
   ngOnInit() {
 
     if (this.data) {
-    this.newItem = { ...this.data }; // 🔥 set ค่า
-  }
+      this.isEdit = true;
+      this.newItem = { ...this.data }; // 🔥 set ค่า
+    }
   }
 
   save() {
