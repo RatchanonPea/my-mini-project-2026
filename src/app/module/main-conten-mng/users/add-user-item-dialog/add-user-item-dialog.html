@@ -1,12 +1,20 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <h2 mat-dialog-title class="dialog-header">
   <mat-icon>person</mat-icon>
-  <span>Add New Item</span>
+  <!-- <span>Add New Item</span> -->
+  <h2 mat-dialog-title>
+  {{ isEdit ? 'Edit Item' : 'Add Item' }}
+</h2>
 </h2>
 
 <div mat-dialog-content class="dialog-body">
 
   <div class="form-card">
+    <mat-form-field appearance="outline">
+      <mat-label>Code</mat-label>
+      <!-- <mat-icon matPrefix>badge</mat-icon> -->
+      <input matInput [(ngModel)]="newItem.code" placeholder="Auto-generated code" disabled>
+    </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>ID</mat-label>

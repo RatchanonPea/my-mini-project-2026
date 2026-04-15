@@ -7,6 +7,8 @@ import { MatTableModule } from '@angular/material/table';
 import { CommonModule } from '@angular/common';
 import { ConfirmDialog } from '../../../common/helper';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIcon } from "@angular/material/icon";
+
 
 interface GridItem {
   No?: number;
@@ -19,12 +21,14 @@ interface GridItem {
 
 @Component({
   selector: 'app-users',
-  imports: [MatPaginatorModule, MatTableModule, CommonModule, MatButtonModule],
+  imports: [MatPaginatorModule, MatTableModule, CommonModule, MatButtonModule, MatIcon],
   templateUrl: './users.html',
   styleUrl: './users.scss',
 })
 export class Users {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  clickedRows = new Set<GridItem>();
 
   pageEvent: any;
   pageIndex = 0;
@@ -58,11 +62,51 @@ export class Users {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         // เพิ่มข้อมูลเข้า table
+        result.code = this.generateCode();
         this.dataSource.data = [...this.dataSource.data, result];
         this.totalItems++;
       }
     });
   }
+
+  generateCode(): string {
+    const prefix = 'A';
+
+    // ดึงเลขทั้งหมดที่มี
+    const numbers = this.items
+      .map(item => item.code)
+      .filter(code => code) // กัน undefined
+      .map(code => Number(code!.replace(prefix, '')));
+
+    const max = numbers.length > 0 ? Math.max(...numbers) : 0;
+
+    const next = max + 1;
+
+    return prefix + next.toString().padStart(3, '0');
+  }
+
+  editItem(item: any) {
+  const dialogRef = this.dialog.open(AddUserItemDialog, {
+    width: '400px',
+    data: item // 🔥 ส่งข้อมูลไป
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+
+      // 🔥 update แทน add
+      const index = this.dataSource.data.findIndex(x => x.id === result.id);
+
+      if (index !== -1) {
+        const updatedData = [...this.dataSource.data];
+        updatedData[index] = result;
+
+        this.dataSource.data = updatedData;
+      }
+    }
+  });
+}
+
   removeItem(id: number): void {
     ConfirmDialog('ยืนยันการลบ', "คุณต้องการลบรายการนี้ใช่หรือไม่")
       .then(async emit => {

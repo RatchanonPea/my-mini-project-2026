@@ -8,25 +8,35 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIcon } from "@angular/material/icon";
 import { MatButton } from '@angular/material/button';
 
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Inject } from '@angular/core';
+
 
 @Component({
   selector: 'app-add-user-item-dialog',
   standalone: true,
-  imports: [MatDialogModule, CommonModule, FormsModule, MatInputModule, MatFormFieldModule, MatIcon,MatButton],
+  imports: [MatDialogModule, CommonModule, FormsModule, MatInputModule, MatFormFieldModule, MatIcon, MatButton],
   templateUrl: './add-user-item-dialog.html',
   styleUrl: './add-user-item-dialog.scss',
 })
 export class AddUserItemDialog {
   newItem = {
     id: '',
+    code: '',
     title: '',
     description: '',
     price: 0
   };
+  isEdit = false;
   constructor(
-    private dialogRef: MatDialogRef<AddUserItemDialog>
+    private dialogRef: MatDialogRef<AddUserItemDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) { }
   ngOnInit() {
+
+    if (this.data) {
+    this.newItem = { ...this.data }; // 🔥 set ค่า
+  }
   }
 
   save() {
