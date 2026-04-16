@@ -10,83 +10,100 @@
   <div class="form-card">
     <!-- <div class="form-container"> -->
 
-      <!-- Code -->
-      <mat-form-field appearance="outline" floatLabel="always">
-        <mat-label>Code</mat-label>
-        <mat-icon matPrefix>badge</mat-icon>
-        <input matInput [(ngModel)]="newItem.code" placeholder="Auto-generated code" readonly>
-      </mat-form-field>
+    <!-- Code -->
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>Code</mat-label>
+      <mat-icon matPrefix>badge</mat-icon>
+      <input matInput [(ngModel)]="newItem.code" placeholder="Auto-generated code" readonly>
+    </mat-form-field>
 
-      <!-- ID -->
-      <mat-form-field appearance="outline">
-        <mat-label>ID</mat-label>
-        <mat-icon matPrefix>pin</mat-icon>
-        <input matInput [(ngModel)]="newItem.id" required>
-      </mat-form-field>
+    <!-- ID -->
+    <mat-form-field appearance="outline">
+      <mat-label>ID</mat-label>
+      <mat-icon matPrefix>pin</mat-icon>
+      <input matInput [(ngModel)]="newItem.id" required>
+    </mat-form-field>
 
-      <!-- Username -->
-      <mat-form-field appearance="outline">
-        <mat-label>Username</mat-label>
-        <mat-icon matPrefix>person</mat-icon>
-        <input matInput [(ngModel)]="newItem.username" required>
-      </mat-form-field>
+    <!-- Username -->
+    <mat-form-field appearance="outline">
+      <mat-label>Username</mat-label>
+      <mat-icon matPrefix>person</mat-icon>
+      <input matInput [(ngModel)]="newItem.username" required>
+    </mat-form-field>
 
-      <!-- Password -->
-      <mat-form-field appearance="outline">
-        <mat-label>Password</mat-label>
-        <mat-icon matPrefix>lock</mat-icon>
-        <input matInput type="password" [(ngModel)]="newItem.password" required>
-      </mat-form-field>
+    <!-- Password -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Password</mat-label>
+      <mat-icon matPrefix>lock</mat-icon>
 
-      <!-- First Name -->
-      <mat-form-field appearance="outline">
-        <mat-label>First Name</mat-label>
-        <input matInput [(ngModel)]="newItem.firstName">
-      </mat-form-field>
+      <input matInput [type]="hidePassword ? 'password' : 'text'" [(ngModel)]="newItem.password" required>
 
-      <!-- Last Name -->
-      <mat-form-field appearance="outline">
-        <mat-label>Last Name</mat-label>
-        <input matInput [(ngModel)]="newItem.lastName">
-      </mat-form-field>
+      <!-- 👁️ ใช้ icon ธรรมดา -->
+      <mat-icon matSuffix class="eye-icon" (click)="hidePassword = !hidePassword">
+        {{ hidePassword ? 'visibility_off' : 'visibility' }}
+      </mat-icon>
 
-      <!-- Email -->
-      <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <mat-icon matPrefix>email</mat-icon>
-        <input matInput type="email" [(ngModel)]="newItem.email">
-      </mat-form-field>
+    </mat-form-field>
 
-      <!-- Phone -->
-      <mat-form-field appearance="outline">
-        <mat-label>Phone</mat-label>
-        <mat-icon matPrefix>call</mat-icon>
-        <input matInput [(ngModel)]="newItem.phone">
-      </mat-form-field>
+    <!-- First Name -->
+    <mat-form-field appearance="outline">
+      <mat-label>First Name</mat-label>
+      <input matInput [(ngModel)]="newItem.firstName">
+    </mat-form-field>
 
-      <!-- Role -->
-      <mat-form-field appearance="outline">
-        <mat-label>Role</mat-label>
-        <mat-icon matPrefix>admin_panel_settings</mat-icon>
-        <mat-select [(ngModel)]="newItem.role">
-          <mat-option value="admin">Admin</mat-option>
-          <mat-option value="manager">Manager</mat-option>
-          <mat-option value="user">User</mat-option>
-        </mat-select>
-      </mat-form-field>
+    <!-- Last Name -->
+    <mat-form-field appearance="outline">
+      <mat-label>Last Name</mat-label>
+      <input matInput [(ngModel)]="newItem.lastName">
+    </mat-form-field>
 
-      <!-- Status -->
-      <mat-form-field appearance="outline">
-        <mat-label>Status</mat-label>
-        <mat-select [(ngModel)]="newItem.status">
-          <mat-option value="active">Active</mat-option>
-          <mat-option value="inactived">inactived</mat-option>
-        </mat-select>
-      </mat-form-field>
+    <!-- Email -->
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <mat-icon matPrefix>email</mat-icon>
+      <input matInput type="email" [(ngModel)]="newItem.email">
+    </mat-form-field>
 
-  <!-- </div> -->
+    <!-- Phone -->
+    <mat-form-field appearance="outline">
+      <mat-label>Phone</mat-label>
+      <mat-icon matPrefix>call</mat-icon>
+      <input matInput [(ngModel)]="newItem.phone">
+    </mat-form-field>
 
-</div>
+    <!-- Role -->
+    <mat-form-field appearance="outline">
+      <mat-label>Role</mat-label>
+      <mat-icon matPrefix>admin_panel_settings</mat-icon>
+      <mat-select [(ngModel)]="newItem.role">
+        <mat-option value="admin">Admin</mat-option>
+        <mat-option value="manager">Manager</mat-option>
+        <mat-option value="user">User</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Select Date</mat-label>
+      <mat-icon matPrefix>calendar_today</mat-icon>
+
+      <input matInput [matDatepicker]="picker" [(ngModel)]="newItem.date">
+
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- Status -->
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [(ngModel)]="newItem.status">
+        <mat-option value="active">Active</mat-option>
+        <mat-option value="inactived">inactived</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- </div> -->
+
+  </div>
 
 </div>
 

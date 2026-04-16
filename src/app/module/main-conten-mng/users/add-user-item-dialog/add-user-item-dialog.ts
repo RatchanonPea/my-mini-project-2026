@@ -12,12 +12,13 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Inject } from '@angular/core';
 import { MatOption } from "@angular/material/core";
 import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from "@angular/material/datepicker";
 
 
 @Component({
   selector: 'app-add-user-item-dialog',
   standalone: true,
-  imports: [MatDialogModule, CommonModule, FormsModule, MatInputModule, MatFormFieldModule, MatIcon, MatButton, MatOption, MatSelectModule ],
+  imports: [MatDialogModule, CommonModule, FormsModule, MatInputModule, MatFormFieldModule, MatIcon, MatButton, MatOption, MatSelectModule, MatDatepickerModule],
   templateUrl: './add-user-item-dialog.html',
   styleUrl: './add-user-item-dialog.scss',
 })
@@ -36,6 +37,8 @@ export class AddUserItemDialog {
     phone: '',
 
     role: '',
+    date: new Date(),
+  
     status: 'active',
 
     // 🔥 audit fields
@@ -45,6 +48,7 @@ export class AddUserItemDialog {
     updatedBy: '',
     updatedAt: new Date()
   };
+  hidePassword = true;
   isEdit = false;
   constructor(
     private dialogRef: MatDialogRef<AddUserItemDialog>,
@@ -55,6 +59,7 @@ export class AddUserItemDialog {
     if (this.data) {
       this.isEdit = true;
       this.newItem = { ...this.data }; // 🔥 set ค่า
+      console.log('Edit item:', this.newItem);
     }
   }
 

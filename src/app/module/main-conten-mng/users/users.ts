@@ -23,7 +23,14 @@ interface GridItem {
 
   email?: string;
   role: string;
+  date: Date;
   status: string;
+  // 🔥 audit fields
+  createdBy: string,
+  createdDate: Date,
+
+  updatedBy: string,
+  updatedDate: Date
 }
 
 @Component({
@@ -42,7 +49,7 @@ export class Users {
   pageSize = 5;
   dataSource = new MatTableDataSource<GridItem>([]);
 
-  items : GridItem[] = this.generateMockData(20);
+  items: GridItem[] = this.generateMockData(20);
   // items: GridItem[] = [
   //   {
   //     id: 1,
@@ -109,6 +116,7 @@ export class Users {
     'fullname',
     'email',
     'role',
+    'date',
     'status',
     'action'
   ];
@@ -126,39 +134,65 @@ export class Users {
     this.dataSource.paginator = this.paginator;
   }
 
- generateMockData(count: number): GridItem[] {
-  const roles = ['admin', 'user', 'manager'];
-  const statuses = ['active', 'inactived'];
+  generateMockData(count: number): GridItem[] {
+    const roles = ['admin', 'user', 'manager'];
+    const statuses = ['active', 'inactived'];
 
-  const firstNames = [
-    'สมชาย', 'สมหญิง', 'กิตติ', 'ณัฐ', 'วิชัย',
-    'อนันต์', 'พงษ์ศักดิ์', 'ศิริพร', 'สุดา', 'นภา'
-  ];
+    const firstNames = [
+      'สมชาย', 'สมหญิง', 'กิตติ', 'ณัฐ', 'วิชัย',
+      'อนันต์', 'พงษ์ศักดิ์', 'ศิริพร', 'สุดา', 'นภา'
+    ];
 
-  const lastNames = [
-    'ใจดี', 'รักดี', 'ทองสุข', 'มีชัย', 'เจริญสุข',
-    'บุญมี', 'ศรีสุข', 'แซ่ลิ้ม', 'ตั้งใจ', 'รุ่งเรือง'
-  ];
+    const lastNames = [
+      'ใจดี', 'รักดี', 'ทองสุข', 'มีชัย', 'เจริญสุข',
+      'บุญมี', 'ศรีสุข', 'แซ่ลิ้ม', 'ตั้งใจ', 'รุ่งเรือง'
+    ];
 
-  return Array.from({ length: count }, (_, i) => {
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const users = ['system', 'admin01', 'manager01']; // 🔥 คนที่ create/update
 
-    return {
-      id: i + 1,
-      code: 'U' + (i + 1).toString().padStart(3, '0'),
-      username: `user${i + 1}`,
+    return Array.from({ length: count }, (_, i) => {
+      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
 
-      firstName,
-      lastName,
+      const createdAt = this.randomDate(); // 🔥 สุ่มเวลา
+      const updatedAt = new Date(createdAt.getTime() + Math.random() * 1000000000);
 
-      email: `${firstName}.${lastName}${i + 1}@example.com`,
+      return {
+        id: i + 1,
+        code: 'U' + (i + 1).toString().padStart(3, '0'),
+        username: `user${i + 1}`,
 
-      role: roles[Math.floor(Math.random() * roles.length)],
-      status: statuses[Math.floor(Math.random() * statuses.length)]
-    };
-  });
-}
+        firstName,
+        lastName,
+
+        email: `user${i + 1}@example.com`,
+        password: this.generatePassword(),
+
+        role: roles[Math.floor(Math.random() * roles.length)],
+        date : new Date(),
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+
+        // 🔥 audit fields
+        createdBy: users[Math.floor(Math.random() * users.length)],
+        createdDate: createdAt,
+
+        updatedBy: users[Math.floor(Math.random() * users.length)],
+        updatedDate: updatedAt
+      };
+    });
+  }
+  randomDate(): Date {
+    const start = new Date(2023, 0, 1).getTime();
+    const end = new Date().getTime();
+
+    return new Date(start + Math.random() * (end - start));
+  } 
+  generatePassword(length: number = 10): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+    return Array.from({ length }, () =>
+      chars[Math.floor(Math.random() * chars.length)]
+    ).join('');
+  }
 
   openAddDialog() {
     const dialogRef = this.dialog.open(AddUserItemDialog, {

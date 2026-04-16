@@ -63,28 +63,40 @@
 .status-badge:hover {
   transform: scale(1.05);
 }
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-mat-chip {
-  font-weight: 600;
-  text-transform: capitalize;
-  border-radius: 999px;
-  padding: 4px 10px;
+  width: 120px;              /* 🔥 เท่ากันทุกอัน */
+  height: 36px;
+
+  border-radius: 10px;       /* 🔥 เอาโค้งแบบ inactive */
+  border: 1px solid #ccc;
+
+  font-weight: 500;
+  font-size: 14px;
+
+  gap: 6px;
 }
 
-/* 🔴 Admin */
-.role-admin {
-  background-color: #fdecea;
-  color: #d32f2f;
+/* 🟢 Manager (โทนเขียวอ่อนแบบ soft) */
+.role-manager.mat-mdc-chip {
+  background-color: #e8f5e9 !important;
+  border-color: #81c784 !important;
+  color: #2e7d32 !important;
 }
 
-/* 🔵 User */
-.role-user {
-  background-color: #e3f2fd;
-  color: #1976d2;
+/* 🔴 Admin (โทนเดียวกับ inactive แต่แดง) */
+.role-admin.mat-mdc-chip {
+  background-color: #fbe9e7 !important;
+  border-color: #ef9a9a !important;
+  color: #c62828 !important;
 }
 
-/* 🟢 Manager (optional) */
-.role-manager {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+/* 🔵 User (โทนฟ้าอ่อน) */
+.role-user.mat-mdc-chip {
+  background-color: #e3f2fd !important;
+  border-color: #90caf9 !important;
+  color: #1565c0 !important;
 }
