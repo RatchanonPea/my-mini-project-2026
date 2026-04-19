@@ -26,7 +26,8 @@
   color: #6b7280;
   font-size: 0.9rem;
 
-  display: inline-block; /* 🔥 สำคัญ ไม่งั้นไม่แกว่ง */
+  display: inline-block;
+  /* 🔥 สำคัญ ไม่งั้นไม่แกว่ง */
   transform-origin: top center;
 
   animation: swing 1.6s ease-in-out infinite;
@@ -34,12 +35,29 @@
 
 /* keyframes */
 @keyframes swing {
-  0%   { transform: rotate(0deg); }
-  20%  { transform: rotate(6deg); }
-  40%  { transform: rotate(-4deg); }
-  60%  { transform: rotate(3deg); }
-  80%  { transform: rotate(-2deg); }
-  100% { transform: rotate(0deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  20% {
+    transform: rotate(6deg);
+  }
+
+  40% {
+    transform: rotate(-4deg);
+  }
+
+  60% {
+    transform: rotate(3deg);
+  }
+
+  80% {
+    transform: rotate(-2deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 .grid-layout {
@@ -114,6 +132,7 @@
   background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
   color: #fff;
 }
+
 .calendar-panel {
   width: 100%;
 
@@ -358,3 +377,39 @@
   }
 }
 
+// test
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 20vh;
+  background: #faf7f7;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.text-image {
+  font-size: 200px;
+  font-weight: bold;
+  // background: url(https://unsplash.com/photos/woman-on-boat-overlooking-city-skyline-at-sunset-MQfDZmBkLe8);
+  background: url('https://ckk88.com/wp-content/uploads/2024/08/CIT-04-EX.jpg');
+  background-size: 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: moveBg 10s linear infinite;
+  align-items: center;
+}
+
+@keyframes moveBg {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}

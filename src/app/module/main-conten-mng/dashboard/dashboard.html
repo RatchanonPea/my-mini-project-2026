@@ -1,10 +1,17 @@
+<body>
+  <!-- ต้องมีข้อความใน div เพื่อให้พื้นหลังแสดงผลตามตัวอักษร -->
+  <div class="text-image">Dashboard</div>
+</body>
 <section class="dashboard-page">
   <div class="dashboard-header">
     <div>
-      <h4>Dashboard</h4>
+      <!-- <h4>Dashboard</h4> -->
       <p class="subtitle">ภาพรวมสถานะล่าสุด พร้อมปฏิทินตารางงาน</p>
     </div>
   </div>
+
+
+
 
   <div class="dashboard-top grid-layout">
     <div class="stats-panel">
@@ -25,9 +32,7 @@
           <mat-card-subtitle>{{ selectedDate | date:'MMMM yyyy' }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <mat-calendar
-            [selected]="selectedDate"
-            (selectedChange)="onDateSelected($event)">
+          <mat-calendar [selected]="selectedDate" (selectedChange)="onDateSelected($event)">
           </mat-calendar>
         </mat-card-content>
       </mat-card>
