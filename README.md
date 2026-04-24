@@ -52,6 +52,26 @@ For end-to-end (e2e) testing, run:
 ng e2e
 ```
 
+## push project ขึ้น repo
+START
+1.ติดตั้ง Git ให้เรียบร้อย แล้วเช็คว่าใช้ได้ Check
+git --version
+2.เข้าไปที่ folder โปรเจกต์
+cd path/to/your-project
+3.init git
+4. add file เข้า staging
+git add .
+5. commit ครั้งแรก
+git commit -m "first commit"
+6. สร้าง repo บน GitHub
+https://github.com/username/my-project.git
+7. เชื่อม repo (remote)
+git remote add origin https://github.com/username/my-project.git
+8. push ขึ้น GitHub
+git branch -M main
+git push -u origin main
+END
+
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
 ## Additional Resources
