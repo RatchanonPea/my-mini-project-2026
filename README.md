@@ -55,21 +55,37 @@ ng e2e
 ## push project ขึ้น repo
 START
 ## 1.ติดตั้ง Git ให้เรียบร้อย แล้วเช็คว่าใช้ได้ Check
+```bash
 git --version
+```
 ## 2.เข้าไปที่ folder โปรเจกต์
+```bash
 cd path/to/your-project
+```
 ## 3.init git
+```bash
 git init
+```
 ## 4. add file เข้า staging
+```bash
 git add .
+```
 ## 5. commit ครั้งแรก
+```bash
 git commit -m "first commit"
+```
 ## 6. สร้าง repo บน GitHub
+```bash
 https://github.com/username/my-project.git
+```
 ## 7. เชื่อม repo (remote)
+```bash
 git remote add origin https://github.com/username/my-project.git
+```
 ## 8. push ขึ้น GitHub
+```bash
 git branch -M main
+```
 ## git push -u origin main
 END
 
