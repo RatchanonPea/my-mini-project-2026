@@ -1,16 +1,16 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AddUserItemDialog } from './add-user-item-dialog/add-user-item-dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatTableModule } from '@angular/material/table';
 import { CommonModule } from '@angular/common';
-import { ConfirmDialog } from '../../../common/helper';
+import { ConfirmDialog, DialogSuccess, DialogErrorHtmlConfirm } from '../../../common/helper';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIcon } from "@angular/material/icon";
 import { MatIconModule } from '@angular/material/icon';
-import { MatChip } from '@angular/material/chips';
 import { MatChipsModule } from '@angular/material/chips';
+import { ApiService, CreateUserPayload, UpdateUserPayload, User } from '../../../services/api';
+import { AuthService } from '../../../services/auth';
 
 
 interface GridItem {
@@ -20,9 +20,10 @@ interface GridItem {
   // fullname : string;
   firstName: string;
   lastName: string;
-
   email?: string;
+  phone?: string;
   role: string;
+  role_id?: number;
   date: Date;
   status: string;
   // 🔥 audit fields
@@ -35,7 +36,7 @@ interface GridItem {
 
 @Component({
   selector: 'app-users',
-  imports: [MatPaginatorModule, MatTableModule, CommonModule, MatButtonModule, MatIcon, MatChipsModule, MatIconModule, MatChip],
+  imports: [MatPaginatorModule, MatTableModule, CommonModule, MatButtonModule, MatIconModule, MatChipsModule, MatDialogModule],
   templateUrl: './users.html',
   styleUrl: './users.scss',
 })
@@ -49,7 +50,7 @@ export class Users {
   pageSize = 5;
   dataSource = new MatTableDataSource<GridItem>([]);
 
-  items: GridItem[] = this.generateMockData(20);
+  items: GridItem[] = [];
   // items: GridItem[] = [
   //   {
   //     id: 1,
@@ -116,6 +117,8 @@ export class Users {
     'fullname',
     'email',
     'role',
+    'updatedBy',
+    'updatedDate',
     'date',
     'status',
     'action'
@@ -124,14 +127,86 @@ export class Users {
 
   constructor(
     private dialog: MatDialog,
-  ) {
-    this.dataSource.data = this.items;
-  }
+    private apiService: ApiService,
+    private authService: AuthService,
+  ) {}
   ngOnInit() {
-    this.items = this.generateMockData(20);
+    this.loadUsers();
   }
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
+  }
+
+  // Parse SQL style datetime "YYYY-MM-DD HH:mm:ss" into local Date
+  // to avoid incorrect timezone shifts when using `new Date(string)` directly.
+  private parseSqlDatetimeToLocal(value?: string): Date {
+    if (!value) return new Date();
+
+    // Match YYYY-MM-DD HH:mm[:ss]
+    const m = value.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (m) {
+      const year = Number(m[1]);
+      const month = Number(m[2]) - 1;
+      const day = Number(m[3]);
+      const hour = Number(m[4]);
+      const minute = Number(m[5]);
+      const second = Number(m[6] ?? '0');
+      return new Date(year, month, day, hour, minute, second);
+    }
+
+    // Fallback to Date constructor for ISO strings with timezone info
+    return new Date(value);
+  }
+
+  loadUsers(): void {
+    this.apiService.getUsers().subscribe({
+      next: (response) => {
+        console.log('Users API response:', response);
+        const users = response.data ?? [];
+        console.log('Users array length:', users.length);
+        this.items = users.map((user) => this.toGridItem(user));
+        this.dataSource.data = this.items;
+        this.totalItems = this.items.length;
+      },
+      error: (error) => console.error('Error fetching users:', error),
+    });
+  }
+
+  private toGridItem(user: User): GridItem {
+    const firstName = user.first_name ?? '';
+    const lastName = user.last_name ?? '';
+
+    return {
+      id: user.user_id,
+      code: user.code ?? `U${user.user_id.toString().padStart(3, '0')}`,
+      username: user.username,
+      firstName,
+      lastName,
+      email: user.email ?? '',
+      phone: user.phone ?? '',
+      role: user.role_name ?? this.mapRoleId(user.role_id),
+      role_id: user.role_id,
+      date: user.created_at ? this.parseSqlDatetimeToLocal(user.created_at) : new Date(),
+      status: user.status === false || user.status === 0 || user.status === '0' ? 'inactived' : 'active',
+      createdBy: user.created_by ?? '',
+      createdDate: user.created_at ? this.parseSqlDatetimeToLocal(user.created_at) : new Date(),
+      updatedBy: user.updated_by ?? this.authService.getCurrentUser() ?? '',
+      updatedDate: user.updated_at ? this.parseSqlDatetimeToLocal(user.updated_at) : new Date(),
+    };
+  }
+
+  private mapRoleId(roleId?: number): string {
+    // กำหนดให้ตรงกับ role_id ที่ backend ส่งกลับ
+    if (roleId === 1) {
+      return 'manager';
+    }
+    if (roleId === 2) {
+      return 'admin';
+    }
+    if (roleId === 3) {
+      return 'staff';
+    }
+    return 'user';
   }
 
   generateMockData(count: number): GridItem[] {
@@ -186,7 +261,7 @@ export class Users {
     const end = new Date().getTime();
 
     return new Date(start + Math.random() * (end - start));
-  } 
+  }
   generatePassword(length: number = 10): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
     return Array.from({ length }, () =>
@@ -196,18 +271,39 @@ export class Users {
 
   openAddDialog() {
     const dialogRef = this.dialog.open(AddUserItemDialog, {
-      width: '400px',
+      width: '600px',
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // เพิ่มข้อมูลเข้า table
-        result.code = this.generateCode();
-        // 🔥 set audit
-        result.createdBy = 'admin'; // หรือเอาจาก login user
-        result.createdAt = new Date();
-        this.dataSource.data = [...this.dataSource.data, result];
-        this.totalItems++;
+        const fullName = [result.firstName, result.lastName].filter(Boolean).join(' ');
+        const currentUser = this.authService.getCurrentUser() ?? undefined;
+        const payload: CreateUserPayload = {
+          username: result.username,
+          first_name: result.firstName,
+          last_name: result.lastName,
+          password_hash: result.password,
+          email: result.email,
+          phone: result.phone,
+          status: result.status === 'active' ? 1 : 0,
+          created_by: currentUser,
+          updated_by: currentUser,
+        };
+
+        if (result.role_id != null) {
+          payload.role_id = result.role_id;
+        }
+
+        this.apiService.createUser(payload).subscribe({
+          next: () => {
+            this.loadUsers();
+            DialogSuccess('สร้างผู้ใช้ใหม่เรียบร้อยแล้ว', 'สร้างสำเร็จ');
+          },
+          error: (error) => {
+            console.error('Error creating user:', error);
+            DialogErrorHtmlConfirm('ไม่สามารถสร้างผู้ใช้ได้ โปรดลองอีกครั้ง');
+          },
+        });
       }
     });
   }
@@ -229,25 +325,48 @@ export class Users {
   }
 
   editItem(item: any) {
+    const dialogData = {
+      ...item,
+      // dialog expects `updatedAt`/`createdAt` names; map from grid fields
+      updatedAt: item.updatedDate,
+      createdAt: item.createdDate,
+      date: item.date,
+    };
+
     const dialogRef = this.dialog.open(AddUserItemDialog, {
-      width: '400px',
-      data: item
+      width: '600px',
+      data: dialogData
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        const payload: UpdateUserPayload = {
+          user_id: result.id,
+          code: result.code,
+          username: result.username,
+          first_name: result.firstName,
+          last_name: result.lastName,
+          email: result.email,
+          phone: result.phone,
+          role_id: result.role_id ?? undefined,
+          status: result.status === 'active' ? 1 : 0,
+          updated_by: this.authService.getCurrentUser() ?? undefined,
+        };
 
-        const index = this.dataSource.data.findIndex(x => x.id === result.id);
-
-        if (index !== -1) {
-          result.updatedBy = 'admin'; // 🔥 ใครแก้
-          result.updatedAt = new Date();
-
-          const updatedData = [...this.dataSource.data];
-          updatedData[index] = result;
-
-          this.dataSource.data = updatedData;
+        if (result.password) {
+          payload.password_hash = result.password;
         }
+
+        this.apiService.updateUser(payload).subscribe({
+          next: () => {
+            this.loadUsers();
+            DialogSuccess('แก้ไขข้อมูลผู้ใช้สำเร็จแล้ว', 'อัปเดตสำเร็จ');
+          },
+          error: (error) => {
+            console.error('Error updating user:', error);
+            DialogErrorHtmlConfirm('ไม่สามารถอัปเดตผู้ใช้ได้ โปรดลองอีกครั้ง');
+          },
+        });
       }
     });
   }

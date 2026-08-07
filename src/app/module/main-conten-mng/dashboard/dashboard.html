@@ -1,20 +1,13 @@
-<body>
-  <!-- ต้องมีข้อความใน div เพื่อให้พื้นหลังแสดงผลตามตัวอักษร -->
-  <div class="text-image">Dashboard</div>
-</body>
 <section class="dashboard-page">
   <div class="dashboard-header">
     <div>
-      <!-- <h4>Dashboard</h4> -->
-      <p class="subtitle">ภาพรวมสถานะล่าสุด พร้อมปฏิทินตารางงาน</p>
+      <h4>ภาพรวมร้านอาหาร</h4>
+      <p class="subtitle">สรุปยอดขาย, ต้นทุน, กำไร และรายการสินค้าขายดี</p>
     </div>
   </div>
 
-
-
-
   <div class="dashboard-top grid-layout">
-    <div class="stats-panel">
+    <div class="dashboard-main">
       <div class="dashboard-cards">
         <mat-card class="dashboard-card stat-card" *ngFor="let stat of stats">
           <mat-card-content class="card-stats" [ngClass]="'bg-' + stat.color">
@@ -23,69 +16,79 @@
           </mat-card-content>
         </mat-card>
       </div>
+
+      <mat-card class="animation-card">
+        <mat-card-header>
+          <mat-card-title>กำลังเคลื่อนที่ไปข้างหน้า</mat-card-title>
+          <mat-card-subtitle>ไอเดียดีๆ สำหรับร้านค้าของคุณ</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="runner-scene">
+            <div class="runner">
+              <div class="head"></div>
+              <div class="body"></div>
+              <div class="arm left"></div>
+              <div class="arm right"></div>
+              <div class="leg left"></div>
+              <div class="leg right"></div>
+            </div>
+            <div class="ground"></div>
+          </div>
+          <div class="quote-box">
+            <div class="quote-text">"ความสำเร็จไม่ได้มาจากการรอคอย แต่มาจากการก้าวไปข้างหน้า"</div>
+            <div class="quote-author">— เจ้าของร้านผู้กล้า</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="dashboard-table">
+        <mat-card>
+          <mat-card-header class="table-header">
+            <mat-card-title>สินค้าขายดีวันนี้</mat-card-title>
+            <mat-card-subtitle>Top 5 เมนูที่สร้างรายได้สูงสุด</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="table-container">
+              <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+                <ng-container matColumnDef="id">
+                  <th mat-header-cell *matHeaderCellDef> ลำดับ </th>
+                  <td mat-cell *matCellDef="let item"> {{ item.id }} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef> เมนู </th>
+                  <td mat-cell *matCellDef="let item"> {{ item.name }} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="sold">
+                  <th mat-header-cell *matHeaderCellDef> ขายแล้ว </th>
+                  <td mat-cell *matCellDef="let item"> {{ item.sold }} ชิ้น </td>
+                </ng-container>
+
+                <ng-container matColumnDef="revenue">
+                  <th mat-header-cell *matHeaderCellDef> รายได้ </th>
+                  <td mat-cell *matCellDef="let item"> {{ item.revenue | currency:'THB ':'symbol':'1.0-0' }} </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
     </div>
 
-    <div class="calendar-panel">
+    <div class="dashboard-side">
       <mat-card class="calendar-card">
         <mat-card-header>
-          <mat-card-title>Calendar</mat-card-title>
+          <mat-card-title>ปฏิทินร้าน</mat-card-title>
           <mat-card-subtitle>{{ selectedDate | date:'MMMM yyyy' }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <mat-calendar [selected]="selectedDate" (selectedChange)="onDateSelected($event)">
-          </mat-calendar>
+          <mat-calendar [selected]="selectedDate" (selectedChange)="onDateSelected($event)"></mat-calendar>
         </mat-card-content>
       </mat-card>
     </div>
-  </div>
-
-  <div class="dashboard-table">
-    <mat-card>
-      <mat-card-header class="table-header">
-        <mat-card-title>LATEST WEB SITES</mat-card-title>
-        <mat-card-subtitle>รายงานเว็บล่าสุด</mat-card-subtitle>
-        <div class="tab-buttons">
-          <mat-tab-group class="custom-tabs">
-            <mat-tab label="Last Web Sites">
-              <div class="table-container">
-                <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-                  <ng-container matColumnDef="id">
-                    <th mat-header-cell *matHeaderCellDef> ID </th>
-                    <td mat-cell *matCellDef="let element"> {{element.id}} </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="website">
-                    <th mat-header-cell *matHeaderCellDef> Website </th>
-                    <td mat-cell *matCellDef="let element"> {{element.website}} </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef> Status </th>
-                    <td mat-cell *matCellDef="let element">
-                      <span class="status-badge" [ngClass]="element.status.toLowerCase()">
-                        {{element.status}}
-                      </span>
-                    </td>
-                  </ng-container>
-
-                  <ng-container matColumnDef="user">
-                    <th mat-header-cell *matHeaderCellDef> User </th>
-                    <td mat-cell *matCellDef="let element"> {{element.user}} </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                </table>
-              </div>
-            </mat-tab>
-            <mat-tab label="LATEST MEDIAS">
-              <div class="table-container">
-                <p>Media reports will be displayed here.</p>
-              </div>
-            </mat-tab>
-          </mat-tab-group>
-        </div>
-      </mat-card-header>
-    </mat-card>
   </div>
 </section>

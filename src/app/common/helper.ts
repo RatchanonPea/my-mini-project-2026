@@ -61,6 +61,22 @@ export function DialogSuccessTimerPromiseResult(htmlText: string = "บันท
   });
 }
 
+export function ToastSuccess(htmlText: string = "Login สำเร็จแล้ว", titleText: string = "สำเร็จ") {
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'success',
+    title: titleText,
+    text: htmlText,
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: true,
+    customClass: {
+      popup: 'dc-swal-toast',
+    }
+  });
+}
+
 export function DialogInfo(htmlText: string = "", titleText: string = "ข้อมูล") {
   Swal.fire({
     html: `

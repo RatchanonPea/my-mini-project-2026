@@ -13,6 +13,8 @@ import { ConfirmDialog } from '../../common/helper';
 })
 export class Navbar implements OnInit, OnDestroy {
   currentUser: string | null = null;
+  currentUserRole: string | null = null;
+  isDropdownOpen = false;
   private subscription: Subscription = new Subscription();
 
   constructor(private authService: AuthService) {}
@@ -23,10 +25,19 @@ export class Navbar implements OnInit, OnDestroy {
         this.currentUser = user;
       })
     );
+    this.subscription.add(
+      this.authService.currentUserRole$.subscribe(role => {
+        this.currentUserRole = role;
+      })
+    );
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  toggleDropdown(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
   }
 
   logout(): void {

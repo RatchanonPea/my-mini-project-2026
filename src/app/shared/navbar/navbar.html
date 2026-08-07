@@ -1,16 +1,36 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <div class="container-fluid">
     <a class="navbar-brand" href="#">
-      <i class="fas fa-rocket"></i> MiniProject Angular
+      <img class="navbar-logo" src="assets/images/Logo/CheckenLogo.jpg" alt="Checken Logo" />
+      MiniProject Angular
     </a>
 
-    <div class="d-flex align-items-center">
-      <span class="navbar-text me-3" *ngIf="currentUser">
-        <i class="fas fa-user"></i> ยินดีต้อนรับ: {{ currentUser }}
-      </span>
-      <button class="btn btn-outline-light btn-sm" (click)="logout()" *ngIf="currentUser">
-        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-      </button>
+    <div class="d-flex align-items-center position-relative">
+      <div class="navbar-user" *ngIf="currentUser">
+        <button class="btn btn-user-toggle" type="button" (click)="toggleDropdown()">
+          <span class="avatar-circle"><i class="fas fa-user"></i></span>
+          <!-- <span class="user-name">{{ currentUser }}</span> -->
+          <i class="fas fa-chevron-down ms-2"></i>
+        </button>
+
+        <div class="dropdown-panel" [class.open]="isDropdownOpen" aria-hidden="{{ !isDropdownOpen }}">
+          <div class="panel-header">
+            <div class="panel-avatar">
+              <span>{{ currentUser.charAt(0) }}</span>
+            </div>
+            <div>
+              <div class="panel-name">{{ currentUser }}</div>
+              <div class="panel-role">Role: <span>{{ currentUserRole || '-' }}</span></div>
+            </div>
+          </div>
+
+          <div class="panel-actions">
+            <button class="btn btn-logout" (click)="logout()">
+              <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </nav>

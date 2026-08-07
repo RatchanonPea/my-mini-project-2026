@@ -5,7 +5,13 @@ import { MainContentMngComponent } from './main-conten-mng.component';
 import { Dashboard } from './dashboard/dashboard';
 import { Users } from './users/users';
 import { AddUserItemDialog } from './users/add-user-item-dialog/add-user-item-dialog';
-import { MatInputModule } from "@angular/material/input";
+import { Sales } from './sales/sales';
+import { Expenses } from './expenses/expenses';
+import { Reports } from './reports/reports';
+import { MainPage } from './main-page/main-page';
+import { Settings } from './settings/settings';
+import { MatInputModule } from '@angular/material/input';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [MainContentMngComponent],
@@ -15,7 +21,13 @@ import { MatInputModule } from "@angular/material/input";
     Dashboard,
     Users,
     AddUserItemDialog,
-    MatInputModule
-]
+    Sales,
+    Expenses,
+    Reports,
+    MainPage,
+    Settings,
+    MatInputModule,
+    MatDialogModule
+  ]
 })
 export class MainContenMngModule { }

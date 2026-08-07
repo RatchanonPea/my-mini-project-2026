@@ -1,8 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { MainPage } from './main-page/main-page';
 import { Dashboard } from './dashboard/dashboard';
 import { Users } from './users/users';
+import { Sales } from './sales/sales';
+import { Expenses } from './expenses/expenses';
+import { Reports } from './reports/reports';
+import { MainPage } from './main-page/main-page';
+import { Settings } from './settings/settings';
 
 const routes: Routes = [
   {
@@ -15,13 +19,25 @@ const routes: Routes = [
         pathMatch: 'full'
       },
       {
-        path: 'main-page', data: { breadcrumb: 'Main Page' }, component: MainPage
-      },
-      {
         path: 'dashboard', data: { breadcrumb: 'Dashboard' }, component: Dashboard
       },
       {
-        path: 'users', data: { breadcrumb: 'Users' }, component: Users
+        path: 'sales', data: { breadcrumb: 'Sales / POS' }, component: Sales
+      },
+      {
+        path: 'expenses', data: { breadcrumb: 'Expenses' }, component: Expenses
+      },
+      {
+        path: 'reports', data: { breadcrumb: 'Reports' }, component: Reports
+      },
+      {
+        path: 'products', data: { breadcrumb: 'ข้อมูลสินค้า' }, component: MainPage
+      },
+      {
+        path: 'settings', data: { breadcrumb: 'ตั้งค่า' }, component: Settings
+      },
+      {
+        path: 'users', data: { breadcrumb: 'ข้อมูลพนักงาน' }, component: Users
       }
     ]
   }

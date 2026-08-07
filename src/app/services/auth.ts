@@ -1,6 +1,20 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of } from 'rxjs';
+
+interface LoginResponse {
+  success: boolean;
+  message?: string;
+  returnObject?: {
+    user_id: number;
+    username: string;
+    full_name?: string;
+    role?: string;
+    role_name?: string;
+    [key: string]: any;
+  };
+}
 
 @Injectable({
   providedIn: 'root',
@@ -8,25 +22,46 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
   private currentUserSubject = new BehaviorSubject<string | null>(this.getCurrentUser());
+  private currentUserRoleSubject = new BehaviorSubject<string | null>(this.getCurrentUserRole());
 
-  constructor(private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
-  login(username: string, password: string): boolean {
-    if (username === 'Pea01' && password === '1234') {
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('currentUser', username);
-      this.isLoggedInSubject.next(true);
-      this.currentUserSubject.next(username);
-      return true;
-    }
-    return false;
+  login(username: string, password: string): Observable<boolean> {
+    return this.http.post<LoginResponse>('/api/auth/login', { username, password }).pipe(
+      map((response) => {
+        if (response?.success && response?.returnObject) {
+          const displayName = response.returnObject.full_name ?? response.returnObject.username ?? username;
+          const role = response.returnObject.role_name ?? response.returnObject.role ?? '';
+
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('currentUser', displayName);
+          localStorage.setItem('currentUserRole', role);
+          localStorage.setItem('userInfo', JSON.stringify(response.returnObject));
+
+          this.isLoggedInSubject.next(true);
+          this.currentUserSubject.next(displayName);
+          this.currentUserRoleSubject.next(role);
+          return true;
+        }
+
+        return false;
+      }),
+      catchError((error) => {
+        console.error('Auth login failed', error);
+        return of(false);
+      })
+    );
   }
 
   logout(): void {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUserRole');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     this.isLoggedInSubject.next(false);
     this.currentUserSubject.next(null);
+    this.currentUserRoleSubject.next(null);
     this.router.navigate(['/auth/login']);
   }
 
@@ -38,11 +73,19 @@ export class AuthService {
     return localStorage.getItem('currentUser');
   }
 
+  getCurrentUserRole(): string | null {
+    return localStorage.getItem('currentUserRole');
+  }
+
   get isLoggedIn$(): Observable<boolean> {
     return this.isLoggedInSubject.asObservable();
   }
 
   get currentUser$(): Observable<string | null> {
     return this.currentUserSubject.asObservable();
+  }
+
+  get currentUserRole$(): Observable<string | null> {
+    return this.currentUserRoleSubject.asObservable();
   }
 }

@@ -21,7 +21,7 @@
     <mat-form-field appearance="outline">
       <mat-label>ID</mat-label>
       <mat-icon matPrefix>pin</mat-icon>
-      <input matInput [(ngModel)]="newItem.id" required>
+      <input matInput [(ngModel)]="newItem.id" disabled>
     </mat-form-field>
 
     <!-- Username -->
@@ -32,17 +32,15 @@
     </mat-form-field>
 
     <!-- Password -->
-    <mat-form-field appearance="outline" class="full-width">
+    <mat-form-field *ngIf="!isEdit" appearance="outline" class="full-width">
       <mat-label>Password</mat-label>
       <mat-icon matPrefix>lock</mat-icon>
 
       <input matInput [type]="hidePassword ? 'password' : 'text'" [(ngModel)]="newItem.password" required>
 
-      <!-- 👁️ ใช้ icon ธรรมดา -->
       <mat-icon matSuffix class="eye-icon" (click)="hidePassword = !hidePassword">
         {{ hidePassword ? 'visibility_off' : 'visibility' }}
       </mat-icon>
-
     </mat-form-field>
 
     <!-- First Name -->
@@ -75,21 +73,19 @@
     <mat-form-field appearance="outline">
       <mat-label>Role</mat-label>
       <mat-icon matPrefix>admin_panel_settings</mat-icon>
-      <mat-select [(ngModel)]="newItem.role">
-        <mat-option value="admin">Admin</mat-option>
-        <mat-option value="manager">Manager</mat-option>
-        <mat-option value="user">User</mat-option>
+      <mat-select name="role" [(ngModel)]="newItem.role_id">
+        <mat-option *ngFor="let role of roleOptions" [value]="role.role_id">
+          {{ role.role_name }}
+        </mat-option>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Select Date</mat-label>
+      <mat-label>Updated At</mat-label>
       <mat-icon matPrefix>calendar_today</mat-icon>
 
-      <input matInput [matDatepicker]="picker" [(ngModel)]="newItem.date">
-
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
+      <input matInput [value]="newItem.updatedAt | date:'dd/MM/yyyy HH:mm':'Asia/Bangkok'" disabled>
+      <mat-hint>Auto-set by system — datetime (not editable)</mat-hint>
     </mat-form-field>
 
     <!-- Status -->
@@ -109,6 +105,6 @@
 
 <div mat-dialog-actions class="dialog-footer">
   <button mat-stroked-button (click)="cancel()">Cancel</button>
-  <button matButton="filled" [disabled]="!newItem.id || !newItem.username || !newItem.password || !newItem.role"
+  <button matButton="filled" [disabled]="!newItem.username || (!newItem.password && !isEdit) || newItem.role_id == null"
     (click)="save()">Save</button>
 </div>
