@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { DialogSuccess } from '../../../common/helper';
 
 interface SaleItem {
   id: number;
@@ -65,6 +66,7 @@ export class Sales {
     };
     this.soldItems = [item, ...this.soldItems];
     this.dataSource.data = this.soldItems;
+    DialogSuccess('บันทึกยอดขายเรียบร้อยแล้ว', 'บันทึกสำเร็จ');
     this.resetForm();
   }
 
@@ -93,6 +95,7 @@ export class Sales {
       return item;
     });
     this.dataSource.data = this.soldItems;
+    DialogSuccess('อัปเดตยอดขายเรียบร้อยแล้ว', 'อัปเดตสำเร็จ');
     this.resetForm();
   }
 
