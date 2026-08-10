@@ -8,6 +8,101 @@ $theme: mat.define-theme();
 
 @include mat.all-component-themes($theme);
 
+// Shared mat-table styles for the whole project
+.table-wrapper,
+.grid {
+  overflow-x: auto;
+}
+
+table[mat-table],
+table.mat-table,
+table.mat-mdc-table {
+  width: 100%;
+  border-collapse: collapse;
+  // border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+th.mat-header-cell,
+th.mat-mdc-header-cell {
+  background: #e8f1ff;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mat-cell,
+.mat-header-cell,
+.mat-mdc-cell,
+.mat-mdc-header-cell {
+  padding: 1rem 1.2rem;
+}
+
+tr.mat-row:nth-child(even),
+tr.mat-mdc-row:nth-child(even) {
+  background: #f8fbff;
+}
+
+.mat-header-row,
+.mat-mdc-header-row {
+  background-color: #dbeafe !important;
+}
+
+.mat-cell,
+.mat-header-cell,
+.mat-mdc-cell,
+.mat-mdc-header-cell {
+  border: 1px solid #d1d5db;
+}
+
+.mat-row .mat-cell,
+.mat-mdc-row .mat-mdc-cell {
+  border-bottom: 1px solid transparent;
+  border-top: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.mat-row:hover:not(.no-data-row) .mat-cell,
+.mat-mdc-row:hover:not(.no-data-row) .mat-mdc-cell {
+  background: rgba(37, 99, 235, 0.04);
+  border-top-color: rgba(37, 99, 235, 0.35);
+  border-bottom-color: rgba(37, 99, 235, 0.35);
+}
+
+.mat-row.no-data-row .mat-cell,
+.mat-mdc-row.no-data-row .mat-mdc-cell {
+  cursor: default;
+  background: transparent;
+  border-color: transparent;
+}
+
+.no-data-message {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1.75rem 0;
+  color: #334155;
+  font-size: 1rem;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px dashed rgba(37, 99, 235, 0.35);
+  // border-radius: 0.75rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.no-data-message mat-icon {
+  font-size: 1.4rem;
+  color: #2563eb;
+}
+
+mat-paginator {
+  border-top: 1px solid #cbd5e1;
+}
+
 // Custom global styles
 html, body {
   height: 100%;

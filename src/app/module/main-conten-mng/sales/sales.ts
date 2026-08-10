@@ -6,7 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 interface SaleItem {
   id: number;
@@ -19,120 +20,39 @@ interface SaleItem {
 @Component({
   selector: 'app-sales',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule],
-  template: `
-    <section class="sales-page">
-      <div class="page-header">
-        <div>
-          <h3>บันทึกยอดขาย (Sales / POS)</h3>
-          <p class="subtitle">เลือกเมนูอาหาร แล้วบันทึกยอดขาย ประวัติการขายวันนี้สามารถแก้ไขหรือยกเลิกได้</p>
-        </div>
-      </div>
-
-      <div class="sales-grid">
-        <mat-card class="sales-card">
-          <mat-card-header>
-            <mat-card-title>บันทึกรายการขาย</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>เมนูอาหาร</mat-label>
-                <select matNativeControl [(ngModel)]="newSale.product">
-                  <option value="">เลือกเมนูอาหาร</option>
-                  <option *ngFor="let item of menuItems" [value]="item">{{ item }}</option>
-                </select>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>จำนวน</mat-label>
-                <input matInput type="number" [(ngModel)]="newSale.quantity" min="1" />
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>ราคา/ชิ้น</mat-label>
-                <input matInput type="number" [(ngModel)]="newSale.price" min="0" />
-              </mat-form-field>
-            </div>
-            <div class="form-actions">
-              <button mat-flat-button color="primary" (click)="addSale()" [disabled]="!canAddSale()">
-                <mat-icon>add_shopping_cart</mat-icon> บันทึกยอดขายด่วน
-              </button>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="history-card">
-          <mat-card-header>
-            <mat-card-title>ประวัติการขายวันนี้</mat-card-title>
-            <mat-card-subtitle>แก้ไขหรือยกเลิกบิลได้</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="table-wrapper">
-              <table mat-table [dataSource]="soldItems" class="mat-elevation-z2">
-                <ng-container matColumnDef="id">
-                  <th mat-header-cell *matHeaderCellDef> # </th>
-                  <td mat-cell *matCellDef="let item">{{ item.id }}</td>
-                </ng-container>
-                <ng-container matColumnDef="product">
-                  <th mat-header-cell *matHeaderCellDef> เมนู </th>
-                  <td mat-cell *matCellDef="let item">{{ item.product }}</td>
-                </ng-container>
-                <ng-container matColumnDef="quantity">
-                  <th mat-header-cell *matHeaderCellDef> จำนวน </th>
-                  <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
-                </ng-container>
-                <ng-container matColumnDef="price">
-                  <th mat-header-cell *matHeaderCellDef> ราคา/ชิ้น </th>
-                  <td mat-cell *matCellDef="let item">{{ item.price | currency:'THB ':'symbol':'1.0-0' }}</td>
-                </ng-container>
-                <ng-container matColumnDef="total">
-                  <th mat-header-cell *matHeaderCellDef> รวม </th>
-                  <td mat-cell *matCellDef="let item">{{ item.total | currency:'THB ':'symbol':'1.0-0' }}</td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-              </table>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </section>
-  `,
-  styles: [
-    `.sales-page { padding: 1.5rem; }
-     .page-header { margin-bottom: 1.5rem; }
-     .subtitle { color: #6b7280; }
-     .sales-grid { display: grid; gap: 1.25rem; grid-template-columns: 1.5fr 1fr; }
-     .sales-card, .history-card { padding: 1rem; }
-     .form-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr; gap: 1rem; align-items: end; }
-     .full-width { width: 100%; }
-     .form-actions { margin-top: 1rem; }
-     .table-wrapper { overflow-x: auto; }
-     table { width: 100%; border-collapse: collapse; }
-     th, td { padding: 0.75rem 0.5rem; }
-     th { text-align: left; }
-    `
-  ]
+  imports: [CommonModule, FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule],
+  templateUrl: './sales.html',
+  styleUrls: ['./sales.scss']
 })
 export class Sales {
   menuItems = ['ไก่ย่าง', 'ส้มตำ', 'ข้าวเหนียว', 'น้ำตก', 'คอหมูย่าง'];
-  displayedColumns = ['id', 'product', 'quantity', 'price', 'total'];
+  displayedColumns = ['id', 'product', 'quantity', 'price', 'total', 'action'];
   soldItems: SaleItem[] = [];
+  dataSource = new MatTableDataSource<SaleItem>([]);
+  isEditing = false;
   newSale: Partial<SaleItem> = {
     product: '',
     quantity: 1,
     price: 0,
   };
 
-  canAddSale(): boolean {
-    return !!this.newSale.product && !!this.newSale.quantity && !!this.newSale.price;
+  canSaveSale(): boolean {
+    return !!this.newSale.product && (this.newSale.quantity ?? 0) > 0 && (this.newSale.price ?? 0) > 0;
   }
 
-  addSale(): void {
-    if (!this.canAddSale()) {
+  saveSale(): void {
+    if (!this.canSaveSale()) {
       return;
     }
 
+    if (this.isEditing && this.newSale.id) {
+      this.updateSale();
+    } else {
+      this.addSale();
+    }
+  }
+
+  addSale(): void {
     const id = this.soldItems.length + 1;
     const quantity = this.newSale.quantity || 0;
     const price = this.newSale.price || 0;
@@ -144,6 +64,52 @@ export class Sales {
       total: quantity * price,
     };
     this.soldItems = [item, ...this.soldItems];
+    this.dataSource.data = this.soldItems;
+    this.resetForm();
+  }
+
+  editSale(item: SaleItem): void {
+    this.isEditing = true;
+    this.newSale = { ...item };
+  }
+
+  updateSale(): void {
+    if (!this.newSale.id) {
+      return;
+    }
+
+    const quantity = this.newSale.quantity || 0;
+    const price = this.newSale.price || 0;
+    this.soldItems = this.soldItems.map(item => {
+      if (item.id === this.newSale.id) {
+        return {
+          ...item,
+          product: this.newSale.product || item.product,
+          quantity,
+          price,
+          total: quantity * price,
+        };
+      }
+      return item;
+    });
+    this.dataSource.data = this.soldItems;
+    this.resetForm();
+  }
+
+  cancelEdit(): void {
+    this.resetForm();
+  }
+
+  removeSale(id: number): void {
+    this.soldItems = this.soldItems.filter(item => item.id !== id);
+    this.dataSource.data = this.soldItems;
+    if (this.isEditing && this.newSale.id === id) {
+      this.resetForm();
+    }
+  }
+
+  resetForm(): void {
+    this.isEditing = false;
     this.newSale = { product: '', quantity: 1, price: 0 };
   }
 }

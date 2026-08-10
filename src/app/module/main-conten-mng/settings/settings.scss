@@ -1,0 +1,6 @@
+.settings-page { padding: 1.5rem; }
+.page-header { margin-bottom: 1.5rem; }
+.subtitle { color: #6b7280; }
+.settings-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.settings-card { padding: 1rem; min-height: 170px; display: flex; flex-direction: column; justify-content: space-between; }
+.settings-card p { margin: 0 0 1rem; color: #4b5563; }

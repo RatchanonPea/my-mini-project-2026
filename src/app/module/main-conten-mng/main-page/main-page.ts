@@ -9,6 +9,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { ConfirmDelete, ConfirmDialog, DialogSuccess } from '../../../common/helper';
 import { ApiService, ProductItem } from '../../../services/api';
+import { AuthService } from '../../../services/auth';
 
 @Component({
   selector: 'app-main-page',
@@ -33,11 +34,25 @@ export class MainPage implements AfterViewInit {
 
   displayedColumns = ['No', 'product_id', 'product_code', 'product_name', 'price', 'action'];
   isLoading = false;
+  currentUserRole: string | null = null;
+  searchText = '';
 
-  constructor(private api: ApiService) {
+  get isStaffRole(): boolean {
+    return (this.currentUserRole ?? '').trim().toLowerCase() === 'staff';
+  }
+
+  get canManageProducts(): boolean {
+    return !this.isStaffRole;
+  }
+
+  constructor(private api: ApiService, private authService: AuthService) {
   }
 
   ngOnInit() {
+    this.currentUserRole = this.authService.getCurrentUserRole();
+    this.authService.currentUserRole$.subscribe((role) => {
+      this.currentUserRole = role;
+    });
     this.loadItems();
   }
 
@@ -63,12 +78,36 @@ export class MainPage implements AfterViewInit {
 
   updateTable() {
     this.dataSource = new MatTableDataSource<ProductItem>([...this.items]);
+    this.dataSource.filterPredicate = (data, filter) => {
+      const haystack = [
+        data.product_id ?? '',
+        data.product_code ?? '',
+        data.product_name ?? '',
+        data.price ?? ''
+      ].join(' ').toLowerCase();
+      return haystack.includes(filter);
+    };
+    this.applySearch();
     if (this.paginator) {
       this.dataSource.paginator = this.paginator;
     }
   }
 
+  clearSearch(): void {
+    this.searchText = '';
+    this.applySearch();
+  }
+
+  applySearch(): void {
+    this.dataSource.filter = this.searchText.trim().toLowerCase();
+    this.pageIndex = 0;
+  }
+
   addItem() {
+    if (this.isStaffRole) {
+      return;
+    }
+
     const productName = this.newItem.product_name?.trim();
     const price = Number(this.newItem.price) || 0;
 
@@ -153,6 +192,10 @@ export class MainPage implements AfterViewInit {
   }
 
   editItem(item: ProductItem) {
+    if (this.isStaffRole) {
+      return;
+    }
+
     this.isEditing = true;
     this.newItem = {
       product_id: item.product_id,
@@ -163,6 +206,10 @@ export class MainPage implements AfterViewInit {
   }
 
   removeItem(product_id: number): void {
+    if (this.isStaffRole) {
+      return;
+    }
+
     ConfirmDelete('ยืนยันการลบ', 'คุณต้องการลบรายการนี้ใช่หรือไม่')
       .then((emit) => {
         if (emit) {

@@ -72,6 +72,14 @@
 
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                <tr mat-row *matNoDataRow class="no-data-row">
+                  <td mat-cell [attr.colspan]="displayedColumns.length">
+                    <div class="no-data-message">
+                      <mat-icon>storage</mat-icon>
+                      No Data
+                    </div>
+                  </td>
+                </tr>
               </table>
             </div>
           </mat-card-content>

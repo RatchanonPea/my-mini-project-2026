@@ -1,0 +1,99 @@
+<section class="sales-page">
+  <div class="page-header">
+    <div>
+      <h3>บันทึกยอดขาย (Sales / POS)</h3>
+      <p class="subtitle">เลือกเมนูอาหาร แล้วบันทึกยอดขาย ประวัติการขายวันนี้สามารถแก้ไขหรือยกเลิกได้</p>
+    </div>
+  </div>
+
+  <div class="sales-grid">
+    <mat-card class="sales-card">
+      <mat-card-header>
+        <mat-card-title>บันทึกรายการขาย</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>เมนูอาหาร</mat-label>
+            <mat-select [(ngModel)]="newSale.product">
+              <mat-option value="">เลือกเมนูอาหาร</mat-option>
+              <mat-option *ngFor="let item of menuItems" [value]="item">{{ item }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>จำนวน</mat-label>
+            <input matInput type="number" [(ngModel)]="newSale.quantity" min="1" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>ราคา/ชิ้น</mat-label>
+            <input matInput type="number" [(ngModel)]="newSale.price" min="0" />
+          </mat-form-field>
+        </div>
+        <div class="form-actions">
+          <button mat-flat-button color="primary" (click)="saveSale()" [disabled]="!canSaveSale()">
+            <mat-icon>{{ isEditing ? 'edit' : 'add_shopping_cart' }}</mat-icon>
+            {{ isEditing ? 'อัปเดตรายการขาย' : 'บันทึกยอดขายด่วน' }}
+          </button>
+          <button *ngIf="isEditing" mat-stroked-button color="warn" (click)="cancelEdit()">
+            ยกเลิก
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="history-card">
+      <mat-card-header>
+        <mat-card-title>ประวัติการขายวันนี้</mat-card-title>
+        <mat-card-subtitle>แก้ไขหรือยกเลิกบิลได้</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="table-wrapper">
+          <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef> No. </th>
+              <td mat-cell *matCellDef="let item">{{ item.id }}</td>
+            </ng-container>
+            <ng-container matColumnDef="product">
+              <th mat-header-cell *matHeaderCellDef> เมนู </th>
+              <td mat-cell *matCellDef="let item">{{ item.product }}</td>
+            </ng-container>
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell *matHeaderCellDef> จำนวน </th>
+              <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
+            </ng-container>
+            <ng-container matColumnDef="price">
+              <th mat-header-cell *matHeaderCellDef> ราคา/ชิ้น </th>
+              <td mat-cell *matCellDef="let item">{{ item.price | currency:'THB ':'symbol':'1.0-0' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef> รวม </th>
+              <td mat-cell *matCellDef="let item">{{ item.total | currency:'THB ':'symbol':'1.0-0' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef class="text-center"> Action </th>
+              <td mat-cell *matCellDef="let item" class="text-center">
+                <button mat-icon-button color="primary" aria-label="Edit" (click)="editSale(item)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" aria-label="Delete" (click)="removeSale(item.id)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr mat-row *matNoDataRow class="no-data-row">
+              <td mat-cell [attr.colspan]="displayedColumns.length">
+                <div class="no-data-message">
+                  <mat-icon>storage</mat-icon>
+                  No Data
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</section>

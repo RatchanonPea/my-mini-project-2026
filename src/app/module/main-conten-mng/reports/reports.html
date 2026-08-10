@@ -1,0 +1,54 @@
+<section class="reports-page">
+  <div class="page-header">
+    <div>
+      <h3>รายงานร้านอาหาร</h3>
+      <p class="subtitle">เลือกวันและประเภทรายงานเพื่อดูสรุปยอดขายและต้นทุน</p>
+    </div>
+  </div>
+
+  <div class="report-filters">
+    <mat-card class="filter-card">
+      <mat-card-header>
+        <mat-card-title>ตัวกรองรายงาน</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="filter-row">
+          <mat-form-field appearance="outline">
+            <mat-label>ประเภทรายงาน</mat-label>
+            <mat-select [(ngModel)]="reportType">
+              <mat-option value="sales">ยอดขาย</mat-option>
+              <mat-option value="expense">ค่าใช้จ่าย</mat-option>
+              <mat-option value="profit">กำไร</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>วันที่เริ่ม</mat-label>
+            <input matInput [matDatepicker]="startPicker" [(ngModel)]="dateStart" />
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>วันที่สิ้นสุด</mat-label>
+            <input matInput [matDatepicker]="endPicker" [(ngModel)]="dateEnd" />
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="filter-actions">
+          <button mat-flat-button color="primary" (click)="generateReport()">
+            <mat-icon>insights</mat-icon> ดูรายงาน
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="report-summary-grid">
+    <mat-card class="summary-card" *ngFor="let summary of reportSummary">
+      <mat-card-content>
+        <div class="summary-title">{{ summary.label }}</div>
+        <div class="summary-value">{{ summary.value }}</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</section>

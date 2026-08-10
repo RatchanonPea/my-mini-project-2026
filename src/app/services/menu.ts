@@ -6,6 +6,7 @@ export interface MenuItem {
   icon?: string;
   children?: MenuItem[];
   expanded?: boolean;
+  roles?: string[];
 }
 
 @Injectable({
@@ -46,7 +47,8 @@ export class MenuService {
         {
           path: 'main-conten-mng/users',
           label: 'ข้อมูลพนักงาน',
-          icon: 'fas fa-users'
+          icon: 'fas fa-users',
+          roles: ['manager']
         },
         {
           path: 'main-conten-mng/settings',

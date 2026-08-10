@@ -1,14 +1,31 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <div class="main-content">
-  <h3>User Grid Popup Add</h3>
-  <p class="subtitle">เพิ่มข้อมูลได้แบบ Pop up แล้วเห็นตารางอัปเดตทันที</p>
-  <div class="card form-card">
-    <div class="card-body">
-      <button mat-flat-button color="primary" (click)="openAddDialog()">
-        Add New User
-      </button>
+  <div class="page-header">
+    <div>
+      <h3>จัดการผู้ใช้</h3>
+      <p class="subtitle">เพิ่ม แก้ไข และจัดการข้อมูลผู้ใช้ได้จากตารางนี้</p>
     </div>
   </div>
+
+  <div class="card form-card">
+    <div class="toolbar-row">
+      <button mat-flat-button color="primary" (click)="openAddDialog()">
+        <mat-icon>person_add</mat-icon>
+        เพิ่มผู้ใช้
+      </button>
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>ค้นหา</mat-label>
+        <input matInput [(ngModel)]="searchText" (input)="applySearch()" placeholder="ค้นหาชื่อ รหัส ผู้ใช้ หรือ role" />
+        <div matSuffix class="search-suffix">
+          <button mat-icon-button aria-label="Clear search" *ngIf="searchText" (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon>search</mat-icon>
+        </div>
+      </mat-form-field>
+    </div>
+  </div>
+
   <div class="grid">
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
 
@@ -127,6 +144,14 @@
       <!-- rows -->
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr mat-row *matNoDataRow class="no-data-row">
+        <td mat-cell [attr.colspan]="displayedColumns.length">
+          <div class="no-data-message">
+            <mat-icon>storage</mat-icon>
+            No Data
+          </div>
+        </td>
+      </tr>
 
     </table>
 

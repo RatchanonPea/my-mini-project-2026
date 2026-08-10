@@ -1,0 +1,11 @@
+.sales-page { padding: 1.5rem; }
+.page-header { margin-bottom: 1.5rem; }
+.subtitle { color: #6b7280; }
+.sales-grid { display: grid; gap: 1.25rem; grid-template-columns: 1.3fr 1fr; }
+.sales-card, .history-card { padding: 1rem; border-radius: 16px; }
+.form-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr; gap: 1rem; align-items: end; }
+.full-width { width: 100%; }
+.form-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-top: 1rem; }
+.table-wrapper { overflow-x: auto; background: #ffffff; border-radius: 16px; padding: 12px; margin-top: 0; }
+th { text-align: left; }
+.text-center { text-align: center !important; }

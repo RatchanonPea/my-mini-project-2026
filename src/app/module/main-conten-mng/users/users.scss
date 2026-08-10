@@ -1,15 +1,74 @@
-.demo-table {
-  width: 100%;
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background: #f7fafc;
 }
 
-.mat-mdc-row .mat-mdc-cell {
-  border-bottom: 1px solid transparent;
-  border-top: 1px solid transparent;
-  cursor: pointer;
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
 }
 
-.mat-mdc-row:hover .mat-mdc-cell {
-  border-color: currentColor;
+.page-header h3 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.page-header .subtitle {
+  margin: 0;
+  color: #475569;
+  max-width: 780px;
+  line-height: 1.4;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.search-field {
+  min-width: 280px;
+  flex: 1;
+  max-width: 420px;
+  margin: 0;
+}
+
+.search-field .mat-mdc-text-field-input {
+  padding-right: 88px !important;
+}
+
+.search-suffix {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-right: 0.5rem;
+}
+
+.search-suffix button {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  margin-right: 0.3rem;
+}
+
+.grid {
+  overflow-x: auto;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 12px;
+  margin-top: 0;
 }
 
 .demo-row-is-clicked {
@@ -67,17 +126,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  width: 120px;              /* 🔥 เท่ากันทุกอัน */
-  height: 36px;
-
-  border-radius: 10px;       /* 🔥 เอาโค้งแบบ inactive */
-  border: 1px solid #ccc;
-
-  font-weight: 500;
-  font-size: 14px;
-
+  width: 110px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid #dbeafe;
+  font-weight: 600;
+  font-size: 13px;
   gap: 6px;
+  text-transform: capitalize;
 }
 
 /* 🟢 Manager (โทนเขียวอ่อนแบบ soft) */

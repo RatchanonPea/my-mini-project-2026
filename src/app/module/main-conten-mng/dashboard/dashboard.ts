@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -42,35 +42,35 @@ export class Dashboard implements OnInit {
   ];
 
   displayedColumns: string[] = ['id', 'name', 'sold', 'revenue'];
-  dataSource: TopProduct[] = [
+  dataSource = new MatTableDataSource<TopProduct>([
     { id: 1, name: 'ส้มตำไทย', sold: 45, revenue: 11250 },
     { id: 2, name: 'ไก่ย่าง', sold: 32, revenue: 9600 },
     { id: 3, name: 'ข้าวเหนียวหมูปิ้ง', sold: 28, revenue: 8400 },
     { id: 4, name: 'ตำลาว', sold: 21, revenue: 6300 },
     { id: 5, name: 'เครื่องดื่มเย็น', sold: 18, revenue: 5400 }
-  ];
+  ]);
 
   ngOnInit() {
     // Initialize component
   }
 
   get totalRevenue(): number {
-    return this.dataSource.reduce((sum, item) => sum + item.revenue, 0);
+    return this.dataSource.data.reduce((sum, item) => sum + item.revenue, 0);
   }
 
   get totalSold(): number {
-    return this.dataSource.reduce((sum, item) => sum + item.sold, 0);
+    return this.dataSource.data.reduce((sum, item) => sum + item.sold, 0);
   }
 
   get bestSellingMenu(): string {
-    if (!this.dataSource.length) {
+    if (!this.dataSource.data.length) {
       return '-';
     }
-    return this.dataSource.reduce((best, item) => item.revenue > best.revenue ? item : best, this.dataSource[0]).name;
+    return this.dataSource.data.reduce((best, item) => item.revenue > best.revenue ? item : best, this.dataSource.data[0]).name;
   }
 
   get menuCount(): number {
-    return this.dataSource.length;
+    return this.dataSource.data.length;
   }
 
   onDateSelected(date: Date) {

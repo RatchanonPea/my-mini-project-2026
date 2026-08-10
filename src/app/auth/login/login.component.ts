@@ -29,7 +29,8 @@ export class LoginComponent {
     this.authService.login(this.datalogin.username, this.datalogin.password).subscribe((success) => {
       this.isSubmitting = false;
       if (success) {
-        ToastSuccess('เข้าสู่ระบบสำเร็จ', 'ยินดีต้อนรับ');
+        const welcomeName = this.authService.getCurrentUser() ?? this.datalogin.username;
+        ToastSuccess('เข้าสู่ระบบสำเร็จ', `ยินดีต้อนรับ ${welcomeName}`);
         this.router.navigate(['/main-conten-mng/dashboard']);
       } else {
         this.errorMessage = 'Username หรือ Password ไม่ถูกต้อง';

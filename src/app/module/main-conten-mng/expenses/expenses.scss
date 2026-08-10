@@ -1,0 +1,11 @@
+.expenses-page { padding: 1.5rem; }
+.page-header { margin-bottom: 1.5rem; }
+.subtitle { color: #6b7280; }
+.expenses-grid { display: grid; gap: 1.25rem; grid-template-columns: 1.3fr 1fr; }
+.expense-entry-card, .expense-history-card { padding: 1rem; }
+.form-row { display: grid; gap: 1rem; margin-bottom: 1rem; }
+.small-row { grid-template-columns: 1fr; }
+.full-width { width: 100%; }
+.form-actions { margin-top: 1rem; }
+.table-wrapper { overflow-x: auto; }
+.summary-row { margin-top: 1rem; display: flex; justify-content: space-between; padding-top: 1rem; border-top: 1px solid #e5e7eb; }

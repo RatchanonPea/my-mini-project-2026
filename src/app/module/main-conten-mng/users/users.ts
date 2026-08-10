@@ -5,10 +5,13 @@ import { AddUserItemDialog } from './add-user-item-dialog/add-user-item-dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatTableModule } from '@angular/material/table';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ConfirmDialog, DialogSuccess, DialogErrorHtmlConfirm } from '../../../common/helper';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { ApiService, CreateUserPayload, UpdateUserPayload, User } from '../../../services/api';
 import { AuthService } from '../../../services/auth';
 
@@ -36,7 +39,7 @@ interface GridItem {
 
 @Component({
   selector: 'app-users',
-  imports: [MatPaginatorModule, MatTableModule, CommonModule, MatButtonModule, MatIconModule, MatChipsModule, MatDialogModule],
+  imports: [MatPaginatorModule, MatTableModule, CommonModule, FormsModule, MatButtonModule, MatIconModule, MatChipsModule, MatDialogModule, MatInputModule, MatFormFieldModule],
   templateUrl: './users.html',
   styleUrl: './users.scss',
 })
@@ -49,6 +52,7 @@ export class Users {
   pageIndex = 0;
   pageSize = 5;
   dataSource = new MatTableDataSource<GridItem>([]);
+  searchText = '';
 
   items: GridItem[] = [];
   // items: GridItem[] = [
@@ -166,10 +170,36 @@ export class Users {
         console.log('Users array length:', users.length);
         this.items = users.map((user) => this.toGridItem(user));
         this.dataSource.data = this.items;
+        this.dataSource.filterPredicate = (data, filter) => {
+          const haystack = [
+            data.id,
+            data.code ?? '',
+            data.username ?? '',
+            data.firstName ?? '',
+            data.lastName ?? '',
+            data.email ?? '',
+            data.role ?? '',
+            data.status ?? '',
+            data.updatedBy ?? ''
+          ].join(' ').toLowerCase();
+          return haystack.includes(filter);
+        };
+        this.applySearch();
         this.totalItems = this.items.length;
       },
       error: (error) => console.error('Error fetching users:', error),
     });
+  }
+
+  applySearch(): void {
+    this.dataSource.filter = this.searchText.trim().toLowerCase();
+    this.pageIndex = 0;
+    this.totalItems = this.dataSource.filteredData.length;
+  }
+
+  clearSearch(): void {
+    this.searchText = '';
+    this.applySearch();
   }
 
   private toGridItem(user: User): GridItem {

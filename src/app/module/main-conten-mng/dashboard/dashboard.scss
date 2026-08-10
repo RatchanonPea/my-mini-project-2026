@@ -568,32 +568,6 @@
   .table-container {
     padding: 0 1.5rem 1.5rem;
     overflow-x: auto;
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-
-      ::ng-deep {
-        .mat-mdc-header-cell {
-          background: #f8fafc;
-          color: #374151;
-          font-weight: 600;
-          font-size: 0.8rem;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          padding: 0.75rem 1rem;
-        }
-
-        .mat-mdc-cell {
-          padding: 0.85rem 1rem;
-          border-bottom: 1px solid #e5e7eb;
-        }
-
-        .mat-mdc-row:hover {
-          background: #f9fafb;
-        }
-      }
-    }
   }
 
   .status-badge {
@@ -692,3 +666,4 @@ body {
     background-position: 0% 50%;
   }
 }
+
