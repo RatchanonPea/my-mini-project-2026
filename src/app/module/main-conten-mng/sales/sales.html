@@ -93,6 +93,10 @@
             </tr>
           </table>
         </div>
+        <div class="summary-row">
+          <span>รวมจำนวนทั้งหมด: {{ totalQuantity }}</span>
+          <strong>ยอดรวมทั้งหมด: {{ totalAmount | currency:'THB ':'symbol':'1.0-0' }}</strong>
+        </div>
       </mat-card-content>
     </mat-card>
   </div>

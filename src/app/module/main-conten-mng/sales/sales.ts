@@ -112,4 +112,12 @@ export class Sales {
     this.isEditing = false;
     this.newSale = { product: '', quantity: 1, price: 0 };
   }
+
+  get totalQuantity(): number {
+    return this.soldItems.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  get totalAmount(): number {
+    return this.soldItems.reduce((sum, item) => sum + item.total, 0);
+  }
 }
