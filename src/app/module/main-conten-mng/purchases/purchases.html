@@ -1,0 +1,194 @@
+<section class="purchases-page">
+  <div class="page-header">
+    <div>
+      <h3>สั่งซื้อไก่ (Purchases)</h3>
+      <p class="subtitle">บันทึกใบสั่งซื้อไก่ (นับเป็นตัว ทีละ 0.5) เลือกราคารับต่อตัวได้ หรือกรอกเองถ้าราคาไม่ตรง กดรับของเมื่อไก่มาถึงเพื่อเพิ่มสต็อก</p>
+    </div>
+  </div>
+
+  <div class="purchases-grid">
+    <mat-card class="purchase-entry-card">
+      <mat-card-header>
+        <mat-card-title>{{ editingId ? 'แก้ไขใบสั่งซื้อ' : 'สร้างใบสั่งซื้อ' }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="save()">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>วันที่สั่ง</mat-label>
+              <input matInput [matDatepicker]="orderPicker" formControlName="order_date" />
+              <mat-datepicker-toggle matIconSuffix [for]="orderPicker"></mat-datepicker-toggle>
+              <mat-datepicker #orderPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>ผู้ขาย / ร้านที่สั่ง</mat-label>
+              <mat-select formControlName="supplier_id">
+                @for (s of suppliers; track s.supplier_id) {
+                  <mat-option [value]="s.supplier_id">{{ s.name }}</mat-option>
+                }
+              </mat-select>
+              <mat-error>กรุณาเลือกผู้ขาย</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>จำนวน (ตัว)</mat-label>
+              <input matInput type="number" step="0.5" min="0.5" formControlName="quantity" />
+              @if (form.controls.quantity.hasError('halfStep')) {
+                <mat-error>ใส่ได้ทีละ 0.5 ตัว (เช่น 1, 1.5, 2)</mat-error>
+              } @else {
+                <mat-error>จำนวนต้องไม่ต่ำกว่า 0.5 ตัว</mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>ราคารับต่อตัว (บาท)</mat-label>
+              <mat-select formControlName="price_choice">
+                @for (price of prices; track price) {
+                  <mat-option [value]="price">{{ price | number:'1.0-2' }} บาท{{ price === standardCost ? ' (ราคามาตรฐาน)' : '' }}</mat-option>
+                }
+                <mat-option [value]="customPrice">กรอกเอง...</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          @if (isCustom) {
+            <div class="form-row" animate.enter="fade-in">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>ราคาต่อตัว (กรอกเอง)</mat-label>
+                <input matInput type="number" min="0" step="0.5" formControlName="custom_cost" placeholder="เช่น 145" />
+                <mat-error>กรุณากรอกราคาต่อตัว (0 ขึ้นไป)</mat-error>
+              </mat-form-field>
+            </div>
+          }
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>หมายเหตุ</mat-label>
+              <input matInput formControlName="note" maxlength="500" />
+            </mat-form-field>
+          </div>
+          <div class="order-total">
+            <span>รวมเป็นเงิน</span>
+            <strong>{{ orderTotal | currency:'THB ':'symbol':'1.0-2' }}</strong>
+          </div>
+          <div class="form-actions">
+            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving || unitCost === null">
+              <mat-icon>{{ editingId ? 'edit' : 'add_shopping_cart' }}</mat-icon>
+              {{ editingId ? 'อัปเดตใบสั่งซื้อ' : 'สร้างใบสั่งซื้อ' }}
+            </button>
+            @if (editingId) {
+              <button mat-button type="button" (click)="reset()">ยกเลิกการแก้ไข</button>
+            }
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="purchase-history-card">
+      <mat-card-header>
+        <mat-card-title>รายการใบสั่งซื้อ</mat-card-title>
+        <mat-card-subtitle>ค้นหาตามผู้ขาย รหัส หรือหมายเหตุ กรองตามวันที่สั่งและสถานะได้</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form class="filter-bar" [formGroup]="filterForm" (ngSubmit)="search()">
+          <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+            <mat-label>ค้นหาผู้ขาย / รหัส / หมายเหตุ</mat-label>
+            <input matInput formControlName="keyword" />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+            <mat-label>วันที่สั่ง</mat-label>
+            <input matInput [matDatepicker]="filterPicker" formControlName="date" />
+            <mat-datepicker-toggle matIconSuffix [for]="filterPicker"></mat-datepicker-toggle>
+            <mat-datepicker #filterPicker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+            <mat-label>สถานะ</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="">ทุกสถานะ</mat-option>
+              <mat-option value="ordered">สั่งแล้ว</mat-option>
+              <mat-option value="received">รับแล้ว</mat-option>
+              <mat-option value="cancelled">ยกเลิก</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="filter-actions">
+            <button mat-flat-button color="primary" type="submit"><mat-icon>search</mat-icon> ค้นหา</button>
+            <button mat-stroked-button type="button" (click)="clearFilter()">ล้าง</button>
+          </div>
+        </form>
+
+        <div class="table-wrapper">
+          <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+            <ng-container matColumnDef="code">
+              <th mat-header-cell *matHeaderCellDef> รหัส </th>
+              <td mat-cell *matCellDef="let po">{{ po.code }}</td>
+            </ng-container>
+            <ng-container matColumnDef="order_date">
+              <th mat-header-cell *matHeaderCellDef> วันที่สั่ง </th>
+              <td mat-cell *matCellDef="let po">{{ po.order_date | date:'dd/MM/yyyy':'UTC' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="supplier">
+              <th mat-header-cell *matHeaderCellDef> ผู้ขาย </th>
+              <td mat-cell *matCellDef="let po">{{ po.supplier_name || '-' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell *matHeaderCellDef> จำนวน (ตัว) </th>
+              <td mat-cell *matCellDef="let po">{{ po.quantity | number:'1.0-2' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="unit_cost">
+              <th mat-header-cell *matHeaderCellDef> ราคา/ตัว </th>
+              <td mat-cell *matCellDef="let po">{{ po.unit_cost | currency:'THB ':'symbol':'1.0-2' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef> รวม </th>
+              <td mat-cell *matCellDef="let po">{{ po.total_cost | currency:'THB ':'symbol':'1.0-2' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef> สถานะ </th>
+              <td mat-cell *matCellDef="let po"><span class="po-status" [ngClass]="'po-' + po.status">{{ statusLabel[po.status] }}</span></td>
+            </ng-container>
+            <ng-container matColumnDef="received_date">
+              <th mat-header-cell *matHeaderCellDef> วันที่รับ </th>
+              <td mat-cell *matCellDef="let po">{{ po.received_date ? (po.received_date | date:'dd/MM/yyyy':'UTC') : '-' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="updated_at">
+              <th mat-header-cell *matHeaderCellDef> แก้ไขล่าสุด </th>
+              <td mat-cell *matCellDef="let po">{{ po.updated_at ? (po.updated_at | date:'dd/MM/yyyy HH:mm':'UTC') : '-' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="updated_by_name">
+              <th mat-header-cell *matHeaderCellDef> แก้ไขโดย </th>
+              <td mat-cell *matCellDef="let po">{{ po.updated_by_name || '-' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="action" stickyEnd>
+              <th mat-header-cell *matHeaderCellDef class="text-center"> Action </th>
+              <td mat-cell *matCellDef="let po" class="text-center" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+                @if (po.status === 'ordered') {
+                  <button mat-icon-button type="button" color="primary" aria-label="รับไก่เข้าสต็อก" title="รับไก่เข้าสต็อก" (click)="receive(po)"><mat-icon>inventory</mat-icon></button>
+                  <button mat-icon-button type="button" aria-label="แก้ไข" title="แก้ไข" (click)="edit(po)"><mat-icon>edit</mat-icon></button>
+                  <button mat-icon-button type="button" color="warn" aria-label="ยกเลิก" title="ยกเลิกใบสั่งซื้อ" (click)="cancel(po)"><mat-icon>cancel</mat-icon></button>
+                }
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" tabindex="0" title="กดเพื่อดูรายละเอียด" (click)="openDetail(row)" (keydown.enter)="openDetail(row)"></tr>
+            <tr class="mat-mdc-row no-data-row" *matNoDataRow>
+              <td class="mat-mdc-cell" [attr.colspan]="displayedColumns.length">
+                <div class="no-data-message">
+                  <mat-icon>storage</mat-icon>
+                  No Data
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <app-pager [total]="total" [pageSize]="pageSize" [pageIndex]="pageIndex" (pageChange)="onPageChange($event)"></app-pager>
+        <div class="summary-row">
+          <span>รวม {{ total }} ใบ / {{ totalQuantity | number:'1.0-2' }} ตัว</span>
+          <strong>{{ totalAmount | currency:'THB ':'symbol':'1.0-2' }}</strong>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</section>

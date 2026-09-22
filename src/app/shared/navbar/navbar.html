@@ -1,11 +1,18 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <div class="container-fluid">
+    <app-chicken class="navbar-chicken" [size]="34"></app-chicken>
     <a class="navbar-brand" href="#">
       <img class="navbar-logo" src="assets/images/Logo/CheckenLogo.jpg" alt="Checken Logo" />
-      MiniProject Angular
+      <span class="brand-label">
+        <span class="brand-title" [attr.aria-label]="brandTitle">@for (letter of brandLetters; track $index) {<span class="brand-letter" aria-hidden="true">{{ letter === ' ' ? '\u00a0' : letter }}</span>}</span>
+        <span class="brand-subtitle" [attr.aria-label]="brandSubtitle">@for (letter of brandSubLetters; track $index) {<span class="brand-letter" aria-hidden="true">{{ letter === ' ' ? '\u00a0' : letter }}</span>}</span>
+      </span>
     </a>
 
-    <div class="d-flex align-items-center position-relative">
+    <div class="d-flex align-items-center position-relative gap-2">
+      <button class="btn btn-theme-toggle" type="button" (click)="theme.toggle()" [attr.aria-label]="theme.mode() === 'dark' ? 'สลับเป็นโหมดสว่าง' : 'สลับเป็นโหมดมืด'" [title]="theme.mode() === 'dark' ? 'โหมดสว่าง' : 'โหมดมืด'">
+        <i class="fas" [ngClass]="theme.mode() === 'dark' ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
       <div class="navbar-user" *ngIf="currentUser">
         <button class="btn btn-user-toggle" type="button" (click)="toggleDropdown()">
           <span class="avatar-circle"><i class="fas fa-user"></i></span>

@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { NetworkService } from './services/network';
+import { ThemeService } from './services/theme';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -8,5 +10,7 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.scss'
 })
 export class App {
-  protected title = 'MiniProjectAngular_2024';
+  protected network = inject(NetworkService);
+  private theme = inject(ThemeService);
+  protected title = 'Arre ไก่หมุน';
 }

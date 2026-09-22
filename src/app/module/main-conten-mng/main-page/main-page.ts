@@ -7,14 +7,16 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
-import { ConfirmDelete, ConfirmDialog, DialogSuccess } from '../../../common/helper';
-import { ApiService, ProductItem } from '../../../services/api';
+import { MatSelectModule } from '@angular/material/select';
+import { ConfirmDelete, ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess } from '../../../common/helper';
+import { ApiService, Category, ProductItem } from '../../../services/api';
 import { AuthService } from '../../../services/auth';
+import { Pager } from '../../../shared/pager/pager';
 
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatPaginatorModule, MatIconModule],
+  imports: [Pager, CommonModule, FormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatPaginatorModule, MatIconModule, MatSelectModule],
   templateUrl: './main-page.html',
   styleUrls: ['./main-page.scss'],
 })
@@ -23,16 +25,18 @@ export class MainPage implements AfterViewInit {
 
   pageEvent: any;
   pageIndex = 0;
-  pageSize = 5;
+  pageSize = 10;
   dataSource = new MatTableDataSource<ProductItem>([]);
   items: ProductItem[] = [];
+  categories: Category[] = [];
   newItem: Partial<ProductItem> = {
     product_name: '',
+    category_id: null,
     is_active: true
   };
   isEditing = false;
 
-  displayedColumns = ['No', 'product_id', 'product_code', 'product_name', 'price', 'action'];
+  displayedColumns = ['No', 'product_id', 'product_code', 'product_name', 'category_name', 'price', 'updated_at', 'updated_by_name', 'action'];
   isLoading = false;
   currentUserRole: string | null = null;
   searchText = '';
@@ -54,6 +58,7 @@ export class MainPage implements AfterViewInit {
       this.currentUserRole = role;
     });
     this.loadItems();
+    this.api.getCategories('product').subscribe((c) => (this.categories = c));
   }
 
   ngAfterViewInit() {
@@ -83,6 +88,7 @@ export class MainPage implements AfterViewInit {
         data.product_id ?? '',
         data.product_code ?? '',
         data.product_name ?? '',
+        data.category_name ?? '',
         data.price ?? ''
       ].join(' ').toLowerCase();
       return haystack.includes(filter);
@@ -123,7 +129,8 @@ export class MainPage implements AfterViewInit {
 
       const isChanged =
         existing.product_name !== productName ||
-        existing.price !== price;
+        existing.price !== price ||
+        (existing.category_id ?? null) !== (this.newItem.category_id ?? null);
 
       if (!isChanged) {
         this.resetForm();
@@ -137,6 +144,7 @@ export class MainPage implements AfterViewInit {
               product_id: existing.product_id,
               product_name: productName,
               price,
+              category_id: this.newItem.category_id ?? null,
               is_active: existing.is_active ?? true
             });
           }
@@ -148,32 +156,40 @@ export class MainPage implements AfterViewInit {
     const newItem: Omit<ProductItem, 'product_id'> = {
       product_name: productName,
       price,
+      category_id: this.newItem.category_id ?? null,
       is_active: true
     };
 
-    this.api.createProduct(newItem).subscribe({
-      next: (created) => {
-        this.items = [...this.items, created];
-        this.updateTable();
-        DialogSuccess('เพิ่มรายการสำเร็จ');
-        this.resetForm();
-      },
-      error: (err) => {
-        console.error('Create product failed', err);
-      }
-    });
+    ConfirmDialog('ยืนยันการเพิ่มสินค้า', `คุณต้องการเพิ่มสินค้า "${productName}" ในราคา ${price} บาท ใช่หรือไม่ ?`)
+      .then((confirm) => {
+        if (!confirm) {
+          return;
+        }
+
+        this.api.createProduct(newItem).subscribe({
+          next: () => {
+            this.resetForm();
+            this.loadItems();
+            DialogSuccess('เพิ่มรายการสำเร็จ');
+          },
+          error: (err) => {
+            console.error('Create product failed', err);
+            DialogErrorHtmlConfirm('ไม่สามารถเพิ่มสินค้าได้ กรุณาลองใหม่อีกครั้ง');
+          }
+        });
+      });
   }
 
   updateItem(changes: Partial<ProductItem> & { product_id: number }) {
     this.api.updateProduct(changes).subscribe({
-      next: (updated) => {
-        this.items = this.items.map(item => item.product_id === updated.product_id ? updated : item);
-        this.updateTable();
-        DialogSuccess('อัปเดตรายการสำเร็จ');
+      next: () => {
         this.resetForm();
+        this.loadItems();
+        DialogSuccess('อัปเดตรายการสำเร็จ');
       },
       error: (err) => {
         console.error('Update product failed', err);
+        DialogErrorHtmlConfirm('ไม่สามารถแก้ไขสินค้าได้ กรุณาลองใหม่อีกครั้ง');
       }
     });
   }
@@ -186,6 +202,7 @@ export class MainPage implements AfterViewInit {
   resetForm() {
     this.newItem = {
       product_name: '',
+      category_id: null,
       is_active: true
     };
     this.isEditing = false;
@@ -201,6 +218,7 @@ export class MainPage implements AfterViewInit {
       product_id: item.product_id,
       product_name: item.product_name,
       price: item.price,
+      category_id: item.category_id ?? null,
       is_active: item.is_active
     };
   }
@@ -214,18 +232,31 @@ export class MainPage implements AfterViewInit {
       .then((emit) => {
         if (emit) {
           this.api.deleteProduct(product_id).subscribe({
-            next: (updated) => {
-              this.items = this.items.map(item => item.product_id === updated.product_id ? updated : item)
-                .filter(item => item.is_active !== 0);
-              this.updateTable();
+            next: () => {
+              this.loadItems();
               DialogSuccess('ลบรายการสำเร็จ');
             },
             error: (err) => {
               console.error('Delete product failed', err);
+              DialogErrorHtmlConfirm('ไม่สามารถลบสินค้าได้ กรุณาลองใหม่อีกครั้ง');
             }
           });
         }
       });
+  }
+
+  get totalFiltered(): number {
+    return this.dataSource.filteredData.length;
+  }
+
+  goToPage(index: number): void {
+    this.paginator.pageIndex = index;
+    this.paginator.page.emit({
+      pageIndex: index,
+      previousPageIndex: this.pageIndex,
+      pageSize: this.paginator.pageSize,
+      length: this.paginator.length,
+    });
   }
 
   onPageChange(event: any) {

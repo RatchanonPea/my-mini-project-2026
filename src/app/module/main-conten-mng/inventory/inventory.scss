@@ -1,0 +1,94 @@
+.inventory-page { padding: 1.5rem; }
+.page-header { margin-bottom: 1.5rem; }
+.subtitle { color: #6b7280; }
+.form-row { display: grid; gap: 1rem; margin-bottom: 1rem; }
+.full-width { width: 100%; }
+.form-actions { margin-top: 0.5rem; }
+.table-wrapper { overflow-x: auto; }
+.text-center { text-align: center !important; }
+
+.inventory-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+// every box fills its whole card, even when a longer label makes its row taller
+.inventory-cards .stat-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inventory-cards .stat-card mat-card-content {
+  flex: 1;
+}
+
+.inventory-cards .card-stats {
+  height: 100%;
+  min-height: 130px;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  border-radius: inherit;
+}
+
+.inventory-cards .stat-number { font-size: 2rem; font-weight: 800; line-height: 1.1; }
+.inventory-cards .stat-number small { font-size: 1rem; font-weight: 600; opacity: 0.9; }
+.inventory-cards .stat-label { margin-top: 0.4rem; font-size: 0.8rem; opacity: 0.95; }
+
+.inv-balance .card-stats { background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%); }
+.inv-balance.is-low .card-stats { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+.inv-value .card-stats { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+.inv-cost .card-stats { background: linear-gradient(135deg, #fdba74 0%, #f97316 100%); }
+.inv-sold .card-stats { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
+.inv-profit .card-stats { background: linear-gradient(135deg, #16a34a 0%, #166534 100%); }
+.inv-waste .card-stats { background: linear-gradient(135deg, #78716c 0%, #44403c 100%); }
+
+.low-stock-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: #fee2e2;
+  border: 1px solid #ef4444;
+  color: #991b1b;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.8fr) 1.6fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.inventory-grid > * { min-width: 0; }
+.side-forms { display: grid; gap: 1.25rem; }
+.inv-form-card, .ledger-card { padding: 1rem; }
+
+@media (max-width: 1100px) {
+  .inventory-grid { grid-template-columns: 1fr; }
+}
+
+.ledger-type {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lt-receive { background: #e6f4ea; color: #2e7d32; }
+.lt-sale { background: #ffedd5; color: #c2410c; }
+.lt-waste { background: #fee2e2; color: #b91c1c; }
+.lt-adjust { background: #e0e7ff; color: #3730a3; }
+
+.qty-in { color: #2e7d32; }
+.qty-out { color: #b91c1c; }

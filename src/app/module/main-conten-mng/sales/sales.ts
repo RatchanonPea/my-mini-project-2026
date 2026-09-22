@@ -1,126 +1,169 @@
-import { Component } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Subject, catchError, of, switchMap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { Pager } from '../../../shared/pager/pager';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { DialogSuccess } from '../../../common/helper';
-
-interface SaleItem {
-  id: number;
-  product: string;
-  quantity: number;
-  price: number;
-  total: number;
-}
+import { ApiService, ProductItem, SaleItem } from '../../../services/api';
+import { ConfirmDelete, DialogErrorHtmlConfirm, DialogSuccess, toYmd } from '../../../common/helper';
 
 @Component({
   selector: 'app-sales',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule],
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule, Pager, MatDatepickerModule, MatNativeDateModule],
   templateUrl: './sales.html',
   styleUrls: ['./sales.scss']
 })
-export class Sales {
-  menuItems = ['ไก่ย่าง', 'ส้มตำ', 'ข้าวเหนียว', 'น้ำตก', 'คอหมูย่าง'];
-  displayedColumns = ['id', 'product', 'quantity', 'price', 'total', 'action'];
-  soldItems: SaleItem[] = [];
+export class Sales implements OnInit {
+  private api = inject(ApiService);
+  private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
+  private reload$ = new Subject<void>();
+
+  displayedColumns = ['id', 'code', 'date', 'product', 'quantity', 'price', 'total', 'updated_at', 'updated_by_name', 'action'];
+  products: ProductItem[] = [];
   dataSource = new MatTableDataSource<SaleItem>([]);
-  isEditing = false;
-  newSale: Partial<SaleItem> = {
-    product: '',
-    quantity: 1,
-    price: 0,
-  };
 
-  canSaveSale(): boolean {
-    return !!this.newSale.product && (this.newSale.quantity ?? 0) > 0 && (this.newSale.price ?? 0) > 0;
+  readonly pageSize = 10;
+  pageIndex = 0;
+  total = 0;
+  totalQuantity = 0;
+  totalAmount = 0;
+
+  private formDateItems: SaleItem[] = [];
+  editingId: number | null = null;
+  saving = false;
+
+  filterForm = this.fb.group({
+    keyword: [''],
+    date: [new Date() as Date | null],
+  });
+
+  form = this.fb.nonNullable.group({
+    product_id: [0, [Validators.required, Validators.min(1)]],
+    quantity: [1, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]],
+  });
+
+  get isEditing(): boolean {
+    return this.editingId !== null;
   }
 
-  saveSale(): void {
-    if (!this.canSaveSale()) {
-      return;
-    }
-
-    if (this.isEditing && this.newSale.id) {
-      this.updateSale();
-    } else {
-      this.addSale();
-    }
+  get availableProducts(): ProductItem[] {
+    const current = this.formDateItems.find((i) => i.item_id === this.editingId);
+    const soldIds = new Set(this.formDateItems.map((i) => i.product_id));
+    return this.products.filter((p) => !soldIds.has(p.product_id) || p.product_id === current?.product_id);
   }
 
-  addSale(): void {
-    const id = this.soldItems.length + 1;
-    const quantity = this.newSale.quantity || 0;
-    const price = this.newSale.price || 0;
-    const item: SaleItem = {
-      id,
-      product: this.newSale.product || '',
-      quantity,
-      price,
-      total: quantity * price,
-    };
-    this.soldItems = [item, ...this.soldItems];
-    this.dataSource.data = this.soldItems;
-    DialogSuccess('บันทึกยอดขายเรียบร้อยแล้ว', 'บันทึกสำเร็จ');
-    this.resetForm();
+  get selectedProduct(): ProductItem | undefined {
+    return this.products.find((p) => p.product_id === this.form.controls.product_id.value);
+  }
+
+  ngOnInit(): void {
+    this.api.getProducts().subscribe((items) => (this.products = items.filter((p) => p.is_active)));
+
+    this.reload$.pipe(
+      switchMap(() => this.api.searchSales({
+        keyword: this.filterForm.controls.keyword.value ?? '',
+        date: this.filterForm.controls.date.value ? toYmd(this.filterForm.controls.date.value) : null,
+        page: this.pageIndex + 1,
+        pageSize: this.pageSize,
+      }).pipe(catchError(() => of({ items: [], total: 0, total_quantity: 0, total_amount: 0, page: 1, pageSize: this.pageSize })))),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((result) => {
+      this.dataSource.data = result.items;
+      this.total = result.total;
+      this.totalQuantity = result.total_quantity ?? 0;
+      this.totalAmount = result.total_amount;
+    });
+
+    this.reload$.next();
+    this.loadFormDateItems(toYmd(new Date()));
+  }
+
+  private loadFormDateItems(date: string): void {
+    this.api.getSales(date).subscribe((items) => (this.formDateItems = items));
+  }
+
+  search(): void {
+    this.pageIndex = 0;
+    this.reload$.next();
+  }
+
+  clearFilter(): void {
+    this.filterForm.reset({ keyword: '', date: new Date() });
+    this.search();
+  }
+
+  onPageChange(pageIndex: number): void {
+    this.pageIndex = pageIndex;
+    this.reload$.next();
   }
 
   editSale(item: SaleItem): void {
-    this.isEditing = true;
-    this.newSale = { ...item };
-  }
-
-  updateSale(): void {
-    if (!this.newSale.id) {
-      return;
-    }
-
-    const quantity = this.newSale.quantity || 0;
-    const price = this.newSale.price || 0;
-    this.soldItems = this.soldItems.map(item => {
-      if (item.id === this.newSale.id) {
-        return {
-          ...item,
-          product: this.newSale.product || item.product,
-          quantity,
-          price,
-          total: quantity * price,
-        };
-      }
-      return item;
-    });
-    this.dataSource.data = this.soldItems;
-    DialogSuccess('อัปเดตยอดขายเรียบร้อยแล้ว', 'อัปเดตสำเร็จ');
-    this.resetForm();
+    this.editingId = item.item_id;
+    this.loadFormDateItems(item.sale_date.slice(0, 10));
+    this.form.setValue({ product_id: item.product_id, quantity: item.quantity });
   }
 
   cancelEdit(): void {
     this.resetForm();
   }
 
-  removeSale(id: number): void {
-    this.soldItems = this.soldItems.filter(item => item.id !== id);
-    this.dataSource.data = this.soldItems;
-    if (this.isEditing && this.newSale.id === id) {
-      this.resetForm();
+  saveSale(): void {
+    if (this.form.invalid || this.saving) {
+      this.form.markAllAsTouched();
+      return;
     }
+    const { product_id, quantity } = this.form.getRawValue();
+    const editing = this.editingId;
+    const request$ = editing
+      ? this.api.updateSaleItem({ item_id: editing, product_id, quantity })
+      : this.api.createSaleItem({ sale_date: toYmd(new Date()), product_id, quantity });
+
+    this.saving = true;
+    request$.subscribe({
+      next: () => {
+        this.saving = false;
+        DialogSuccess(editing ? 'อัปเดตยอดขายเรียบร้อยแล้ว' : 'บันทึกยอดขายเรียบร้อยแล้ว', editing ? 'อัปเดตสำเร็จ' : 'บันทึกสำเร็จ');
+        this.resetForm();
+        this.reload$.next();
+      },
+      error: (err) => {
+        this.saving = false;
+        DialogErrorHtmlConfirm(err?.error?.message ?? 'บันทึกไม่สำเร็จ');
+      },
+    });
   }
 
-  resetForm(): void {
-    this.isEditing = false;
-    this.newSale = { product: '', quantity: 1, price: 0 };
+  async removeSale(id: number): Promise<void> {
+    if (!(await ConfirmDelete())) {
+      return;
+    }
+    this.api.deleteSaleItem(id).subscribe({
+      next: () => {
+        if (this.editingId === id) {
+          this.resetForm();
+        } else if (this.editingId === null) {
+          this.loadFormDateItems(toYmd(new Date()));
+        }
+        this.reload$.next();
+      },
+      error: (err) => DialogErrorHtmlConfirm(err?.error?.message ?? 'ลบไม่สำเร็จ'),
+    });
   }
 
-  get totalQuantity(): number {
-    return this.soldItems.reduce((sum, item) => sum + item.quantity, 0);
-  }
-
-  get totalAmount(): number {
-    return this.soldItems.reduce((sum, item) => sum + item.total, 0);
+  private resetForm(): void {
+    this.editingId = null;
+    this.loadFormDateItems(toYmd(new Date()));
+    this.form.reset({ product_id: 0, quantity: 1 });
   }
 }

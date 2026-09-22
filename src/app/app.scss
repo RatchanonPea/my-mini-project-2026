@@ -1,0 +1,18 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100%;
+}
+
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-weight: 600;
+  color: #fff;
+  background: #b91c1c;
+}

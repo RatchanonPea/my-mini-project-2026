@@ -5,10 +5,10 @@
 
   <div class="content-wrapper" [class.sidebar-collapsed]="sidebarCollapsed">
     <div class="content-header">
-      <button class="btn btn-outline-secondary btn-sm toggle-sidebar" (click)="toggleSidebar()">
+      <button class="btn toggle-sidebar" type="button" aria-label="ย่อ/ขยายเมนู" (click)="toggleSidebar()">
         <i class="fas fa-bars"></i>
       </button>
-      <h4 class="mb-0">Dashboard</h4>
+      <h4 class="mb-0">{{ pageTitle() }}</h4>
     </div>
 
     <div class="content-body">

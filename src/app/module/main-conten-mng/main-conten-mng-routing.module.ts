@@ -7,6 +7,10 @@ import { Expenses } from './expenses/expenses';
 import { Reports } from './reports/reports';
 import { MainPage } from './main-page/main-page';
 import { Settings } from './settings/settings';
+import { Inventory } from './inventory/inventory';
+import { Purchases } from './purchases/purchases';
+import { Suppliers } from './suppliers/suppliers';
+import { SupplierProfile } from './suppliers/supplier-profile/supplier-profile';
 
 const routes: Routes = [
   {
@@ -26,6 +30,18 @@ const routes: Routes = [
       },
       {
         path: 'expenses', data: { breadcrumb: 'Expenses' }, component: Expenses
+      },
+      {
+        path: 'inventory', data: { breadcrumb: 'Inventory' }, component: Inventory
+      },
+      {
+        path: 'purchases', data: { breadcrumb: 'สั่งซื้อไก่' }, component: Purchases
+      },
+      {
+        path: 'suppliers', data: { breadcrumb: 'ผู้ขาย/ร้านที่สั่ง' }, component: Suppliers
+      },
+      {
+        path: 'suppliers/:id', data: { breadcrumb: 'โปรไฟล์ร้านค้า' }, component: SupplierProfile
       },
       {
         path: 'reports', data: { breadcrumb: 'Reports' }, component: Reports

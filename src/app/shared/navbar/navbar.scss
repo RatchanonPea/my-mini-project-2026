@@ -1,5 +1,38 @@
+:host {
+  display: block;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1030;
+  width: 100vw;
+  min-width: 100vw;
+  max-width: 100vw;
+  height: 64px;
+}
+
 .navbar {
-  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  height: 64px;
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+  background: linear-gradient(90deg, #b91c1c 0%, #ea580c 55%, #f97316 100%) !important;
+  box-shadow: 0 2px 8px rgba(124, 45, 18, .35);
+}
+
+.navbar .container-fluid {
+  width: 100%;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+@media (min-width: 992px) {
+  .navbar .container-fluid {
+    padding-right: 2rem;
+    padding-left: 2rem;
+  }
 }
 
 .navbar-brand {
@@ -70,7 +103,7 @@
   top: calc(100% + 10px);
   right: 0;
   min-width: 260px;
-  background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(242,248,255,1) 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,247,237,1) 100%);
   color: #212529;
   border-radius: 16px;
   box-shadow: 0 18px 45px rgba(0,0,0,0.18);
@@ -106,7 +139,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #3a8dff, #61b6ff);
+  background: linear-gradient(135deg, #ea580c, #fb923c);
   color: white;
   font-weight: 700;
   font-size: 1rem;
@@ -125,7 +158,7 @@
 }
 
 .panel-role span {
-  color: #1d4ed8;
+  color: #c2410c;
   font-weight: 600;
 }
 
@@ -139,7 +172,7 @@
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  background-color: #1d4ed8;
+  background-color: #c2410c;
   color: white;
   border: none;
   border-radius: 12px;
@@ -150,12 +183,133 @@
 }
 
 .btn-logout:hover {
-  background-color: #2563eb;
+  background-color: #b91c1c;
   transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+  box-shadow: 0 8px 18px rgba(185, 28, 28, 0.25);
 }
 
 .btn-logout:active {
   transform: translateY(0);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.18);
+  box-shadow: 0 4px 10px rgba(185, 28, 28, 0.2);
+}
+
+@media (max-width: 575.98px) {
+  .navbar .container-fluid {
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+  }
+
+  .navbar-brand {
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-user-toggle {
+    padding: 0.35rem 0.55rem;
+  }
+
+  .avatar-circle {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (max-width: 400px) {
+  .brand-label {
+    display: none;
+  }
+}
+
+.btn-theme-toggle {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.08);
+  transition: background-color 0.2s ease;
+}
+
+.btn-theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.btn-theme-toggle i {
+  transition: transform 0.4s ease;
+}
+
+.btn-theme-toggle:hover i {
+  transform: rotate(25deg);
+}
+
+// the chicken roams along the bottom edge and passes behind the logo, title and buttons so they stay readable and clickable
+.navbar-chicken {
+  z-index: 0;
+  right: 190px;
+  left: 4px;
+}
+
+.navbar .container-fluid > *:not(app-chicken) {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 575.98px) {
+  .navbar-chicken {
+    display: none;
+  }
+}
+
+// title letters hop when the chicken walks under them
+.brand-letter {
+  display: inline-block;
+}
+
+.brand-letter.bounce {
+  animation: letter-bounce 0.55s ease;
+}
+
+@keyframes letter-bounce {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-9px) scale(1.18); }
+  55% { transform: translateY(1px) scale(0.96); }
+  75% { transform: translateY(-3px) scale(1.04); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+// site name: big title with a small "By ..." credit underneath
+.brand-label {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.1;
+  // keeps the white title readable when the white chicken walks behind it
+  text-shadow: 0 1px 2px rgba(60, 10, 0, 0.75), 0 0 6px rgba(60, 10, 0, 0.45);
+}
+
+.brand-title {
+  font-family: 'Itim', 'Mali', 'Kanit', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+.brand-subtitle {
+  align-self: flex-end;
+  text-align: right;
+  font-family: 'Mali', 'Itim', 'Kanit', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.brand-letter {
+  transition: color 0.15s ease;
+}
+
+.brand-letter.contrast {
+  color: #7c2d12;
+  text-shadow: none;
 }

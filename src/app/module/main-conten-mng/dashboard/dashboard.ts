@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -7,8 +7,10 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { ApiService } from '../../../services/api';
+import { toYmd } from '../../../common/helper';
 
-export interface TopProduct {
+export interface DashboardTopProduct {
   id: number;
   name: string;
   sold: number;
@@ -31,27 +33,63 @@ export interface TopProduct {
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss'],
 })
-export class Dashboard implements OnInit {
+export class Dashboard implements OnInit, OnDestroy {
+  private api = inject(ApiService);
+  private countUpFrames = new Map<number, number>();
+  private readonly countUpMs = 900;
+
   selectedDate: Date = new Date();
 
   stats = [
-    { title: 'ยอดขายวันนี้', value: '฿ 12,840', color: 'primary' },
-    { title: 'ค่าใช้จ่ายวันนี้', value: '฿ 3,840', color: 'warn' },
-    { title: 'กำไรสุทธิ', value: '฿ 9,000', color: 'accent' },
-    { title: 'ออเดอร์รอดำเนินการ', value: '8', color: 'info' }
+    { title: 'ยอดขายวันนี้', value: '฿ 0', color: 'primary', prefix: '฿ ', amount: 0 },
+    { title: 'ค่าใช้จ่ายวันนี้', value: '฿ 0', color: 'warn', prefix: '฿ ', amount: 0 },
+    { title: 'กำไรสุทธิ', value: '฿ 0', color: 'accent', prefix: '฿ ', amount: 0 },
+    { title: 'รายการขายวันนี้', value: '0', color: 'info', prefix: '', amount: 0 },
+    { title: 'ต้นทุนไก่วันนี้', value: '฿ 0', color: 'accent', prefix: '฿ ', amount: 0 },
+    { title: 'กำไรจากไก่วันนี้', value: '฿ 0', color: 'primary', prefix: '฿ ', amount: 0 }
   ];
 
   displayedColumns: string[] = ['id', 'name', 'sold', 'revenue'];
-  dataSource = new MatTableDataSource<TopProduct>([
-    { id: 1, name: 'ส้มตำไทย', sold: 45, revenue: 11250 },
-    { id: 2, name: 'ไก่ย่าง', sold: 32, revenue: 9600 },
-    { id: 3, name: 'ข้าวเหนียวหมูปิ้ง', sold: 28, revenue: 8400 },
-    { id: 4, name: 'ตำลาว', sold: 21, revenue: 6300 },
-    { id: 5, name: 'เครื่องดื่มเย็น', sold: 18, revenue: 5400 }
-  ]);
+  dataSource = new MatTableDataSource<DashboardTopProduct>([]);
 
-  ngOnInit() {
-    // Initialize component
+  ngOnInit(): void {
+    this.loadSummary();
+  }
+
+  private loadSummary(): void {
+    this.api.getDashboardSummary(toYmd(this.selectedDate)).subscribe((s) => {
+      [s.sales_total, s.expense_total, s.profit, s.sale_item_count, s.chicken_cost, s.chicken_profit].forEach((amount, i) => this.countUp(i, amount));
+      this.dataSource.data = s.top_products.map((t, i) => ({ id: i + 1, name: t.product_name, sold: t.sold, revenue: t.revenue }));
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.countUpFrames.forEach((frame) => cancelAnimationFrame(frame));
+  }
+
+  // the number in a stat box climbs (or falls) from what it showed to the new value
+  private countUp(index: number, target: number): void {
+    const stat = this.stats[index];
+    const from = stat.amount;
+    const show = (n: number) => (stat.value = stat.prefix + Math.round(n).toLocaleString('th-TH'));
+    cancelAnimationFrame(this.countUpFrames.get(index) ?? 0);
+    stat.amount = target;
+
+    if (from === target || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      show(target);
+      return;
+    }
+
+    const start = performance.now();
+    const step = (now: number) => {
+      const progress = Math.min(1, (now - start) / this.countUpMs);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      show(from + (target - from) * eased);
+      if (progress < 1) {
+        this.countUpFrames.set(index, requestAnimationFrame(step));
+      }
+    };
+    this.countUpFrames.set(index, requestAnimationFrame(step));
   }
 
   get totalRevenue(): number {
@@ -75,6 +113,7 @@ export class Dashboard implements OnInit {
 
   onDateSelected(date: Date) {
     this.selectedDate = date;
+    this.loadSummary();
   }
 }
 

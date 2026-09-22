@@ -1,1 +1,4 @@
+@if (!network.online()) {
+  <div class="offline-banner" role="alert" animate.enter="slide-down-in" animate.leave="slide-up-out">ขาดการเชื่อมต่ออินเทอร์เน็ต — ระบบจะโหลดข้อมูลให้ใหม่อัตโนมัติเมื่อเชื่อมต่อได้</div>
+}
 <router-outlet></router-outlet>

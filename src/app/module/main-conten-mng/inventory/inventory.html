@@ -1,0 +1,212 @@
+<section class="inventory-page">
+  <div class="page-header">
+    <div>
+      <h3>Inventory (สต็อกไก่)</h3>
+      <p class="subtitle">ไก่มีรายการเดียว นับเป็นตัว ทีละ 0.5 (ผ่ากลาง 1 ตัวได้ 2 ครึ่งตัว) รับเข้าจากใบสั่งซื้อ ตัดออกเมื่อขาย และบันทึกของเสียได้</p>
+    </div>
+  </div>
+
+  @if (summary; as s) {
+    @if (s.is_low) {
+      <div class="low-stock-alert" role="alert" animate.enter="fade-in">
+        <mat-icon>warning</mat-icon>
+        <span>ไก่เหลือน้อย: คงเหลือ <strong>{{ s.balance | number:'1.0-2' }}</strong> ตัว (เตือนเมื่อเหลือ {{ s.low_stock_threshold | number:'1.0-2' }} ตัวหรือน้อยกว่า) ควรสั่งซื้อเพิ่ม</span>
+      </div>
+    }
+
+    <div class="inventory-cards">
+      <mat-card class="stat-card inv-balance" [class.is-low]="s.is_low">
+        <mat-card-content class="card-stats">
+          <div class="stat-number">{{ s.balance | number:'1.0-2' }} <small>ตัว</small></div>
+          <div class="stat-label">คงเหลือในสต็อก ({{ s.code }})</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card inv-value">
+        <mat-card-content class="card-stats">
+          <div class="stat-number">{{ s.stock_value | currency:'THB ':'symbol':'1.0-0' }}</div>
+          <div class="stat-label">มูลค่าสต็อกคงเหลือ</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card inv-cost">
+        <mat-card-content class="card-stats">
+          <div class="stat-number">{{ s.unit_cost | currency:'THB ':'symbol':'1.0-2' }}</div>
+          <div class="stat-label">ต้นทุนไก่ต่อตัว ({{ s.cost_source === 'average' ? 'เฉลี่ยจากที่รับจริง' : 'ค่ามาตรฐาน' }})</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card inv-sold">
+        <mat-card-content class="card-stats">
+          <div class="stat-number">{{ s.sold | number:'1.0-2' }} <small>ตัว</small></div>
+          <div class="stat-label">ขายไปแล้ว (ต้นทุน {{ s.sold_cost | currency:'THB ':'symbol':'1.0-0' }})</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card inv-profit">
+        <mat-card-content class="card-stats">
+          <div class="stat-number">{{ s.gross_profit | currency:'THB ':'symbol':'1.0-0' }}</div>
+          <div class="stat-label">กำไรจากไก่ (รายได้ {{ s.chicken_revenue | currency:'THB ':'symbol':'1.0-0' }} − ต้นทุน)</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card inv-waste">
+        <mat-card-content class="card-stats">
+          <div class="stat-number">{{ s.waste | number:'1.0-2' }} <small>ตัว</small></div>
+          <div class="stat-label">ของเสีย (มูลค่า {{ s.waste_cost | currency:'THB ':'symbol':'1.0-0' }})</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+  <div class="inventory-grid">
+    <div class="side-forms">
+      <mat-card class="inv-form-card">
+        <mat-card-header>
+          <mat-card-title>บันทึกของเสีย / ปรับยอด</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="adjustForm" (ngSubmit)="saveAdjustment()">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>ประเภท</mat-label>
+                <mat-select formControlName="type">
+                  <mat-option value="waste">ของเสีย (ไก่เสีย/ตกพื้น/ไหม้) ลดสต็อก</mat-option>
+                  <mat-option value="adjust">ปรับยอด (นับสต็อกจริงไม่ตรง) เพิ่ม/ลด</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>วันที่</mat-label>
+                <input matInput [matDatepicker]="adjustPicker" formControlName="adjust_date" />
+                <mat-datepicker-toggle matIconSuffix [for]="adjustPicker"></mat-datepicker-toggle>
+                <mat-datepicker #adjustPicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>{{ isWaste ? 'จำนวนที่เสีย (ตัว)' : 'จำนวนที่ปรับ (ตัว, ลบ = ลดสต็อก)' }}</mat-label>
+                <input matInput type="number" step="0.5" formControlName="quantity" />
+                @if (adjustForm.controls.quantity.hasError('halfStep')) {
+                  <mat-error>ใส่ได้ทีละ 0.5 ตัว</mat-error>
+                } @else {
+                  <mat-error>กรุณากรอกจำนวน</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>หมายเหตุ</mat-label>
+                <input matInput formControlName="note" maxlength="500" />
+              </mat-form-field>
+            </div>
+            <div class="form-actions">
+              <button mat-flat-button color="primary" type="submit" [disabled]="!adjustValid || saving">
+                <mat-icon>{{ isWaste ? 'delete_sweep' : 'tune' }}</mat-icon> บันทึก
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="inv-form-card">
+        <mat-card-header>
+          <mat-card-title>ตั้งค่า</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>เตือนเมื่อเหลือไม่เกิน (ตัว)</mat-label>
+                <input matInput type="number" step="0.5" min="0" formControlName="low_stock_threshold" />
+                <mat-error>ใส่ค่า 0 ขึ้นไป ทีละ 0.5</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>ต้นทุนมาตรฐานต่อตัว (บาท)</mat-label>
+                <input matInput type="number" step="0.5" min="0" formControlName="unit_cost" />
+                <mat-hint>ใช้จนกว่าจะรับไก่ครั้งแรก หลังจากนั้นใช้ราคาเฉลี่ยที่รับจริง</mat-hint>
+                <mat-error>ใส่ค่า 0 ขึ้นไป</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="form-actions">
+              <button mat-stroked-button type="submit" [disabled]="settingsForm.invalid || savingSettings">
+                <mat-icon>save</mat-icon> บันทึกการตั้งค่า
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card class="ledger-card">
+      <mat-card-header>
+        <mat-card-title>ประวัติสต็อก</mat-card-title>
+        <mat-card-subtitle>รับเข้า ขายออก (รวมรายวัน) ของเสีย และปรับยอด</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form class="filter-bar" [formGroup]="filterForm" (ngSubmit)="search()">
+          <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+            <mat-label>ประเภท</mat-label>
+            <mat-select formControlName="type">
+              <mat-option value="">ทุกประเภท</mat-option>
+              <mat-option value="receive">รับเข้า</mat-option>
+              <mat-option value="sale">ขายออก</mat-option>
+              <mat-option value="waste">ของเสีย</mat-option>
+              <mat-option value="adjust">ปรับยอด</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+            <mat-label>วันที่</mat-label>
+            <input matInput [matDatepicker]="filterPicker" formControlName="date" />
+            <mat-datepicker-toggle matIconSuffix [for]="filterPicker"></mat-datepicker-toggle>
+            <mat-datepicker #filterPicker></mat-datepicker>
+          </mat-form-field>
+          <div class="filter-actions">
+            <button mat-flat-button color="primary" type="submit"><mat-icon>search</mat-icon> ค้นหา</button>
+            <button mat-stroked-button type="button" (click)="clearFilter()">ล้าง</button>
+          </div>
+        </form>
+
+        <div class="table-wrapper">
+          <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+            <ng-container matColumnDef="ledger_date">
+              <th mat-header-cell *matHeaderCellDef> วันที่ </th>
+              <td mat-cell *matCellDef="let row">{{ row.ledger_date | date:'dd/MM/yyyy':'UTC' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef> รายการ </th>
+              <td mat-cell *matCellDef="let row"><span class="ledger-type" [ngClass]="'lt-' + row.type">{{ typeLabel[row.type] }}</span></td>
+            </ng-container>
+            <ng-container matColumnDef="ref_code">
+              <th mat-header-cell *matHeaderCellDef> อ้างอิง </th>
+              <td mat-cell *matCellDef="let row">{{ row.ref_code }}</td>
+            </ng-container>
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell *matHeaderCellDef class="text-center"> เข้า (+) / ออก (−) ตัว </th>
+              <td mat-cell *matCellDef="let row" class="text-center">
+                <strong [class.qty-in]="row.quantity > 0" [class.qty-out]="row.quantity < 0">{{ row.quantity > 0 ? '+' : '' }}{{ row.quantity | number:'1.0-2' }}</strong>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="balance_after">
+              <th mat-header-cell *matHeaderCellDef class="text-center"> คงเหลือ (ตัว) </th>
+              <td mat-cell *matCellDef="let row" class="text-center"><strong>{{ row.balance_after | number:'1.0-2' }}</strong></td>
+            </ng-container>
+            <ng-container matColumnDef="note">
+              <th mat-header-cell *matHeaderCellDef> หมายเหตุ </th>
+              <td mat-cell *matCellDef="let row">{{ row.supplier || row.note || '-' }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" tabindex="0" title="กดเพื่อดูรายละเอียด" (click)="openDetail(row)" (keydown.enter)="openDetail(row)"></tr>
+            <tr class="mat-mdc-row no-data-row" *matNoDataRow>
+              <td class="mat-mdc-cell" [attr.colspan]="displayedColumns.length">
+                <div class="no-data-message">
+                  <mat-icon>storage</mat-icon>
+                  No Data
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <app-pager [total]="total" [pageSize]="pageSize" [pageIndex]="pageIndex" (pageChange)="onPageChange($event)"></app-pager>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</section>

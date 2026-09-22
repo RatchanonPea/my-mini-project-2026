@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,102 +10,117 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+
+import { ApiService, ReportGroupBy, ReportPeriod, SummaryTotals } from '../../../services/api';
+import { toYmd } from '../../../common/helper';
+import { Pager } from '../../../shared/pager/pager';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule],
-  template: `
-    <section class="reports-page">
-      <div class="page-header">
-        <div>
-          <h3>รายงานร้านอาหาร</h3>
-          <p class="subtitle">เลือกวันและประเภทรายงานเพื่อดูสรุปยอดขายและต้นทุน</p>
-        </div>
-      </div>
-
-      <div class="report-filters">
-        <mat-card class="filter-card">
-          <mat-card-header>
-            <mat-card-title>ตัวกรองรายงาน</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="filter-row">
-              <mat-form-field appearance="outline">
-                <mat-label>ประเภทรายงาน</mat-label>
-                <mat-select [(ngModel)]="reportType">
-                  <mat-option value="sales">ยอดขาย</mat-option>
-                  <mat-option value="expense">ค่าใช้จ่าย</mat-option>
-                  <mat-option value="profit">กำไร</mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>วันที่เริ่ม</mat-label>
-                <input matInput [matDatepicker]="startPicker" [(ngModel)]="dateStart" />
-                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-                <mat-datepicker #startPicker></mat-datepicker>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>วันที่สิ้นสุด</mat-label>
-                <input matInput [matDatepicker]="endPicker" [(ngModel)]="dateEnd" />
-                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-                <mat-datepicker #endPicker></mat-datepicker>
-              </mat-form-field>
-            </div>
-            <div class="filter-actions">
-              <button mat-flat-button color="primary" (click)="generateReport()">
-                <mat-icon>insights</mat-icon> ดูรายงาน
-              </button>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-
-      <div class="report-summary-grid">
-        <mat-card class="summary-card" *ngFor="let summary of reportSummary">
-          <mat-card-content>
-            <div class="summary-title">{{ summary.label }}</div>
-            <div class="summary-value">{{ summary.value }}</div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </section>
-  `,
-  styles: [
-    `.reports-page { padding: 1.5rem; }
-     .page-header { margin-bottom: 1.5rem; }
-     .subtitle { color: #6b7280; }
-     .report-filters { display: grid; gap: 1rem; margin-bottom: 1.25rem; }
-     .filter-card { padding: 1rem; }
-     .filter-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: end; }
-     .filter-actions { margin-top: 1rem; }
-     .report-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
-     .summary-card { padding: 1rem; text-align: center; }
-     .summary-title { color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
-     .summary-value { font-size: 1.5rem; font-weight: 700; }
-    `
-  ]
+  imports: [
+    CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule,
+    MatIconModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatTableModule, MatButtonToggleModule, Pager,
+  ],
+  templateUrl: './reports.html',
+  styleUrls: ['./reports.scss'],
 })
-export class Reports {
-  reportType = 'sales';
-  dateStart = new Date();
-  dateEnd = new Date();
+export class Reports implements OnInit {
+  private api = inject(ApiService);
+  private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
 
-  reportSummary = [
-    { label: 'ยอดขายรวม', value: '฿ 0' },
-    { label: 'ค่าใช้จ่ายรวม', value: '฿ 0' },
-    { label: 'กำไรสุทธิ', value: '฿ 0' },
+  readonly groupByLabel: Record<string, string> = { day: 'รายวัน', week: 'รายสัปดาห์', month: 'รายเดือน', year: 'รายปี' };
+  displayedColumns = ['period', 'sales_total', 'sale_qty', 'purchase_cost', 'chicken_received', 'expense_total', 'profit'];
+
+  form = this.fb.nonNullable.group({
+    groupBy: ['day' as ReportGroupBy, Validators.required],
+    dateStart: [this.monthAgo(), Validators.required],
+    dateEnd: [new Date(), Validators.required],
+  });
+
+  summary: SummaryTotals | null = null;
+  periods: ReportPeriod[] = [];
+  pagedPeriods: ReportPeriod[] = [];
+  loading = false;
+
+  readonly pageSize = 10;
+  pageIndex = 0;
+
+  ngOnInit(): void {
+    this.form.controls.groupBy.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.generateReport());
+    this.generateReport();
+  }
+
+  private monthAgo(): Date {
+    const d = new Date();
+    d.setDate(d.getDate() - 29);
+    return d;
+  }
+
+  // Gregorian-year formatting (matches the dd/MM/yyyy dates shown everywhere else in this app) —
+  // Intl's 'th-TH' locale defaults to the Buddhist calendar (พ.ศ.), which would look inconsistent here.
+  private static readonly THAI_MONTHS = [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
   ];
 
-  generateReport(): void {
-    const salesValue = 12840;
-    const expenseValue = 3840;
-    const profitValue = salesValue - expenseValue;
+  private ddmm(d: Date): string {
+    return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+  }
 
-    this.reportSummary = [
-      { label: 'ยอดขายรวม', value: `฿ ${salesValue.toLocaleString('th-TH')}` },
-      { label: 'ค่าใช้จ่ายรวม', value: `฿ ${expenseValue.toLocaleString('th-TH')}` },
-      { label: 'กำไรสุทธิ', value: `฿ ${profitValue.toLocaleString('th-TH')}` },
-    ];
+  private ddmmyyyy(d: Date): string {
+    return `${this.ddmm(d)}/${d.getUTCFullYear()}`;
+  }
+
+  periodLabel(period: string): string {
+    const d = new Date(period + 'T00:00:00Z');
+    const groupBy = this.form.controls.groupBy.value;
+    if (groupBy === 'year') return d.getUTCFullYear().toString();
+    if (groupBy === 'month') return `${Reports.THAI_MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+    if (groupBy === 'week') {
+      const end = new Date(d);
+      end.setUTCDate(end.getUTCDate() + 6);
+      return `${this.ddmm(d)} - ${this.ddmmyyyy(end)}`;
+    }
+    return this.ddmmyyyy(d);
+  }
+
+  generateReport(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const v = this.form.getRawValue();
+    const from = toYmd(v.dateStart);
+    const to = toYmd(v.dateEnd);
+    this.loading = true;
+
+    this.api.getReportSummary(from, to).subscribe((r) => (this.summary = r));
+    this.api.getReportBreakdown(from, to, v.groupBy).subscribe({
+      next: (r) => {
+        this.periods = r.periods;
+        this.pageIndex = 0;
+        this.updatePage();
+        this.loading = false;
+      },
+      error: () => {
+        this.periods = [];
+        this.pagedPeriods = [];
+        this.loading = false;
+      },
+    });
+  }
+
+  private updatePage(): void {
+    const start = this.pageIndex * this.pageSize;
+    this.pagedPeriods = this.periods.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(pageIndex: number): void {
+    this.pageIndex = pageIndex;
+    this.updatePage();
   }
 }

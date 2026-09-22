@@ -1,0 +1,148 @@
+<section class="supplier-profile-page">
+  <div class="page-header">
+    <button mat-icon-button type="button" (click)="back()" aria-label="กลับ" title="กลับไปรายชื่อร้านค้า">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div>
+      <h3>โปรไฟล์ร้านค้า @if (profile) { <small>({{ profile.supplier.code }})</small> }</h3>
+      <p class="subtitle">ข้อมูลติดต่อและประวัติการสั่งซื้อไก่ทั้งหมดของร้านนี้</p>
+    </div>
+  </div>
+
+  @if (profile; as p) {
+    <div class="profile-grid">
+      <mat-card class="profile-form-card">
+        <mat-card-header>
+          <mat-card-title>ข้อมูลร้าน</mat-card-title>
+          <span class="supplier-status" [ngClass]="form.controls.is_active.value ? 'sup-active' : 'sup-inactive'">
+            {{ form.controls.is_active.value ? 'รับไก่อยู่' : 'ไม่รับไก่แล้ว' }}
+          </span>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="form" (ngSubmit)="save()">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>ชื่อร้าน</mat-label>
+                <input matInput formControlName="name" maxlength="200" />
+                <mat-error>กรุณากรอกชื่อร้าน</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>เบอร์โทร</mat-label>
+                <input matInput formControlName="phone" maxlength="30" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>ที่อยู่</mat-label>
+                <input matInput formControlName="address" maxlength="300" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>หมายเหตุ</mat-label>
+                <input matInput formControlName="note" maxlength="500" />
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <label class="map-label">ปักหมุดตำแหน่งร้าน</label>
+              <app-location-picker [lat]="lat" [lng]="lng" (locationChange)="onLocationChange($event)" (addressChange)="onAddressChange($event)"></app-location-picker>
+            </div>
+            <div class="form-actions">
+              <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving">
+                <mat-icon>save</mat-icon> บันทึก
+              </button>
+              <button mat-stroked-button type="button" [color]="form.controls.is_active.value ? 'warn' : 'primary'" (click)="toggleActive()">
+                <mat-icon>{{ form.controls.is_active.value ? 'block' : 'check_circle' }}</mat-icon>
+                {{ form.controls.is_active.value ? 'ไม่รับไก่จากร้านนี้แล้ว' : 'เปิดรับไก่อีกครั้ง' }}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="profile-side">
+        <div class="profile-stats">
+          <mat-card class="stat-card">
+            <mat-card-content class="card-stats">
+              <div class="stat-number">{{ p.summary.order_count }}</div>
+              <div class="stat-label">จำนวนใบสั่งซื้อ</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="stat-card">
+            <mat-card-content class="card-stats">
+              <div class="stat-number">{{ p.summary.total_received | number:'1.0-2' }} <small>ตัว</small></div>
+              <div class="stat-label">รับไก่แล้วทั้งหมด</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="stat-card">
+            <mat-card-content class="card-stats">
+              <div class="stat-number">{{ p.summary.total_spent | currency:'THB ':'symbol':'1.0-0' }}</div>
+              <div class="stat-label">ยอดซื้อสะสม</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="stat-card">
+            <mat-card-content class="card-stats">
+              <div class="stat-number">{{ p.summary.last_order_date ? (p.summary.last_order_date | date:'dd/MM/yyyy':'UTC') : '-' }}</div>
+              <div class="stat-label">สั่งซื้อล่าสุด</div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <mat-card class="history-card">
+          <mat-card-header>
+            <mat-card-title>ประวัติการสั่งซื้อ</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="table-wrapper">
+              <table mat-table [dataSource]="pagedOrders" class="mat-elevation-z2">
+                <ng-container matColumnDef="code">
+                  <th mat-header-cell *matHeaderCellDef> รหัส </th>
+                  <td mat-cell *matCellDef="let o">{{ o.code }}</td>
+                </ng-container>
+                <ng-container matColumnDef="order_date">
+                  <th mat-header-cell *matHeaderCellDef> วันที่สั่ง </th>
+                  <td mat-cell *matCellDef="let o">{{ o.order_date | date:'dd/MM/yyyy':'UTC' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="quantity">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> จำนวน (ตัว) </th>
+                  <td mat-cell *matCellDef="let o" class="text-center">{{ o.quantity | number:'1.0-2' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="unit_cost">
+                  <th mat-header-cell *matHeaderCellDef> ราคา/ตัว </th>
+                  <td mat-cell *matCellDef="let o">{{ o.unit_cost | currency:'THB ':'symbol':'1.0-2' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="total_cost">
+                  <th mat-header-cell *matHeaderCellDef> รวม </th>
+                  <td mat-cell *matCellDef="let o">{{ o.total_cost | currency:'THB ':'symbol':'1.0-2' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef> สถานะ </th>
+                  <td mat-cell *matCellDef="let o"><span class="po-status" [ngClass]="'po-' + o.status">{{ statusLabel[o.status] }}</span></td>
+                </ng-container>
+                <ng-container matColumnDef="received_date">
+                  <th mat-header-cell *matHeaderCellDef> วันที่รับ </th>
+                  <td mat-cell *matCellDef="let o">{{ o.received_date ? (o.received_date | date:'dd/MM/yyyy':'UTC') : '-' }}</td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                <tr class="mat-mdc-row no-data-row" *matNoDataRow>
+                  <td class="mat-mdc-cell" [attr.colspan]="displayedColumns.length">
+                    <div class="no-data-message">
+                      <mat-icon>storage</mat-icon>
+                      No Data
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <app-pager [total]="orders.length" [pageSize]="pageSize" [pageIndex]="pageIndex" (pageChange)="onPageChange($event)"></app-pager>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  } @else if (!loading) {
+    <p>ไม่พบข้อมูลร้านค้า</p>
+  }
+</section>

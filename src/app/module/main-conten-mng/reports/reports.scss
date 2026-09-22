@@ -1,11 +1,19 @@
 .reports-page { padding: 1.5rem; }
 .page-header { margin-bottom: 1.5rem; }
 .subtitle { color: #6b7280; }
-.report-filters { display: grid; gap: 1rem; margin-bottom: 1.25rem; }
-.filter-card { padding: 1rem; }
-.filter-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: end; }
-.filter-actions { margin-top: 1rem; }
-.report-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+
+.filter-card { padding: 0.5rem 1rem; margin-bottom: 1.25rem; }
+.filter-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+.group-toggle { flex-shrink: 0; }
+
+.report-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
 .summary-card { padding: 1rem; text-align: center; }
-.summary-title { color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+.summary-title { color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; font-size: 0.8rem; }
 .summary-value { font-size: 1.5rem; font-weight: 700; }
+
+.periods-card { padding: 0.5rem 1rem 1rem; }
+.table-wrapper { overflow-x: auto; }
+.text-center { text-align: center !important; }
+.negative { color: #b91c1c; }
+
+:host-context(html.dark-theme) .negative { color: #fca5a5; }

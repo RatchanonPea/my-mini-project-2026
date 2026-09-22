@@ -30,6 +30,21 @@ export class MenuService {
       icon: 'fas fa-money-bill-wave'
     },
     {
+      path: 'main-conten-mng/inventory',
+      label: 'Inventory',
+      icon: 'fas fa-boxes-stacked'
+    },
+    {
+      path: 'main-conten-mng/purchases',
+      label: 'สั่งซื้อไก่',
+      icon: 'fas fa-truck'
+    },
+    {
+      path: 'main-conten-mng/suppliers',
+      label: 'ผู้ขาย/ร้านที่สั่ง',
+      icon: 'fas fa-store'
+    },
+    {
       path: 'main-conten-mng/reports',
       label: 'Reports',
       icon: 'fas fa-chart-bar'

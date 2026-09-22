@@ -1,11 +1,11 @@
 .sidebar {
-  background-color: #343a40;
+  background-color: #3f1d0f;
   color: white;
-  height: calc(100vh - 56px);
+  height: calc(100vh - 64px);
   width: 250px;
   position: fixed;
   left: 0;
-  top: 56px;
+  top: 64px;
   overflow-y: auto;
   transition: width 0.3s ease;
   z-index: 1000;
@@ -17,18 +17,18 @@
 
 .sidebar-header {
   padding: 1rem;
-  border-bottom: 1px solid #495057;
+  border-bottom: 1px solid #6b3a24;
   text-align: center;
 
   h5 {
     margin: 0;
-    color: #adb5bd;
+    color: #e7c9b6;
     font-size: 1.1rem;
   }
 
   i {
     font-size: 1.2rem;
-    color: #adb5bd;
+    color: #e7c9b6;
   }
 }
 
@@ -46,20 +46,20 @@
   display: flex;
   align-items: center;
   padding: 0.75rem 1rem;
-  color: #adb5bd;
+  color: #e7c9b6;
   text-decoration: none;
   transition: all 0.3s ease;
-  border-bottom: 1px solid #495057;
+  border-bottom: 1px solid #6b3a24;
 
   &:hover {
-    background-color: #495057;
+    background-color: #6b3a24;
     color: white;
   }
 
   &.active {
-    background-color: #007bff;
+    background-color: #ea580c;
     color: white;
-    border-right: 3px solid #0056b3;
+    border-right: 3px solid #b91c1c;
   }
 
   &.has-children {
@@ -90,24 +90,24 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  background-color: #495057;
+  background-color: #6b3a24;
 
   .submenu-item {
     .submenu-link {
       display: flex;
       align-items: center;
       padding: 0.5rem 1rem 0.5rem 2.5rem;
-      color: #adb5bd;
+      color: #e7c9b6;
       text-decoration: none;
       transition: all 0.3s ease;
 
       &:hover {
-        background-color: #6c757d;
+        background-color: #8a5a42;
         color: white;
       }
 
       &.active {
-        background-color: #007bff;
+        background-color: #ea580c;
         color: white;
       }
     }
@@ -122,6 +122,32 @@
 }
 
 // Responsive
+@media (min-width: 769px) and (max-width: 991px) {
+  .sidebar {
+    width: 60px;
+  }
+
+  .sidebar-header {
+    padding: 1rem 0;
+  }
+
+  .sidebar-header h5,
+  .menu-text,
+  .submenu-toggle {
+    display: none;
+  }
+
+  .menu-link {
+    justify-content: center;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .menu-icon {
+    margin-right: 0;
+  }
+}
+
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);

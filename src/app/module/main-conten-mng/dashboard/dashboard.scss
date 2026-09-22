@@ -173,7 +173,7 @@
   min-width: 220px;
   flex: 0 0 auto;
   border-radius: 18px;
-  background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #ea580c 0%, #b91c1c 100%);
   color: white;
   padding: 1rem;
   display: grid;
@@ -209,7 +209,7 @@
   .dashboard-side > mat-card {
     width: 100%;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);
   }
 
   .animation-card mat-card-header,
@@ -239,96 +239,11 @@
     padding: 0 1rem 1.25rem;
   }
 
-  .runner-scene {
-    position: relative;
-    height: 190px;
-    overflow: hidden;
-    margin-bottom: 1rem;
-  }
-
-  .runner {
-    position: absolute;
-    bottom: 28px;
-    left: -80px;
-    width: 80px;
-    height: 80px;
-    animation: run 4s linear infinite;
-  }
-
-  .runner .head {
-    position: absolute;
-    top: 0;
-    left: 18px;
-    width: 28px;
-    height: 28px;
-    background: #ffc107;
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.08);
-  }
-
-  .runner .body {
-    position: absolute;
-    top: 24px;
-    left: 24px;
-    width: 12px;
-    height: 40px;
-    background: #374151;
-    border-radius: 8px;
-  }
-
-  .runner .arm,
-  .runner .leg {
-    position: absolute;
-    width: 8px;
-    height: 36px;
-    background: #374151;
-    border-radius: 8px;
-    transform-origin: top center;
-  }
-
-  .runner .arm.left {
-    top: 28px;
-    left: 4px;
-    transform: rotate(40deg);
-    animation: swingArm 0.6s ease-in-out infinite alternate;
-  }
-
-  .runner .arm.right {
-    top: 28px;
-    left: 44px;
-    transform: rotate(-40deg);
-    animation: swingArm 0.6s ease-in-out infinite alternate-reverse;
-  }
-
-  .runner .leg.left {
-    top: 58px;
-    left: 16px;
-    transform: rotate(-30deg);
-    animation: swingLeg 0.6s ease-in-out infinite alternate;
-  }
-
-  .runner .leg.right {
-    top: 58px;
-    left: 36px;
-    transform: rotate(20deg);
-    animation: swingLeg 0.6s ease-in-out infinite alternate-reverse;
-  }
-
-  .ground {
-    position: absolute;
-    bottom: 12px;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #cbd5e1, #e2e8f0);
-    border-radius: 999px;
-  }
-
   .quote-box {
     padding: 1rem;
     border-radius: 18px;
-    background: rgba(79, 70, 229, 0.08);
-    border: 1px solid rgba(79, 70, 229, 0.12);
+    background: rgba(234, 88, 12, 0.08);
+    border: 1px solid rgba(234, 88, 12, 0.18);
   }
 
   .quote-text {
@@ -342,33 +257,6 @@
     font-size: 0.82rem;
     color: #475569;
     text-align: right;
-  }
-
-  @keyframes run {
-    0% {
-      left: -80px;
-    }
-    100% {
-      left: calc(100% + 80px);
-    }
-  }
-
-  @keyframes swingArm {
-    from {
-      transform: rotate(40deg);
-    }
-    to {
-      transform: rotate(0deg);
-    }
-  }
-
-  @keyframes swingLeg {
-    from {
-      transform: rotate(-30deg);
-    }
-    to {
-      transform: rotate(10deg);
-    }
   }
 
   .info-row {
@@ -425,22 +313,22 @@
 }
 
 .bg-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
   color: #fff;
 }
 
 .bg-warn {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
   color: #fff;
 }
 
 .bg-accent {
-  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: #fff;
 }
 
 .bg-info {
-  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
   color: #fff;
 }
 
@@ -464,50 +352,6 @@
     transform-origin: top center;
   }
 
-// .calendar-panel {
-//   width: 100%;
-
-//   .calendar-card {
-//     width: 100%;
-//     border-radius: 20px !important;
-//     box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08) !important;
-//     overflow: hidden;
-//     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-
-//     mat-card-header {
-//       padding: 1rem 1rem 0.75rem;
-//       display: flex;
-//       flex-direction: column;
-//       gap: 0.15rem;
-//     }
-
-//     mat-card-title {
-//       font-size: 1rem;
-//       font-weight: 600;
-//       margin-bottom: 0;
-//     }
-
-//     mat-card-subtitle {
-//       color: #64748b;
-//       font-size: 0.82rem;
-//     }
-
-//     mat-card-content {
-//       padding: 0 0.75rem 1rem;
-//     }
-
-//     mat-calendar {
-//       width: 100%;
-//       font-family: inherit;
-//       font-size: 0.95rem;
-//       border-radius: 18px;
-//       background: #ffffff;
-//       max-height: 300px;
-//       min-height: 270px;
-//       overflow: hidden;
-//     }
-//   }
-// }
 .demo-inline-calendar-card {
   width: 300px;
 }

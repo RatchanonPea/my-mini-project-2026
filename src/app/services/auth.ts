@@ -10,6 +10,12 @@ interface LoginResponse {
     user_id: number;
     username: string;
     full_name?: string;
+    full_name_th?: string;
+    full_name_en?: string;
+    first_name_th?: string;
+    last_name_th?: string;
+    first_name_en?: string;
+    last_name_en?: string;
     role?: string;
     role_name?: string;
     [key: string]: any;
@@ -30,8 +36,15 @@ export class AuthService {
     return this.http.post<LoginResponse>('/api/auth/login', { username, password }).pipe(
       map((response) => {
         if (response?.success && response?.returnObject) {
-          const displayName = response.returnObject.full_name ?? response.returnObject.username ?? username;
-          const role = response.returnObject.role_name ?? response.returnObject.role ?? '';
+          const user = response.returnObject;
+          const thaiName = [user.first_name_th, user.last_name_th].filter(Boolean).join(' ');
+          const englishName = [user.first_name_en, user.last_name_en].filter(Boolean).join(' ');
+          const displayName =
+            user.full_name_th ??
+            user.full_name_en ??
+            user.full_name ??
+            (thaiName || englishName || user.username || username);
+          const role = user.role_name ?? user.role ?? '';
 
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('currentUser', displayName);

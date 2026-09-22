@@ -1,7 +1,6 @@
 <div class="sidebar" [class.collapsed]="collapsed">
   <div class="sidebar-header">
     <h5 *ngIf="!collapsed">เมนูหลัก</h5>
-    <i *ngIf="collapsed" class="fas fa-bars" title="เมนูหลัก"></i>
   </div>
 
   <ul class="sidebar-menu">
@@ -16,7 +15,7 @@
            [class.rotated]="item.expanded"></i>
       </a>
 
-      <ul *ngIf="item.children && item.children.length > 0 && item.expanded && !collapsed"
+      <ul animate.enter="expand-in" *ngIf="item.children && item.children.length > 0 && item.expanded && !collapsed"
           class="submenu">
         <li *ngFor="let child of item.children" class="submenu-item">
           <a [routerLink]="child.path" routerLinkActive="active" class="submenu-link">

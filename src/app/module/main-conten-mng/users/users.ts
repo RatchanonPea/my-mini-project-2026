@@ -13,6 +13,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ApiService, CreateUserPayload, UpdateUserPayload, User } from '../../../services/api';
+import { Pager } from '../../../shared/pager/pager';
 import { AuthService } from '../../../services/auth';
 
 
@@ -39,7 +40,7 @@ interface GridItem {
 
 @Component({
   selector: 'app-users',
-  imports: [MatPaginatorModule, MatTableModule, CommonModule, FormsModule, MatButtonModule, MatIconModule, MatChipsModule, MatDialogModule, MatInputModule, MatFormFieldModule],
+  imports: [Pager, MatPaginatorModule, MatTableModule, CommonModule, FormsModule, MatButtonModule, MatIconModule, MatChipsModule, MatDialogModule, MatInputModule, MatFormFieldModule],
   templateUrl: './users.html',
   styleUrl: './users.scss',
 })
@@ -50,7 +51,7 @@ export class Users {
 
   pageEvent: any;
   pageIndex = 0;
-  pageSize = 5;
+  pageSize = 10;
   dataSource = new MatTableDataSource<GridItem>([]);
   searchText = '';
 
@@ -203,8 +204,19 @@ export class Users {
   }
 
   private toGridItem(user: User): GridItem {
-    const firstName = user.first_name ?? '';
-    const lastName = user.last_name ?? '';
+    const firstName =
+      user.first_name ??
+      user.first_name_th ??
+      user.first_name_en ??
+      (user.full_name_th ? user.full_name_th.split(' ')[0] ?? '' : '') ??
+      '';
+
+    const lastName =
+      user.last_name ??
+      user.last_name_th ??
+      user.last_name_en ??
+      (user.full_name_th ? user.full_name_th.split(' ').slice(1).join(' ') ?? '' : '') ??
+      '' ;
 
     return {
       id: user.user_id,
@@ -218,9 +230,9 @@ export class Users {
       role_id: user.role_id,
       date: user.created_at ? this.parseSqlDatetimeToLocal(user.created_at) : new Date(),
       status: user.status === false || user.status === 0 || user.status === '0' ? 'inactived' : 'active',
-      createdBy: user.created_by ?? '',
+      createdBy: '',
       createdDate: user.created_at ? this.parseSqlDatetimeToLocal(user.created_at) : new Date(),
-      updatedBy: user.updated_by ?? this.authService.getCurrentUser() ?? '',
+      updatedBy: user.updated_by_name ?? '',
       updatedDate: user.updated_at ? this.parseSqlDatetimeToLocal(user.updated_at) : new Date(),
     };
   }
@@ -307,7 +319,6 @@ export class Users {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         const fullName = [result.firstName, result.lastName].filter(Boolean).join(' ');
-        const currentUser = this.authService.getCurrentUser() ?? undefined;
         const payload: CreateUserPayload = {
           username: result.username,
           first_name: result.firstName,
@@ -316,8 +327,6 @@ export class Users {
           email: result.email,
           phone: result.phone,
           status: result.status === 'active' ? 1 : 0,
-          created_by: currentUser,
-          updated_by: currentUser,
         };
 
         if (result.role_id != null) {
@@ -380,7 +389,6 @@ export class Users {
           phone: result.phone,
           role_id: result.role_id ?? undefined,
           status: result.status === 'active' ? 1 : 0,
-          updated_by: this.authService.getCurrentUser() ?? undefined,
         };
 
         if (result.password) {
@@ -406,9 +414,21 @@ export class Users {
       .then(async emit => {
         if (emit) {
           this.dataSource.data = this.dataSource.data.filter(item => item.id !== id);
-          this.totalItems--;
+          this.items = this.items.filter(item => item.id !== id);
+          this.applySearch();
+          this.totalItems = this.dataSource.filteredData.length;
         }
       });
+  }
+
+  goToPage(index: number): void {
+    this.paginator.pageIndex = index;
+    this.paginator.page.emit({
+      pageIndex: index,
+      previousPageIndex: this.pageIndex,
+      pageSize: this.paginator.pageSize,
+      length: this.paginator.length,
+    });
   }
 
   onPageChange(event: any) {

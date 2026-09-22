@@ -4,9 +4,23 @@
 
 @include mat.core();
 
-$theme: mat.define-theme();
+$theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$orange-palette,
+    tertiary: mat.$red-palette,
+  ),
+));
 
 @include mat.all-component-themes($theme);
+
+$dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$orange-palette,
+    tertiary: mat.$red-palette,
+  ),
+));
 
 // Shared mat-table styles for the whole project
 .table-wrapper,
@@ -26,9 +40,9 @@ table.mat-mdc-table {
 
 th.mat-header-cell,
 th.mat-mdc-header-cell {
-  background: #e8f1ff;
+  background: #ffedd5;
   font-weight: 700;
-  color: #1e293b;
+  color: #7c2d12;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -42,19 +56,19 @@ th.mat-mdc-header-cell {
 
 tr.mat-row:nth-child(even),
 tr.mat-mdc-row:nth-child(even) {
-  background: #f8fbff;
+  background: #fff7ed;
 }
 
 .mat-header-row,
 .mat-mdc-header-row {
-  background-color: #dbeafe !important;
+  background-color: #fed7aa !important;
 }
 
 .mat-cell,
 .mat-header-cell,
 .mat-mdc-cell,
 .mat-mdc-header-cell {
-  border: 1px solid #d1d5db;
+  border: 1px solid #fdba74;
 }
 
 .mat-row .mat-cell,
@@ -67,9 +81,9 @@ tr.mat-mdc-row:nth-child(even) {
 
 .mat-row:hover:not(.no-data-row) .mat-cell,
 .mat-mdc-row:hover:not(.no-data-row) .mat-mdc-cell {
-  background: rgba(37, 99, 235, 0.04);
-  border-top-color: rgba(37, 99, 235, 0.35);
-  border-bottom-color: rgba(37, 99, 235, 0.35);
+  background: rgba(234, 88, 12, 0.08);
+  border-top-color: rgba(194, 65, 12, 0.35);
+  border-bottom-color: rgba(194, 65, 12, 0.35);
 }
 
 .mat-row.no-data-row .mat-cell,
@@ -88,15 +102,15 @@ tr.mat-mdc-row:nth-child(even) {
   padding: 1.75rem 0;
   color: #334155;
   font-size: 1rem;
-  background: rgba(59, 130, 246, 0.08);
-  border: 1px dashed rgba(37, 99, 235, 0.35);
+  background: rgba(234, 88, 12, 0.08);
+  border: 1px dashed rgba(194, 65, 12, 0.35);
   // border-radius: 0.75rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .no-data-message mat-icon {
   font-size: 1.4rem;
-  color: #2563eb;
+  color: #c2410c;
 }
 
 mat-paginator {
@@ -113,3 +127,514 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+
+// Same height for every form field across the app
+.mat-mdc-form-field {
+  --mat-form-field-container-height: 40px;
+  --mat-form-field-container-vertical-padding: 8px;
+  --mat-form-field-filled-with-label-container-padding-top: 8px;
+}
+
+// Global compact search/filter bar (search box + date + action buttons on the right)
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  .filter-field {
+    flex: 1 1 240px;
+
+    .mat-mdc-form-field-icon-suffix {
+      padding-right: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    .mat-mdc-icon-button {
+      --mat-icon-button-state-layer-size: 32px;
+      width: 32px;
+      height: 32px;
+      padding: 4px;
+    }
+  }
+
+  .filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex: 1 0 100%;
+    gap: 0.5rem;
+
+    button {
+      height: 40px;
+    }
+  }
+}
+
+// Grid children must be allowed to shrink so the table scrolls inside its own box instead of stretching the page
+.sales-grid > *,
+.expenses-grid > *,
+mat-card-content {
+  min-width: 0;
+}
+
+// Responsive tables: scroll sideways on small screens, wrap long text, keep the Action column pinned on the right
+.table-wrapper,
+.grid,
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-inline: 0 !important;
+
+  table[mat-table] {
+    width: max-content;
+    min-width: 100%;
+    overflow: visible;
+  }
+}
+
+.mat-mdc-header-cell {
+  white-space: nowrap;
+}
+
+.mat-mdc-cell {
+  max-width: 320px;
+  overflow-wrap: break-word;
+}
+
+.mat-mdc-cell.mat-column-date,
+.mat-mdc-cell.mat-column-updated_at,
+.mat-mdc-cell.mat-column-updatedDate,
+.mat-mdc-cell.mat-column-createdDate {
+  white-space: nowrap;
+  max-width: none;
+}
+
+.mat-mdc-cell.mat-column-action,
+.mat-mdc-header-cell.mat-column-action {
+  white-space: nowrap;
+  max-width: none;
+  width: 1%;
+}
+
+td.mat-mdc-cell.mat-mdc-table-sticky {
+  background: var(--mat-table-background-color, #fff);
+}
+
+tr.mat-mdc-row:nth-child(even) td.mat-mdc-cell.mat-mdc-table-sticky {
+  background: #fff7ed;
+}
+
+th.mat-mdc-header-cell.mat-mdc-table-sticky {
+  background: #ffedd5;
+}
+
+tr.mat-mdc-row:hover td.mat-mdc-cell.mat-mdc-table-sticky {
+  background: #ffe8d4;
+}
+
+td.mat-mdc-cell.mat-mdc-table-sticky,
+th.mat-mdc-header-cell.mat-mdc-table-sticky {
+  box-shadow: -6px 0 8px -6px rgba(124, 45, 18, 0.3);
+}
+
+@media (max-width: 600px) {
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding: 0.6rem 0.7rem;
+  }
+}
+
+// border-collapse borders do not travel with sticky cells, so tables in scroll boxes use separate borders drawn on each cell
+.table-wrapper,
+.grid,
+.table-container {
+  table[mat-table] {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    border: 0;
+    border-right: 1px solid #fdba74;
+    border-bottom: 1px solid #fdba74;
+  }
+
+  .mat-mdc-header-cell {
+    border-top: 1px solid #fdba74;
+  }
+
+  .mat-mdc-cell:first-child,
+  .mat-mdc-header-cell:first-child,
+  .mat-mdc-cell.mat-mdc-table-sticky,
+  .mat-mdc-header-cell.mat-mdc-table-sticky {
+    border-left: 1px solid #fdba74;
+  }
+}
+
+// ---------- Dark mode (toggled by adding .dark-theme to <html>, see ThemeService) ----------
+html.dark-theme {
+  color-scheme: dark;
+  @include mat.all-component-colors($dark-theme);
+
+  body,
+  .content-header,
+  .content-body,
+  .main-content {
+    background: #17110e !important;
+    color: #f3e8e0;
+  }
+
+  .content-header {
+    border-color: #4a2e20;
+  }
+
+  .toggle-sidebar {
+    color: #f3e8e0;
+  }
+
+  h1, h2, h3, h4, h5, h6,
+  .dashboard-page,
+  .quote-text,
+  .summary-value,
+  .info-value {
+    color: #f3e8e0 !important;
+  }
+
+  .subtitle,
+  .summary-title,
+  .summary-label,
+  .info-label,
+  .quote-author,
+  .settings-card p,
+  mat-card-subtitle {
+    color: #b9a79b !important;
+  }
+
+  // surfaces that were hard-coded white / pale
+  .summary-card,
+  .summary-tile,
+  .top-seller-slider,
+  .dashboard-side > mat-card,
+  .info-item,
+  .calendar-card mat-calendar,
+  .table-wrapper,
+  .grid,
+  .table-container,
+  .toolbar-row,
+  .dialog-body,
+  .form-card,
+  .dialog-footer,
+  .summary-row,
+  .total-box {
+    background: #241a15 !important;
+    color: #f3e8e0 !important;
+    border-color: #4a2e20 !important;
+  }
+
+  .cluck-bubble {
+    background: #3a2418;
+    color: #fdba74;
+  }
+
+  .no-data-message {
+    background: rgba(251, 146, 60, 0.1);
+    color: #f3e8e0;
+    border-color: rgba(251, 146, 60, 0.45);
+  }
+
+  mat-paginator {
+    border-top-color: #4a2e20;
+  }
+
+  // tables
+  .mat-mdc-header-row {
+    background-color: #5b2410 !important;
+  }
+
+  th.mat-mdc-header-cell,
+  th.mat-mdc-header-cell.mat-mdc-table-sticky {
+    background: #5b2410;
+    color: #ffedd5;
+  }
+
+  tr.mat-mdc-row:nth-child(even) {
+    background: #2b1e18;
+  }
+
+  .mat-mdc-cell {
+    color: #f3e8e0;
+  }
+
+  td.mat-mdc-cell.mat-mdc-table-sticky {
+    background: #241a15;
+  }
+
+  tr.mat-mdc-row:nth-child(even) td.mat-mdc-cell.mat-mdc-table-sticky {
+    background: #2b1e18;
+  }
+
+  tr.mat-mdc-row:hover td.mat-mdc-cell.mat-mdc-table-sticky {
+    background: #3a281f;
+  }
+
+  tr.mat-mdc-row:hover:not(.no-data-row) .mat-mdc-cell {
+    background: rgba(251, 146, 60, 0.12);
+  }
+
+  .table-wrapper,
+  .grid,
+  .table-container {
+    .mat-mdc-cell,
+    .mat-mdc-header-cell {
+      border-right-color: #6b3a24;
+      border-bottom-color: #6b3a24;
+    }
+
+    .mat-mdc-header-cell {
+      border-top-color: #6b3a24;
+    }
+
+    .mat-mdc-cell:first-child,
+    .mat-mdc-header-cell:first-child,
+    .mat-mdc-cell.mat-mdc-table-sticky,
+    .mat-mdc-header-cell.mat-mdc-table-sticky {
+      border-left-color: #6b3a24;
+    }
+  }
+
+  td.mat-mdc-cell.mat-mdc-table-sticky,
+  th.mat-mdc-header-cell.mat-mdc-table-sticky {
+    box-shadow: -6px 0 8px -6px rgba(0, 0, 0, 0.6);
+  }
+
+  // users table chips (role / status) need dark-friendly colours
+  .role-manager.mat-mdc-chip {
+    background: linear-gradient(135deg, #17331f 0%, #1f4a2b 100%) !important;
+    border-color: #4caf50 !important;
+    color: #a5e8b6 !important;
+    --mdc-chip-label-text-color: #a5e8b6;
+    --mat-chip-label-text-color: #a5e8b6;
+    --mdc-chip-with-icon-icon-color: #a5e8b6;
+    --mat-chip-with-icon-icon-color: #a5e8b6;
+    box-shadow: none;
+
+    .mdc-evolution-chip__text-name,
+    mat-icon {
+      color: #a5e8b6 !important;
+    }
+  }
+
+  .role-admin.mat-mdc-chip {
+    background: linear-gradient(135deg, #3a1518 0%, #52202a 100%) !important;
+    border-color: #ef5350 !important;
+    color: #ffb4ab !important;
+    --mdc-chip-label-text-color: #ffb4ab;
+    --mat-chip-label-text-color: #ffb4ab;
+    --mdc-chip-with-icon-icon-color: #ffb4ab;
+    --mat-chip-with-icon-icon-color: #ffb4ab;
+    box-shadow: none;
+
+    .mdc-evolution-chip__text-name,
+    mat-icon {
+      color: #ffb4ab !important;
+    }
+  }
+
+  .role-user.mat-mdc-chip {
+    background: linear-gradient(135deg, #14243d 0%, #1c3557 100%) !important;
+    border-color: #60a5fa !important;
+    color: #93c5fd !important;
+    --mdc-chip-label-text-color: #93c5fd;
+    --mat-chip-label-text-color: #93c5fd;
+    --mdc-chip-with-icon-icon-color: #93c5fd;
+    --mat-chip-with-icon-icon-color: #93c5fd;
+    box-shadow: none;
+
+    .mdc-evolution-chip__text-name,
+    mat-icon {
+      color: #93c5fd !important;
+    }
+  }
+
+  .status-active {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #81c784;
+  }
+
+  .status-inactive {
+    background-color: #4b4b4b;
+    color: #e0e0e0;
+  }
+
+  .status-stock {
+    background-color: #3a3a3a;
+    color: #bdbdbd;
+  }
+
+  // purchase status / ledger chips and the low-stock alert
+  .po-ordered { background: rgba(245, 158, 11, 0.2) !important; color: #fbbf24 !important; }
+  .po-received { background: rgba(76, 175, 80, 0.2) !important; color: #81c784 !important; }
+  .po-cancelled { background: #3a3a3a !important; color: #bdbdbd !important; }
+  .lt-receive { background: rgba(76, 175, 80, 0.2) !important; color: #81c784 !important; }
+  .lt-sale { background: rgba(251, 146, 60, 0.2) !important; color: #fdba74 !important; }
+  .lt-waste { background: rgba(239, 68, 68, 0.2) !important; color: #fca5a5 !important; }
+  .lt-adjust { background: rgba(129, 140, 248, 0.2) !important; color: #a5b4fc !important; }
+  .qty-in { color: #81c784 !important; }
+  .qty-out { color: #fca5a5 !important; }
+  .low-stock-alert { background: rgba(239, 68, 68, 0.15) !important; border-color: #ef4444 !important; color: #fca5a5 !important; }
+  .order-total { background: rgba(251, 146, 60, 0.12) !important; }
+}
+
+// ---------- Motion: smooth enter / leave / page transitions ----------
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes slide-down-in {
+  from { opacity: 0; transform: translateY(-100%); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes slide-up-out {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(-100%); }
+}
+
+@keyframes expand-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+// Angular animate.enter / animate.leave hooks
+.fade-in { animation: fade-in 0.25s ease both; }
+.fade-out { animation: fade-out 0.2s ease both; }
+.slide-down-in { animation: slide-down-in 0.3s ease both; }
+.slide-up-out { animation: slide-up-out 0.25s ease both; }
+.expand-in { animation: expand-in 0.25s ease both; }
+
+// every route change: the new page fades and rises into place
+.content-body > router-outlet + * {
+  display: block;
+  animation: page-enter 0.35s ease both;
+}
+
+// table rows / empty state fade in when data (re)loads or the page changes (opacity only, so sticky columns stay put)
+tr.mat-mdc-row {
+  animation: fade-in 0.3s ease both;
+
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) { animation-delay: #{($i - 1) * 25}ms; }
+  }
+}
+
+.no-data-row {
+  animation: fade-in 0.35s ease both;
+}
+
+// sidebar labels fade in when the menu expands
+.sidebar .menu-text,
+.sidebar .sidebar-header h5 {
+  animation: fade-in 0.3s ease both;
+}
+
+// cards and buttons feel alive
+.mat-mdc-card {
+  transition: box-shadow 0.25s ease, background-color 0.3s ease;
+}
+
+.mat-mdc-card:hover {
+  box-shadow: 0 8px 22px rgba(124, 45, 18, 0.14);
+}
+
+.mat-mdc-button-base {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+
+  &:active:not([disabled]) {
+    transform: scale(0.97);
+  }
+}
+
+// theme switch: colours cross-fade instead of snapping (class is added briefly by ThemeService)
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, fill 0.35s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Dashboard stat boxes: lift like a button on hover (springy), press down on click
+.mat-mdc-card.stat-card {
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  will-change: transform;
+
+  .stat-number {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  &:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 18px 32px rgba(185, 28, 28, 0.38);
+    z-index: 2;
+
+    .stat-number {
+      transform: scale(1.08);
+    }
+  }
+
+  &:active {
+    transform: translateY(-3px) scale(0.99);
+    box-shadow: 0 8px 16px rgba(185, 28, 28, 0.3);
+  }
+}
+
+// Dialog surface blended into the page in dark mode (near-identical background colors) —
+// give it a visibly lighter panel + stronger backdrop so it reads as a floating modal.
+html.dark-theme {
+  .mat-mdc-dialog-surface {
+    background: #2a1f19 !important;
+    border: 1px solid #4a2e20;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+  }
+
+  .cdk-overlay-dark-backdrop {
+    background: rgba(0, 0, 0, 0.65);
+  }
+}
+
+html.dark-theme .mat-mdc-card.stat-card:hover {
+  box-shadow: 0 18px 34px rgba(251, 146, 60, 0.3);
+}
