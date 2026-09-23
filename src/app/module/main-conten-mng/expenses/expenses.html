@@ -17,7 +17,10 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>หมวด</mat-label>
               <mat-select formControlName="category_id">
-                @for (c of categories; track c.category_id) {
+                <mat-option>
+                  <ngx-mat-select-search [formControl]="categorySearch.control" placeholderLabel="ค้นหาหมวด..." noEntriesFoundLabel="ไม่พบหมวด"></ngx-mat-select-search>
+                </mat-option>
+                @for (c of categorySearch.filtered$ | async; track c.category_id) {
                   <mat-option [value]="c.category_id">{{ c.category_name }}</mat-option>
                 }
               </mat-select>

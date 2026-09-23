@@ -123,11 +123,12 @@ export interface TopProduct {
   revenue: number;
 }
 
+export type ReportGroupBy = 'day' | 'week' | 'month' | 'year';
+
 export interface DashboardSummary extends SummaryTotals {
   top_products: TopProduct[];
+  period: { groupBy: ReportGroupBy; from: string; to: string };
 }
-
-export type ReportGroupBy = 'day' | 'week' | 'month' | 'year';
 
 export interface ReportPeriod {
   period: string;
@@ -431,8 +432,8 @@ export class ApiService {
     );
   }
 
-  getDashboardSummary(date: string): Observable<DashboardSummary> {
-    return this.http.get<any>(`${this.baseUrl}/dashboard/summary`, { params: { date } }).pipe(
+  getDashboardSummary(date: string, groupBy: ReportGroupBy = 'day'): Observable<DashboardSummary> {
+    return this.http.get<any>(`${this.baseUrl}/dashboard/summary`, { params: { date, groupBy } }).pipe(
       map((response) => this.extractData<DashboardSummary>(response))
     );
   }

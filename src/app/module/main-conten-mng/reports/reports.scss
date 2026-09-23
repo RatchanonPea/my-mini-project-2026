@@ -5,6 +5,7 @@
 .filter-card { padding: 0.5rem 1rem; margin-bottom: 1.25rem; }
 .filter-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
 .group-toggle { flex-shrink: 0; }
+.year-jump { width: 6.5rem; }
 
 .report-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
 .summary-card { padding: 1rem; text-align: center; }

@@ -11,7 +11,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { Pager } from '../../../shared/pager/pager';
+import { SelectSearch } from '../../../shared/select-search/select-search';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ApiService, Category, ExpenseItem } from '../../../services/api';
 import { DialogErrorHtmlConfirm, DialogSuccess, toYmd } from '../../../common/helper';
@@ -19,7 +21,7 @@ import { DialogErrorHtmlConfirm, DialogSuccess, toYmd } from '../../../common/he
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, Pager, MatSelectModule, MatDatepickerModule, MatNativeDateModule],
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, Pager, MatSelectModule, MatDatepickerModule, MatNativeDateModule, NgxMatSelectSearchModule],
   templateUrl: './expenses.html',
   styleUrls: ['./expenses.scss']
 })
@@ -31,6 +33,7 @@ export class Expenses implements OnInit {
 
   displayedColumns = ['id', 'code', 'category', 'description', 'date', 'amount', 'updated_at', 'updated_by_name', 'action'];
   categories: Category[] = [];
+  categorySearch = new SelectSearch<Category>((c, q) => c.category_name.toLowerCase().includes(q), this.destroyRef);
   dataSource = new MatTableDataSource<ExpenseItem>([]);
 
   readonly pageSize = 10;
@@ -54,7 +57,10 @@ export class Expenses implements OnInit {
   });
 
   ngOnInit(): void {
-    this.api.getCategories('expense').subscribe((c) => (this.categories = c));
+    this.api.getCategories('expense').subscribe((c) => {
+      this.categories = c;
+      this.categorySearch.setSource(c);
+    });
 
     this.reload$.pipe(
       switchMap(() => this.api.searchExpenses({

@@ -25,7 +25,10 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>ผู้ขาย / ร้านที่สั่ง</mat-label>
               <mat-select formControlName="supplier_id">
-                @for (s of suppliers; track s.supplier_id) {
+                <mat-option>
+                  <ngx-mat-select-search [formControl]="supplierFilterCtrl" placeholderLabel="ค้นหาร้านค้า..." noEntriesFoundLabel="ไม่พบร้านค้า"></ngx-mat-select-search>
+                </mat-option>
+                @for (s of filteredSuppliers$ | async; track s.supplier_id) {
                   <mat-option [value]="s.supplier_id">{{ s.name }}</mat-option>
                 }
               </mat-select>

@@ -4,10 +4,10 @@
   </div>
 
   <ul class="sidebar-menu">
-    <li *ngFor="let item of menuItems" class="menu-item">
+    <li *ngFor="let item of menuItems" class="menu-item" #menuItemEl>
       <a [routerLink]="item.path" routerLinkActive="active" class="menu-link"
          [class.has-children]="item.children && item.children.length > 0"
-         (click)="toggleSubmenu(item)">
+         (click)="toggleSubmenu(item, menuItemEl)">
         <i [class]="item.icon" class="menu-icon"></i>
         <span class="menu-text" *ngIf="!collapsed">{{ item.label }}</span>
         <i *ngIf="item.children && item.children.length > 0 && !collapsed"

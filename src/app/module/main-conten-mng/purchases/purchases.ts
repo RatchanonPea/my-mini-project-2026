@@ -1,8 +1,9 @@
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { Subject, catchError, of, switchMap } from 'rxjs';
+import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { ReplaySubject, Subject, catchError, of, switchMap } from 'rxjs';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -29,7 +30,7 @@ const CUSTOM_PRICE = 'custom';
 @Component({
   selector: 'app-purchases',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatDialogModule, Pager],
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatDialogModule, Pager, NgxMatSelectSearchModule],
   templateUrl: './purchases.html',
   styleUrls: ['./purchases.scss'],
 })
@@ -90,9 +91,24 @@ export class Purchases implements OnInit {
     return this.form.controls.price_choice.value === CUSTOM_PRICE;
   }
 
+  // Search box inside the supplier dropdown — filters suppliers by name as you type.
+  supplierFilterCtrl = new FormControl('');
+  filteredSuppliers$ = new ReplaySubject<Supplier[]>(1);
+
+  private filterSuppliers(): void {
+    const search = (this.supplierFilterCtrl.value ?? '').trim().toLowerCase();
+    const list = search
+      ? this.suppliers.filter((s) => s.name.toLowerCase().includes(search))
+      : this.suppliers;
+    this.filteredSuppliers$.next(list);
+  }
+
   ngOnInit(): void {
+    this.supplierFilterCtrl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.filterSuppliers());
+
     this.api.getSuppliers(true).subscribe((s) => {
       this.suppliers = s;
+      this.filterSuppliers();
       if (s.length === 1 && !this.editingId) {
         this.form.controls.supplier_id.setValue(s[0].supplier_id);
       }

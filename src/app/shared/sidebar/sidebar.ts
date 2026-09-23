@@ -33,9 +33,16 @@ export class Sidebar implements OnInit {
     return !item.roles || !item.roles.length || !!this.currentUserRole && item.roles.includes(this.currentUserRole);
   }
 
-  toggleSubmenu(item: MenuItem): void {
-    if (item.children) {
-      item.expanded = !item.expanded;
+  toggleSubmenu(item: MenuItem, li?: HTMLElement): void {
+    if (!item.children) return;
+    item.expanded = !item.expanded;
+
+    // A menu near the bottom (e.g. "ตั้งค่า") can expand its children below the sidebar's own
+    // visible/scrollable area, especially on shorter or tablet-width screens where the sidebar
+    // auto-collapses to icons only — the opened submenu is easy to miss since nothing scrolls
+    // there on its own. Bring it into view once Angular has rendered the expanded <ul>.
+    if (item.expanded && li) {
+      setTimeout(() => li.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 0);
     }
   }
 }

@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,15 +8,17 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ConfirmDelete, ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess } from '../../../common/helper';
 import { ApiService, Category, ProductItem } from '../../../services/api';
 import { AuthService } from '../../../services/auth';
 import { Pager } from '../../../shared/pager/pager';
+import { SelectSearch } from '../../../shared/select-search/select-search';
 
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [Pager, CommonModule, FormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatPaginatorModule, MatIconModule, MatSelectModule],
+  imports: [Pager, CommonModule, FormsModule, ReactiveFormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatPaginatorModule, MatIconModule, MatSelectModule, NgxMatSelectSearchModule],
   templateUrl: './main-page.html',
   styleUrls: ['./main-page.scss'],
 })
@@ -29,6 +31,8 @@ export class MainPage implements AfterViewInit {
   dataSource = new MatTableDataSource<ProductItem>([]);
   items: ProductItem[] = [];
   categories: Category[] = [];
+  private destroyRef = inject(DestroyRef);
+  categorySearch = new SelectSearch<Category>((c, q) => c.category_name.toLowerCase().includes(q), this.destroyRef);
   newItem: Partial<ProductItem> = {
     product_name: '',
     category_id: null,
@@ -58,7 +62,10 @@ export class MainPage implements AfterViewInit {
       this.currentUserRole = role;
     });
     this.loadItems();
-    this.api.getCategories('product').subscribe((c) => (this.categories = c));
+    this.api.getCategories('product').subscribe((c) => {
+      this.categories = c;
+      this.categorySearch.setSource(c);
+    });
   }
 
   ngAfterViewInit() {

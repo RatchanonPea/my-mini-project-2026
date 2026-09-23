@@ -5,6 +5,31 @@
       <!-- <p class="subtitle">สรุปยอดขาย, ต้นทุน, กำไร และรายการสินค้าขายดี</p> -->
       <p>สรุปยอดขาย, ต้นทุน, กำไร และรายการสินค้าขายดี</p>
     </div>
+    <div class="period-controls">
+      <div class="period-stepper">
+        <button mat-icon-button type="button" (click)="stepPeriod(-1)" [attr.aria-label]="'ย้อนกลับ ' + groupByLabel[groupBy]" [title]="'ย้อนกลับ ' + groupByLabel[groupBy]">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <span class="period-label">{{ periodLabel }}</span>
+        <button mat-icon-button type="button" (click)="stepPeriod(1)" [attr.aria-label]="'ถัดไป ' + groupByLabel[groupBy]" [title]="'ถัดไป ' + groupByLabel[groupBy]">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <mat-form-field appearance="outline" class="year-jump" subscriptSizing="dynamic">
+        <mat-label>ไปปี</mat-label>
+        <mat-select [ngModel]="selectedYear" (ngModelChange)="onYearSelect($event)">
+          @for (y of years; track y) {
+            <mat-option [value]="y">{{ y }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-button-toggle-group class="groupby-toggle" [value]="groupBy" (change)="onGroupByChange($event.value)">
+        @for (key of groupByOptions; track key) {
+          <mat-button-toggle [value]="key">{{ groupByLabel[key] }}</mat-button-toggle>
+        }
+      </mat-button-toggle-group>
+    </div>
   </div>
 
   <div class="dashboard-top grid-layout">
@@ -34,8 +59,8 @@
       <div class="dashboard-table">
         <mat-card>
           <mat-card-header class="table-header">
-            <mat-card-title>สินค้าขายดีวันนี้</mat-card-title>
-            <mat-card-subtitle>Top 5 เมนูที่สร้างรายได้สูงสุด</mat-card-subtitle>
+            <mat-card-title>สินค้าขายดี {{ groupByLabel[groupBy] }}</mat-card-title>
+            <mat-card-subtitle>Top 5 เมนูที่สร้างรายได้สูงสุด ({{ periodLabel }})</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
             <div class="table-container">

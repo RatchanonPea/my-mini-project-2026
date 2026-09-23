@@ -17,7 +17,10 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>เมนูอาหาร</mat-label>
               <mat-select formControlName="product_id">
-                @for (p of availableProducts; track p.product_id) {
+                <mat-option>
+                  <ngx-mat-select-search [formControl]="productFilterCtrl" placeholderLabel="ค้นหาเมนู..." noEntriesFoundLabel="ไม่พบเมนู"></ngx-mat-select-search>
+                </mat-option>
+                @for (p of filteredProducts$ | async; track p.product_id) {
                   <mat-option [value]="p.product_id">{{ p.product_name }} ({{ p.price | currency:'THB ':'symbol':'1.0-0' }})</mat-option>
                 }
               </mat-select>

@@ -7,7 +7,11 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { ApiService } from '../../../services/api';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
+import { ApiService, ReportGroupBy } from '../../../services/api';
 import { toYmd } from '../../../common/helper';
 
 export interface DashboardTopProduct {
@@ -16,6 +20,15 @@ export interface DashboardTopProduct {
   sold: number;
   revenue: number;
 }
+
+const STAT_DEFS = [
+  { title: 'ยอดขาย', color: 'primary', prefix: '฿ ' },
+  { title: 'ค่าใช้จ่าย', color: 'warn', prefix: '฿ ' },
+  { title: 'กำไรสุทธิ', color: 'accent', prefix: '฿ ' },
+  { title: 'รายการขาย', color: 'info', prefix: '' },
+  { title: 'ต้นทุนไก่', color: 'accent', prefix: '฿ ' },
+  { title: 'กำไรจากไก่', color: 'primary', prefix: '฿ ' },
+];
 
 @Component({
   selector: 'app-dashboard',
@@ -28,7 +41,11 @@ export interface DashboardTopProduct {
     MatDatepickerModule,
     MatNativeDateModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    FormsModule,
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss'],
@@ -38,16 +55,17 @@ export class Dashboard implements OnInit, OnDestroy {
   private countUpFrames = new Map<number, number>();
   private readonly countUpMs = 900;
 
-  selectedDate: Date = new Date();
+  readonly groupByLabel: Record<string, string> = { day: 'รายวัน', week: 'รายสัปดาห์', month: 'รายเดือน', year: 'รายปี' };
+  readonly groupByOptions: ReportGroupBy[] = ['day', 'week', 'month', 'year'];
 
-  stats = [
-    { title: 'ยอดขายวันนี้', value: '฿ 0', color: 'primary', prefix: '฿ ', amount: 0 },
-    { title: 'ค่าใช้จ่ายวันนี้', value: '฿ 0', color: 'warn', prefix: '฿ ', amount: 0 },
-    { title: 'กำไรสุทธิ', value: '฿ 0', color: 'accent', prefix: '฿ ', amount: 0 },
-    { title: 'รายการขายวันนี้', value: '0', color: 'info', prefix: '', amount: 0 },
-    { title: 'ต้นทุนไก่วันนี้', value: '฿ 0', color: 'accent', prefix: '฿ ', amount: 0 },
-    { title: 'กำไรจากไก่วันนี้', value: '฿ 0', color: 'primary', prefix: '฿ ', amount: 0 }
-  ];
+  selectedDate: Date = new Date();
+  groupBy: ReportGroupBy = 'day';
+  periodLabel = '';
+
+  // Jumping to an old year one ‹ › step at a time is tedious — offer a direct dropdown instead.
+  readonly years: number[] = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - i);
+
+  stats = STAT_DEFS.map((def) => ({ ...def, value: def.prefix + '0', amount: 0 }));
 
   displayedColumns: string[] = ['id', 'name', 'sold', 'revenue'];
   dataSource = new MatTableDataSource<DashboardTopProduct>([]);
@@ -57,10 +75,34 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   private loadSummary(): void {
-    this.api.getDashboardSummary(toYmd(this.selectedDate)).subscribe((s) => {
+    this.api.getDashboardSummary(toYmd(this.selectedDate), this.groupBy).subscribe((s) => {
       [s.sales_total, s.expense_total, s.profit, s.sale_item_count, s.chicken_cost, s.chicken_profit].forEach((amount, i) => this.countUp(i, amount));
       this.dataSource.data = s.top_products.map((t, i) => ({ id: i + 1, name: t.product_name, sold: t.sold, revenue: t.revenue }));
+      this.periodLabel = this.formatPeriod(s.period.from, s.period.to);
     });
+  }
+
+  // Gregorian-year formatting (matches dd/MM/yyyy shown everywhere else) — 'th-TH' Intl formatting
+  // defaults to the Buddhist calendar, which would look inconsistent here.
+  private static readonly THAI_MONTHS = [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
+  ];
+
+  private ddmm(d: Date): string {
+    return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+  }
+
+  private ddmmyyyy(d: Date): string {
+    return `${this.ddmm(d)}/${d.getUTCFullYear()}`;
+  }
+
+  private formatPeriod(from: string, to: string): string {
+    const start = new Date(from + 'T00:00:00Z');
+    if (this.groupBy === 'year') return start.getUTCFullYear().toString();
+    if (this.groupBy === 'month') return `${Dashboard.THAI_MONTHS[start.getUTCMonth()]} ${start.getUTCFullYear()}`;
+    if (this.groupBy === 'week') return `${this.ddmm(start)} - ${this.ddmmyyyy(new Date(to + 'T00:00:00Z'))}`;
+    return this.ddmmyyyy(start);
   }
 
   ngOnDestroy(): void {
@@ -115,5 +157,34 @@ export class Dashboard implements OnInit, OnDestroy {
     this.selectedDate = date;
     this.loadSummary();
   }
-}
 
+  onGroupByChange(groupBy: ReportGroupBy): void {
+    this.groupBy = groupBy;
+    this.loadSummary();
+  }
+
+  // Steps the reference date by one unit of the current period, so "รายปี" can browse other
+  // years (previous/next), "รายเดือน" other months, etc. — not just the period containing today.
+  stepPeriod(direction: -1 | 1): void {
+    const d = new Date(this.selectedDate);
+    if (this.groupBy === 'year') d.setFullYear(d.getFullYear() + direction);
+    else if (this.groupBy === 'month') d.setMonth(d.getMonth() + direction);
+    else if (this.groupBy === 'week') d.setDate(d.getDate() + direction * 7);
+    else d.setDate(d.getDate() + direction);
+    this.selectedDate = d;
+    this.loadSummary();
+  }
+
+  get selectedYear(): number {
+    return this.selectedDate.getFullYear();
+  }
+
+  // Direct jump to an old year — keeps the current month/day (so switching from "รายปี" 2026
+  // back to "รายเดือน" still lands on the same month) instead of resetting to January.
+  onYearSelect(year: number): void {
+    const d = new Date(this.selectedDate);
+    d.setFullYear(year);
+    this.selectedDate = d;
+    this.loadSummary();
+  }
+}

@@ -1,8 +1,9 @@
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject, catchError, of, switchMap } from 'rxjs';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ReplaySubject, Subject, catchError, of, switchMap } from 'rxjs';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -19,7 +20,7 @@ import { ConfirmDelete, DialogErrorHtmlConfirm, DialogSuccess, toYmd } from '../
 @Component({
   selector: 'app-sales',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule, Pager, MatDatepickerModule, MatNativeDateModule],
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule, Pager, MatDatepickerModule, MatNativeDateModule, NgxMatSelectSearchModule],
   templateUrl: './sales.html',
   styleUrls: ['./sales.scss']
 })
@@ -67,8 +68,25 @@ export class Sales implements OnInit {
     return this.products.find((p) => p.product_id === this.form.controls.product_id.value);
   }
 
+  // Search box inside the product dropdown — filters availableProducts by name as you type.
+  productFilterCtrl = new FormControl('');
+  filteredProducts$ = new ReplaySubject<ProductItem[]>(1);
+
+  private filterProducts(): void {
+    const search = (this.productFilterCtrl.value ?? '').trim().toLowerCase();
+    const list = search
+      ? this.availableProducts.filter((p) => p.product_name.toLowerCase().includes(search))
+      : this.availableProducts;
+    this.filteredProducts$.next(list);
+  }
+
   ngOnInit(): void {
-    this.api.getProducts().subscribe((items) => (this.products = items.filter((p) => p.is_active)));
+    this.productFilterCtrl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.filterProducts());
+
+    this.api.getProducts().subscribe((items) => {
+      this.products = items.filter((p) => p.is_active);
+      this.filterProducts();
+    });
 
     this.reload$.pipe(
       switchMap(() => this.api.searchSales({
@@ -90,7 +108,10 @@ export class Sales implements OnInit {
   }
 
   private loadFormDateItems(date: string): void {
-    this.api.getSales(date).subscribe((items) => (this.formDateItems = items));
+    this.api.getSales(date).subscribe((items) => {
+      this.formDateItems = items;
+      this.filterProducts();
+    });
   }
 
   search(): void {
