@@ -1,5 +1,41 @@
 import Swal from "sweetalert2";
+
+// A quiet top-right toast that auto-dismisses, shown alongside the blocking confirm dialogs below
+// (not instead of them). Built as a plain DOM element rather than a second Swal.fire() call,
+// because SweetAlert2 only tracks one live instance — firing a modal right after a toast (as
+// DialogSuccess does below) silently kills the toast before it's even visible.
+const TOAST_ICON: Record<string, string> = { success: '✓', error: '✕', warning: '!', info: 'i' };
+const TOAST_COLOR: Record<string, string> = { success: '#2e7d32', error: '#b91c1c', warning: '#b45309', info: '#0369a1' };
+
+let toastStack: HTMLElement | null = null;
+
+export function ShowToast(message: string, icon: "success" | "error" | "warning" | "info" = "success") {
+  if (!toastStack) {
+    toastStack = document.createElement('div');
+    toastStack.setAttribute('style', 'position:fixed;top:80px;right:16px;z-index:20000;display:flex;flex-direction:column;gap:10px;align-items:flex-end;');
+    document.body.appendChild(toastStack);
+  }
+  const el = document.createElement('div');
+  el.setAttribute('style', `
+    display:flex;align-items:center;gap:10px;max-width:360px;padding:12px 16px;border-radius:12px;
+    background:#fff;color:#1f2937;box-shadow:0 10px 30px rgba(0,0,0,0.18);border:1px solid rgba(0,0,0,0.06);
+    font-size:0.9rem;font-family:inherit;opacity:0;transform:translateX(16px);transition:opacity 200ms ease,transform 200ms ease;
+  `);
+  el.innerHTML = `
+    <span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:0.75rem;font-weight:700;background:${TOAST_COLOR[icon]}">${TOAST_ICON[icon]}</span>
+    <span style="flex:1;overflow-wrap:anywhere;">${message}</span>
+  `;
+  toastStack.appendChild(el);
+  requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translateX(0)'; });
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(16px)';
+    setTimeout(() => el.remove(), 220);
+  }, 3200);
+}
+
 export function DialogSuccess(htmlText: string = "บันทึกรายการสำเร็จ", titleText: string = "สำเร็จ!") {
+  ShowToast(htmlText, "success");
   Swal.fire({
     html: `
         <div class="py-5 px-4">
@@ -716,4 +752,9 @@ export function formatAgeBy24HourRule(birthDate: string | Date | null | undefine
 
 export function toYmd(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+// "YYYY-MM-DDTHH:mm" — the value <input type="datetime-local"> reads and writes, in wall-clock time.
+export function toLocalDatetimeInput(date: Date): string {
+  return `${toYmd(date)}T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }

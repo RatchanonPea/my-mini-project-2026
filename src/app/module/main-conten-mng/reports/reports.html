@@ -79,6 +79,18 @@
     </div>
   }
 
+  @if (periods.length) {
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>กราฟแนวโน้ม{{ groupByLabel[form.controls.groupBy.value] }}</mat-card-title>
+        <mat-card-subtitle>ชี้ที่จุด/แท่งเพื่อดูตัวเลขแต่ละช่วง</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <app-report-chart [labels]="chartLabels" [series]="chartSeries"></app-report-chart>
+      </mat-card-content>
+    </mat-card>
+  }
+
   <mat-card class="periods-card">
     <mat-card-header>
       <mat-card-title>สรุป{{ groupByLabel[form.controls.groupBy.value] }}</mat-card-title>

@@ -90,6 +90,15 @@ export class AuthService {
     return localStorage.getItem('currentUserRole');
   }
 
+  getCurrentUserId(): number | null {
+    try {
+      const id = parseInt(JSON.parse(localStorage.getItem('userInfo') ?? '{}')?.user_id, 10);
+      return Number.isInteger(id) ? id : null;
+    } catch {
+      return null;
+    }
+  }
+
   get isLoggedIn$(): Observable<boolean> {
     return this.isLoggedInSubject.asObservable();
   }

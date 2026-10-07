@@ -13,6 +13,51 @@
       <button class="btn btn-theme-toggle" type="button" (click)="theme.toggle()" [attr.aria-label]="theme.mode() === 'dark' ? 'สลับเป็นโหมดสว่าง' : 'สลับเป็นโหมดมืด'" [title]="theme.mode() === 'dark' ? 'โหมดสว่าง' : 'โหมดมืด'">
         <i class="fas" [ngClass]="theme.mode() === 'dark' ? 'fa-sun' : 'fa-moon'"></i>
       </button>
+
+      <div class="navbar-user" *ngIf="currentUser" #alertsWrap>
+        <button class="btn btn-theme-toggle" type="button" (click)="toggleAlerts()" aria-label="การแจ้งเตือน" title="การแจ้งเตือน">
+          <i class="fas fa-bell"></i>
+          <span class="alert-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+        </button>
+
+        <div class="dropdown-panel alerts-panel" [class.open]="isAlertsOpen" aria-hidden="{{ !isAlertsOpen }}">
+          <div class="alerts-header">
+            <h3>การแจ้งเตือน</h3>
+            <div class="alerts-menu-wrap">
+              <button class="btn-alerts-menu" type="button" (click)="toggleAlertsMenu($event)" aria-label="ตัวเลือกเพิ่มเติม">
+                <i class="fas fa-ellipsis"></i>
+              </button>
+              <div class="alerts-menu" *ngIf="isAlertsMenuOpen">
+                <button type="button" (click)="markAllRead()">
+                  <i class="fas fa-check"></i> ทำเครื่องหมายทั้งหมดว่าอ่านแล้ว
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="alerts-tabs">
+            <button type="button" [class.active]="alertTab === 'all'" (click)="setAlertTab('all')">ทั้งหมด</button>
+            <button type="button" [class.active]="alertTab === 'unread'" (click)="setAlertTab('unread')">ยังไม่ได้อ่าน</button>
+          </div>
+
+          <div class="alerts-list">
+            @for (item of filteredNotifications; track item.log_id) {
+              <div class="alert-item" (click)="openAlert(item)">
+                <span class="alert-icon" [style.background]="iconFor(item.entity).bg"><i class="fas" [ngClass]="iconFor(item.entity).icon"></i></span>
+                <div class="alert-body">
+                  <div class="alert-title">{{ item.description || item.entity }}</div>
+                  <div class="alert-desc">โดย {{ item.user_name || 'ระบบ' }}</div>
+                  <div class="alert-time">{{ timeAgo(item.created_at) }}</div>
+                </div>
+                <span class="alert-unread-dot" *ngIf="!item.is_read"></span>
+              </div>
+            } @empty {
+              <p class="no-alerts">{{ alertTab === 'unread' ? 'ไม่มีการแจ้งเตือนที่ยังไม่ได้อ่าน' : 'ไม่มีการแจ้งเตือนในขณะนี้' }}</p>
+            }
+          </div>
+        </div>
+      </div>
+
       <div class="navbar-user" *ngIf="currentUser">
         <button class="btn btn-user-toggle" type="button" (click)="toggleDropdown()">
           <span class="avatar-circle"><i class="fas fa-user"></i></span>

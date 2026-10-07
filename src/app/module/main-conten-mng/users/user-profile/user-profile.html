@@ -1,0 +1,181 @@
+<section class="user-profile-page">
+  <div class="profile-banner">
+    <button mat-stroked-button type="button" class="back-btn" (click)="back()">
+      <mat-icon>arrow_back</mat-icon> กลับ
+    </button>
+    <span class="banner-tag">โปรไฟล์ผู้ใช้</span>
+
+    <div class="banner-main">
+      <div class="avatar">{{ initials }}</div>
+      <div class="banner-info">
+        <h2>{{ displayName }}</h2>
+        <div class="banner-chips">
+          @if (user) {
+            <span class="chip">ID: {{ user.user_id }}</span>
+            <span class="chip">{{ user.code }}</span>
+          }
+          <span class="chip role-chip">{{ currentRoleName }}</span>
+          @if (!isNew) {
+            <span class="chip status-chip" [ngClass]="form.controls.is_active.value ? 'status-active' : 'status-inactive'">
+              {{ form.controls.is_active.value ? 'Active' : 'Inactive' }}
+            </span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (!isNew && !user && !loading) {
+    <p class="not-found">ไม่พบข้อมูลผู้ใช้</p>
+  } @else {
+    <div class="profile-body">
+      <mat-card class="profile-form-card">
+        <mat-card-header>
+          <mat-card-title>แก้ไขข้อมูลผู้ใช้</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="form" (ngSubmit)="save()">
+            <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Username</mat-label>
+                <input matInput formControlName="username" maxlength="100" />
+                <mat-error>กรุณากรอก Username</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Password {{ isNew ? '' : '(เว้นว่างถ้าไม่เปลี่ยน)' }}</mat-label>
+                <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" maxlength="100" />
+                <mat-icon matSuffix class="eye-icon" (click)="hidePassword = !hidePassword">
+                  {{ hidePassword ? 'visibility_off' : 'visibility' }}
+                </mat-icon>
+                @if (isPasswordRequired && form.controls.password.touched && !form.controls.password.value) {
+                  <mat-error>กรุณากรอกรหัสผ่าน</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>ชื่อ</mat-label>
+                <input matInput formControlName="firstName" maxlength="100" />
+                <mat-error>กรุณากรอกชื่อ</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>นามสกุล</mat-label>
+                <input matInput formControlName="lastName" maxlength="100" />
+                <mat-error>กรุณากรอกนามสกุล</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>อีเมล</mat-label>
+                <input matInput type="email" formControlName="email" maxlength="150" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>เบอร์โทร</mat-label>
+                <input matInput formControlName="phone" maxlength="30" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>สิทธิ์การใช้งาน (Role)</mat-label>
+                <mat-select formControlName="role_id">
+                  @for (r of roles; track r.role_id) {
+                    <mat-option [value]="r.role_id">{{ r.role_name }}</mat-option>
+                  }
+                </mat-select>
+                <mat-error>กรุณาเลือกสิทธิ์การใช้งาน</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-actions">
+              <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving">
+                <mat-icon>save</mat-icon> {{ isNew ? 'สร้างผู้ใช้' : 'บันทึก' }}
+              </button>
+              @if (!isNew) {
+                <button mat-stroked-button type="button" [color]="form.controls.is_active.value ? 'warn' : 'primary'" (click)="toggleActive()">
+                  <mat-icon>{{ form.controls.is_active.value ? 'block' : 'check_circle' }}</mat-icon>
+                  {{ form.controls.is_active.value ? 'ปิดใช้งานผู้ใช้นี้' : 'เปิดใช้งานอีกครั้ง' }}
+                </button>
+              }
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="right-col">
+      <mat-card class="account-summary-card">
+        <mat-card-header>
+          <mat-card-title>สรุปบัญชี</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <dl class="summary-list">
+            <dt>Username</dt>
+            <dd>{{ form.controls.username.value || '-' }}</dd>
+
+            <dt>รหัสผู้ใช้</dt>
+            <dd>{{ user?.code || (isNew ? 'จะสร้างอัตโนมัติ' : '-') }}</dd>
+
+            <dt>สิทธิ์การใช้งาน</dt>
+            <dd>{{ currentRoleName }}</dd>
+
+            <dt>สถานะ</dt>
+            <dd>
+              <span class="chip status-chip" [ngClass]="form.controls.is_active.value ? 'status-active' : 'status-inactive'">
+                {{ form.controls.is_active.value ? 'Active' : 'Inactive' }}
+              </span>
+            </dd>
+
+            @if (user) {
+              <dt>สร้างเมื่อ</dt>
+              <dd>{{ user.created_at ? (user.created_at | date:'dd/MM/yyyy HH:mm':'Asia/Bangkok') : '-' }}</dd>
+
+              <dt>แก้ไขล่าสุด</dt>
+              <dd>{{ user.updated_at ? (user.updated_at | date:'dd/MM/yyyy HH:mm':'Asia/Bangkok') : '-' }}</dd>
+
+              <dt>แก้ไขโดย</dt>
+              <dd>{{ user.updated_by_name || '-' }}</dd>
+            }
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      @if (!isNew) {
+        <mat-card class="activity-card">
+          <mat-card-header>
+            <mat-card-title>กิจกรรมล่าสุด</mat-card-title>
+            <mat-card-subtitle>รายการที่ผู้ใช้นี้เพิ่ม/แก้ไขในระบบ</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <form class="filter-bar" [formGroup]="activityFilterForm" (ngSubmit)="searchActivity()">
+              <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+                <mat-label>ค้นหากิจกรรม</mat-label>
+                <input matInput formControlName="keyword" placeholder="ค้นหาจากรายละเอียด" />
+              </mat-form-field>
+              <div class="filter-actions">
+                <button mat-flat-button color="primary" type="submit"><mat-icon>search</mat-icon> ค้นหา</button>
+                <button mat-stroked-button type="button" (click)="clearActivityFilter()">ล้าง</button>
+              </div>
+            </form>
+
+            @if (activityLogs.length) {
+              <ul class="activity-list">
+                @for (log of activityLogs; track log.log_id) {
+                  <li>
+                    <span class="activity-badge" [ngClass]="'action-' + log.action">{{ actionLabel[log.action] || log.action }}</span>
+                    <div class="activity-body">
+                      <div class="activity-desc">{{ log.description || (entityLabel[log.entity] || log.entity) }}</div>
+                      <div class="activity-time">{{ log.created_at | date:'dd/MM/yyyy HH:mm':'Asia/Bangkok' }} น.</div>
+                    </div>
+                  </li>
+                }
+              </ul>
+              <app-pager [total]="activityTotal" [pageSize]="activityPageSize" [pageIndex]="activityPageIndex" (pageChange)="onActivityPageChange($event)"></app-pager>
+            } @else {
+              <p class="no-activity">{{ activityFilterForm.controls.keyword.value ? 'ไม่พบกิจกรรมที่ตรงกับคำค้นหา' : 'ยังไม่มีกิจกรรมของผู้ใช้นี้' }}</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+      </div>
+    </div>
+  }
+</section>

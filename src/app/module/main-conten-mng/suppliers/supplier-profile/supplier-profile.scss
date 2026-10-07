@@ -8,8 +8,9 @@
 .profile-grid > * { min-width: 0; }
 @media (max-width: 1100px) { .profile-grid { grid-template-columns: 1fr; } }
 
-.profile-form-card { padding: 1rem; }
-.profile-form-card mat-card-header { display: flex; align-items: center; justify-content: space-between; }
+.profile-form-card { padding: 1.5rem; }
+.profile-form-card mat-card-header { display: flex; align-items: center; justify-content: space-between; padding: 0; margin-bottom: 1rem; }
+.profile-form-card mat-card-content { padding: 0; }
 .form-row { display: grid; gap: 1rem; margin-bottom: 1rem; }
 .full-width { width: 100%; }
 .map-label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem; opacity: 0.75; }
@@ -22,7 +23,9 @@
 .stat-number { font-size: 1.5rem; font-weight: 800; }
 .stat-label { font-size: 0.8rem; opacity: 0.8; }
 
-.history-card { padding: 0.5rem 1rem 1rem; }
+.history-card { padding: 1.5rem; }
+.history-card mat-card-header { padding: 0; margin-bottom: 1rem; }
+.history-card mat-card-content { padding: 0; }
 .table-wrapper { overflow-x: auto; }
 .text-center { text-align: center !important; }
 

@@ -34,35 +34,45 @@
 
   <div class="dashboard-top grid-layout">
     <div class="dashboard-main">
-      <div class="dashboard-cards">
-        <mat-card class="dashboard-card stat-card" *ngFor="let stat of stats">
-          <mat-card-content class="card-stats" [ngClass]="'bg-' + stat.color">
-            <div class="stat-number">{{ stat.value }}</div>
-            <div class="stat-label">{{ stat.title }}</div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-
-      <mat-card class="animation-card">
-        <mat-card-header>
-          <mat-card-title>กำลังเคลื่อนที่ไปข้างหน้า</mat-card-title>
-          <mat-card-subtitle>ไอเดียดีๆ สำหรับร้านค้าของคุณ</mat-card-subtitle>
-        </mat-card-header>
+      <mat-card class="main-panel">
         <mat-card-content>
-          <div class="quote-box">
-            <div class="quote-text">"ความสำเร็จไม่ได้มาจากการรอคอย แต่มาจากการก้าวไปข้างหน้า"</div>
-            <div class="quote-author">— เจ้าของร้านผู้กล้า</div>
+          <div class="dashboard-cards">
+            <mat-card class="dashboard-card stat-card" *ngFor="let stat of stats">
+              <mat-card-content class="card-stats" [ngClass]="'bg-' + stat.color">
+                <div class="stat-number">{{ stat.value }}</div>
+                <div class="stat-label">{{ stat.title }}</div>
+              </mat-card-content>
+            </mat-card>
           </div>
-        </mat-card-content>
-      </mat-card>
 
-      <div class="dashboard-table">
-        <mat-card>
-          <mat-card-header class="table-header">
-            <mat-card-title>สินค้าขายดี {{ groupByLabel[groupBy] }}</mat-card-title>
-            <mat-card-subtitle>Top 5 เมนูที่สร้างรายได้สูงสุด ({{ periodLabel }})</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
+          @if (chartLabels.length) {
+            <div class="trend-section">
+              <div class="section-header">
+                <h5>แนวโน้ม{{ groupByLabel[groupBy] }}</h5>
+                <p>ชี้ที่จุด/แท่งเพื่อดูตัวเลขแต่ละช่วง</p>
+              </div>
+              <app-report-chart [labels]="chartLabels" [series]="chartSeries"></app-report-chart>
+            </div>
+          }
+
+          <div class="animation-section">
+            <div class="section-header">
+              <h5>กำลังเคลื่อนที่ไปข้างหน้า</h5>
+              <p>ไอเดียดีๆ สำหรับร้านค้าของคุณ</p>
+            </div>
+            <div class="quote-box">
+              <div class="quote-text">"ความสำเร็จไม่ได้มาจากการรอคอย แต่มาจากการก้าวไปข้างหน้า"</div>
+              <div class="quote-author">— เจ้าของร้านผู้กล้า</div>
+            </div>
+          </div>
+
+          <div class="dashboard-table">
+            <div class="section-header table-header">
+              <div>
+                <h5>สินค้าขายดี {{ groupByLabel[groupBy] }}</h5>
+                <p>Top 5 เมนูที่สร้างรายได้สูงสุด ({{ periodLabel }})</p>
+              </div>
+            </div>
             <div class="table-container">
               <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
                 <ng-container matColumnDef="id">
@@ -97,9 +107,9 @@
                 </tr>
               </table>
             </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
     <div class="dashboard-side">

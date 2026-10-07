@@ -3,7 +3,11 @@
 .subtitle { color: #6b7280; }
 .sales-grid { display: grid; gap: 1.25rem; grid-template-columns: minmax(300px, 0.9fr) 1.6fr; }
 @media (max-width: 1100px) { .sales-grid { grid-template-columns: 1fr; } }
-.sales-card, .history-card { padding: 1rem; border-radius: 16px; }
+.sales-card, .history-card { padding: 1.5rem; border-radius: 16px; }
+.sales-card mat-card-header,
+.history-card mat-card-header { padding: 0; margin-bottom: 1rem; }
+.sales-card mat-card-content,
+.history-card mat-card-content { padding: 0; }
 .form-row { display: grid; grid-template-columns: 1.5fr 0.8fr 0.8fr; gap: 1rem; align-items: end; }
 .full-width { width: 100%; }
 .form-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-top: 1rem; }

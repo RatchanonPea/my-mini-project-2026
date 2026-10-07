@@ -1,18 +1,17 @@
 import { Component, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { AddUserItemDialog } from './add-user-item-dialog/add-user-item-dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatTableModule } from '@angular/material/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ConfirmDialog, DialogSuccess, DialogErrorHtmlConfirm } from '../../../common/helper';
+import { ConfirmDialog } from '../../../common/helper';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ApiService, CreateUserPayload, UpdateUserPayload, User } from '../../../services/api';
+import { ApiService, User } from '../../../services/api';
 import { Pager } from '../../../shared/pager/pager';
 import { AuthService } from '../../../services/auth';
 
@@ -40,7 +39,7 @@ interface GridItem {
 
 @Component({
   selector: 'app-users',
-  imports: [Pager, MatPaginatorModule, MatTableModule, CommonModule, FormsModule, MatButtonModule, MatIconModule, MatChipsModule, MatDialogModule, MatInputModule, MatFormFieldModule],
+  imports: [Pager, MatPaginatorModule, MatTableModule, CommonModule, FormsModule, MatButtonModule, MatIconModule, MatChipsModule, MatInputModule, MatFormFieldModule],
   templateUrl: './users.html',
   styleUrl: './users.scss',
 })
@@ -131,7 +130,7 @@ export class Users {
   totalItems: any = 0;
 
   constructor(
-    private dialog: MatDialog,
+    private router: Router,
     private apiService: ApiService,
     private authService: AuthService,
   ) {}
@@ -311,40 +310,8 @@ export class Users {
     ).join('');
   }
 
-  openAddDialog() {
-    const dialogRef = this.dialog.open(AddUserItemDialog, {
-      width: '600px',
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        const fullName = [result.firstName, result.lastName].filter(Boolean).join(' ');
-        const payload: CreateUserPayload = {
-          username: result.username,
-          first_name: result.firstName,
-          last_name: result.lastName,
-          password_hash: result.password,
-          email: result.email,
-          phone: result.phone,
-          status: result.status === 'active' ? 1 : 0,
-        };
-
-        if (result.role_id != null) {
-          payload.role_id = result.role_id;
-        }
-
-        this.apiService.createUser(payload).subscribe({
-          next: () => {
-            this.loadUsers();
-            DialogSuccess('สร้างผู้ใช้ใหม่เรียบร้อยแล้ว', 'สร้างสำเร็จ');
-          },
-          error: (error) => {
-            console.error('Error creating user:', error);
-            DialogErrorHtmlConfirm('ไม่สามารถสร้างผู้ใช้ได้ โปรดลองอีกครั้ง');
-          },
-        });
-      }
-    });
+  openAddDialog(): void {
+    this.router.navigate(['/main-conten-mng/users/new']);
   }
 
   generateCode(): string {
@@ -363,50 +330,8 @@ export class Users {
     return prefix + next.toString().padStart(3, '0');
   }
 
-  editItem(item: any) {
-    const dialogData = {
-      ...item,
-      // dialog expects `updatedAt`/`createdAt` names; map from grid fields
-      updatedAt: item.updatedDate,
-      createdAt: item.createdDate,
-      date: item.date,
-    };
-
-    const dialogRef = this.dialog.open(AddUserItemDialog, {
-      width: '600px',
-      data: dialogData
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        const payload: UpdateUserPayload = {
-          user_id: result.id,
-          code: result.code,
-          username: result.username,
-          first_name: result.firstName,
-          last_name: result.lastName,
-          email: result.email,
-          phone: result.phone,
-          role_id: result.role_id ?? undefined,
-          status: result.status === 'active' ? 1 : 0,
-        };
-
-        if (result.password) {
-          payload.password_hash = result.password;
-        }
-
-        this.apiService.updateUser(payload).subscribe({
-          next: () => {
-            this.loadUsers();
-            DialogSuccess('แก้ไขข้อมูลผู้ใช้สำเร็จแล้ว', 'อัปเดตสำเร็จ');
-          },
-          error: (error) => {
-            console.error('Error updating user:', error);
-            DialogErrorHtmlConfirm('ไม่สามารถอัปเดตผู้ใช้ได้ โปรดลองอีกครั้ง');
-          },
-        });
-      }
-    });
+  editItem(item: GridItem): void {
+    this.router.navigate(['/main-conten-mng/users', item.id]);
   }
 
   removeItem(id: number): void {

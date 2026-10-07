@@ -27,7 +27,7 @@ const STATUS_LABEL: Record<string, string> = { ordered: 'สั่งแล้�
           {{ row.quantity > 0 ? '+' : '' }}{{ row.quantity | number:'1.0-2' }} <small>ตัว</small>
         </div>
         <dl class="detail-list">
-          <dt>วันที่</dt><dd>{{ row.ledger_date | date:'dd/MM/yyyy':'UTC' }}</dd>
+          <dt>วันที่</dt><dd>{{ row.ledger_date | date:(row.type === 'waste' || row.type === 'adjust' ? 'dd/MM/yyyy HH:mm' : 'dd/MM/yyyy'):'UTC' }}</dd>
           <dt>คงเหลือหลังรายการนี้</dt><dd>{{ row.balance_after | number:'1.0-2' }} ตัว</dd>
           @if (row.event_at) {
             <dt>{{ row.type === 'receive' ? 'เวลาที่รับ' : 'บันทึกล่าสุดเมื่อ' }}</dt><dd>{{ row.event_at | date:'dd/MM/yyyy HH:mm':'UTC' }} น.</dd>
@@ -43,6 +43,12 @@ const STATUS_LABEL: Record<string, string> = { ordered: 'สั่งแล้�
           }
           @if (row.type !== 'sale') {
             <dt>หมายเหตุ</dt><dd>{{ row.note || '-' }}</dd>
+          }
+          @if (row.edit_note) {
+            <dt>หมายเหตุการแก้ไข</dt><dd>{{ row.edit_note }}</dd>
+          }
+          @if (row.approved_by_name) {
+            <dt>ยืนยันการแก้ไขโดย</dt><dd>{{ row.approved_by_name }}</dd>
           }
         </dl>
 

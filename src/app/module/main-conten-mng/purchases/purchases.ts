@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ReplaySubject, Subject, catchError, of, switchMap } from 'rxjs';
@@ -39,6 +40,8 @@ export class Purchases implements OnInit {
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private reload$ = new Subject<void>();
 
   readonly customPrice = CUSTOM_PRICE;
@@ -150,6 +153,14 @@ export class Purchases implements OnInit {
     });
 
     this.reload$.next();
+
+    // Arrived from a notification about one specific purchase order — open its detail straight
+    // away instead of leaving the visitor to hunt for it in the (possibly filtered) list.
+    const poId = Number(this.route.snapshot.queryParamMap.get('openPo'));
+    if (poId) {
+      this.api.getPurchaseOrder(poId).subscribe((po) => this.openDetail(po));
+      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+    }
   }
 
   openDetail(po: PurchaseOrder): void {

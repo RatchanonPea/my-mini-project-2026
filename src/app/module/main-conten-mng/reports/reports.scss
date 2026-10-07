@@ -12,7 +12,13 @@
 .summary-title { color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; font-size: 0.8rem; }
 .summary-value { font-size: 1.5rem; font-weight: 700; }
 
-.periods-card { padding: 0.5rem 1rem 1rem; }
+.chart-card { padding: 1.5rem; margin-bottom: 1.25rem; }
+.chart-card mat-card-header { padding: 0; margin-bottom: 1rem; }
+.chart-card mat-card-content { padding: 0; }
+
+.periods-card { padding: 1.5rem; }
+.periods-card mat-card-header { padding: 0; margin-bottom: 1rem; }
+.periods-card mat-card-content { padding: 0; }
 .table-wrapper { overflow-x: auto; }
 .text-center { text-align: center !important; }
 .negative { color: #b91c1c; }

@@ -202,6 +202,8 @@ export interface LedgerItem {
   unit_cost: number | null;
   total_cost: number | null;
   supplier: string | null;
+  edit_note: string | null;
+  approved_by_name: string | null;
 }
 
 export interface SalesOfDayLine {
@@ -237,6 +239,8 @@ export interface PurchaseOrder {
   received_at?: string | null;
   received_by_name?: string | null;
   note: string | null;
+  edit_note?: string | null;
+  approved_by_name?: string | null;
   updated_at?: string;
   updated_by_name?: string | null;
 }
@@ -247,6 +251,15 @@ export interface PurchasePayload {
   quantity: number;
   unit_cost?: number | null;
   note?: string | null;
+  edit_note?: string | null;
+  approved_by?: number | null;
+}
+
+export interface ApproverInfo {
+  user_id: number;
+  username: string;
+  role_name: string;
+  display_name: string;
 }
 
 export interface Supplier {
@@ -289,6 +302,21 @@ export interface SupplierProfile {
 }
 
 export type SupplierPayload = Pick<Supplier, 'name'> & Partial<Pick<Supplier, 'phone' | 'address' | 'note' | 'is_active' | 'latitude' | 'longitude'>>;
+
+export interface ActivityLogItem {
+  log_id: number;
+  action: string;
+  entity: string;
+  entity_id: number | null;
+  description: string | null;
+  created_at: string;
+  user_id: number | null;
+  user_name: string | null;
+}
+
+export interface NotificationItem extends ActivityLogItem {
+  is_read: boolean | number;
+}
 
 export interface PurchasePrices {
   prices: number[];
@@ -450,6 +478,43 @@ export class ApiService {
     );
   }
 
+  searchActivityLogs(p: SearchParams & { userId?: number }): Observable<PagedResult<ActivityLogItem>> {
+    let params = this.toSearchParams(p);
+    if (p.userId) {
+      params = params.set('userId', p.userId);
+    }
+    return this.http.get<any>(`${this.baseUrl}/activity-logs/search`, { params }).pipe(
+      map((response) => this.extractData<PagedResult<ActivityLogItem>>(response))
+    );
+  }
+
+  // The notification bell: every action system-wide, not just this viewer's own — with per-viewer
+  // read state, unlike searchActivityLogs above (that one is scoped to one user's own history).
+  getNotifications(userId: number, page: number, pageSize: number): Observable<PagedResult<NotificationItem>> {
+    const params = new HttpParams().set('userId', userId).set('page', page).set('pageSize', pageSize);
+    return this.http.get<any>(`${this.baseUrl}/activity-logs/notifications`, { params }).pipe(
+      map((response) => this.extractData<PagedResult<NotificationItem>>(response))
+    );
+  }
+
+  getUnreadNotificationCount(userId: number): Observable<number> {
+    return this.http.get<any>(`${this.baseUrl}/activity-logs/notifications/unread-count`, { params: { userId } }).pipe(
+      map((response) => this.extractData<{ unread: number }>(response).unread)
+    );
+  }
+
+  markNotificationRead(userId: number, logId: number): Observable<unknown> {
+    return this.http.post<any>(`${this.baseUrl}/activity-logs/notifications/mark-read`, { userId, logId }).pipe(
+      map((response) => this.extractData<unknown>(response))
+    );
+  }
+
+  markAllNotificationsRead(userId: number): Observable<unknown> {
+    return this.http.post<any>(`${this.baseUrl}/activity-logs/notifications/mark-all-read`, { userId }).pipe(
+      map((response) => this.extractData<unknown>(response))
+    );
+  }
+
   private toSearchParams(p: SearchParams): HttpParams {
     let params = new HttpParams().set('page', p.page).set('pageSize', p.pageSize);
     if (p.keyword?.trim()) {
@@ -479,7 +544,7 @@ export class ApiService {
     );
   }
 
-  getInventoryLedger(p: { type?: LedgerType | ''; date?: string | null; page: number; pageSize: number }): Observable<LedgerPage> {
+  getInventoryLedger(p: { type?: LedgerType | ''; date?: string | null; page: number; pageSize: number; adjustId?: number; poId?: number }): Observable<LedgerPage> {
     let params = new HttpParams().set('page', p.page).set('pageSize', p.pageSize);
     if (p.type) {
       params = params.set('type', p.type);
@@ -487,14 +552,42 @@ export class ApiService {
     if (p.date) {
       params = params.set('date', p.date);
     }
+    if (p.adjustId) {
+      params = params.set('adjustId', p.adjustId);
+    }
+    if (p.poId) {
+      params = params.set('poId', p.poId);
+    }
     return this.http.get<any>(`${this.baseUrl}/inventory/ledger`, { params }).pipe(
       map((response) => this.extractData<LedgerPage>(response))
+    );
+  }
+
+  // Used when opening a purchase order's detail directly (e.g. from a notification) without
+  // going through the Purchases list/search first.
+  getPurchaseOrder(poId: number): Observable<PurchaseOrder> {
+    return this.http.get<any>(`${this.baseUrl}/purchases/detail/${poId}`).pipe(
+      map((response) => this.extractData<PurchaseOrder>(response))
     );
   }
 
   createStockAdjustment(item: { adjust_date: string; type: 'waste' | 'adjust'; quantity: number; note?: string | null }): Observable<unknown> {
     return this.http.post<any>(`${this.baseUrl}/inventory/createAdjustment`, item).pipe(
       map((response) => this.extractData<unknown>(response))
+    );
+  }
+
+  updateStockAdjustment(item: { adjust_id: number; adjust_date?: string; quantity?: number; edit_note?: string | null; approved_by?: number | null }): Observable<unknown> {
+    return this.http.post<any>(`${this.baseUrl}/inventory/updateAdjustment`, item).pipe(
+      map((response) => this.extractData<unknown>(response))
+    );
+  }
+
+  // Manager/Admin approval, e.g. before correcting a wrong inventory entry — the selected
+  // approver's own password is checked server-side; never trust a client-side check alone.
+  verifyApprover(userId: number, password: string): Observable<ApproverInfo> {
+    return this.http.post<any>(`${this.baseUrl}/users/verify-approver`, { user_id: userId, password }).pipe(
+      map((response) => this.extractData<ApproverInfo>(response))
     );
   }
 

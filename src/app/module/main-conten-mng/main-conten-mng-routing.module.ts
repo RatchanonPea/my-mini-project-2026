@@ -1,7 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { RoleGuard } from '../../auth/role.guard';
 import { Dashboard } from './dashboard/dashboard';
 import { Users } from './users/users';
+import { UserProfile } from './users/user-profile/user-profile';
 import { Sales } from './sales/sales';
 import { Expenses } from './expenses/expenses';
 import { Reports } from './reports/reports';
@@ -53,7 +55,13 @@ const routes: Routes = [
         path: 'settings', data: { breadcrumb: 'ตั้งค่า' }, component: Settings
       },
       {
-        path: 'users', data: { breadcrumb: 'ข้อมูลพนักงาน' }, component: Users
+        path: 'users', data: { breadcrumb: 'ข้อมูลพนักงาน', roles: ['manager', 'admin'] }, component: Users, canActivate: [RoleGuard]
+      },
+      {
+        path: 'users/new', data: { breadcrumb: 'เพิ่มผู้ใช้', roles: ['manager', 'admin'] }, component: UserProfile, canActivate: [RoleGuard]
+      },
+      {
+        path: 'users/:id', data: { breadcrumb: 'โปรไฟล์ผู้ใช้', roles: ['manager', 'admin'] }, component: UserProfile, canActivate: [RoleGuard]
       }
     ]
   }

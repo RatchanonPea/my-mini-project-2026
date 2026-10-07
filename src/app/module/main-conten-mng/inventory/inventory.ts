@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subject, catchError, of, switchMap } from 'rxjs';
@@ -14,10 +15,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ApiService, InventorySummary, LedgerItem, LedgerType } from '../../../services/api';
-import { DialogErrorHtmlConfirm, DialogSuccess, toYmd } from '../../../common/helper';
+import { DialogErrorHtmlConfirm, DialogSuccess, toLocalDatetimeInput, toYmd } from '../../../common/helper';
 import { Pager } from '../../../shared/pager/pager';
 import { halfStep } from '../purchases/purchases';
 import { StockDetailDialog } from './stock-detail-dialog/stock-detail-dialog';
+import { EditLedgerDialog } from './edit-ledger-dialog/edit-ledger-dialog';
 
 @Component({
   selector: 'app-inventory',
@@ -31,10 +33,12 @@ export class Inventory implements OnInit {
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private reload$ = new Subject<void>();
 
   readonly typeLabel: Record<string, string> = { receive: 'รับเข้า', sale: 'ขายออก', waste: 'ของเสีย', adjust: 'ปรับยอด' };
-  displayedColumns = ['ledger_date', 'type', 'ref_code', 'quantity', 'balance_after', 'note'];
+  displayedColumns = ['ledger_date', 'type', 'ref_code', 'quantity', 'balance_after', 'note', 'action'];
   dataSource = new MatTableDataSource<LedgerItem>([]);
   summary: InventorySummary | null = null;
 
@@ -52,7 +56,7 @@ export class Inventory implements OnInit {
 
   adjustForm = this.fb.nonNullable.group({
     type: ['waste' as 'waste' | 'adjust', Validators.required],
-    adjust_date: [new Date(), Validators.required],
+    adjust_date: [toLocalDatetimeInput(new Date()), Validators.required],
     quantity: [0.5, [Validators.required, halfStep]],
     note: [''],
   });
@@ -88,6 +92,18 @@ export class Inventory implements OnInit {
     });
 
     this.reload$.next();
+
+    // Arrived from a notification about one specific adjustment — open its detail straight away
+    // instead of leaving the visitor to hunt for it in the (possibly paginated/filtered) list.
+    const adjustId = Number(this.route.snapshot.queryParamMap.get('openAdjust'));
+    if (adjustId) {
+      this.api.getInventoryLedger({ page: 1, pageSize: 1, adjustId }).subscribe((r) => {
+        if (r.items[0]) {
+          this.openDetail(r.items[0]);
+        }
+      });
+      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+    }
   }
 
   private loadSummary(): void {
@@ -99,6 +115,22 @@ export class Inventory implements OnInit {
 
   openDetail(row: LedgerItem): void {
     this.dialog.open(StockDetailDialog, { width: '520px', maxWidth: '95vw', data: { kind: 'ledger', row } });
+  }
+
+  // Sale rows are a daily aggregate of many sale-item rows (edited on the Sales page instead), so
+  // only receive/waste/adjust — each backed by a single row — can be corrected from here.
+  canEdit(row: LedgerItem): boolean {
+    return row.type !== 'sale';
+  }
+
+  editRow(row: LedgerItem): void {
+    this.dialog.open(EditLedgerDialog, { width: '560px', maxWidth: '95vw', data: { row } }).afterClosed().subscribe((changed) => {
+      if (changed) {
+        DialogSuccess('แก้ไขรายการเรียบร้อยแล้ว');
+        this.loadSummary();
+        this.reload$.next();
+      }
+    });
   }
 
   search(): void {
@@ -124,7 +156,7 @@ export class Inventory implements OnInit {
     const v = this.adjustForm.getRawValue();
     this.saving = true;
     this.api.createStockAdjustment({
-      adjust_date: toYmd(v.adjust_date),
+      adjust_date: v.adjust_date,
       type: v.type,
       quantity: Number(v.quantity),
       note: v.note.trim() || null,
@@ -132,7 +164,7 @@ export class Inventory implements OnInit {
       next: () => {
         this.saving = false;
         DialogSuccess(v.type === 'waste' ? 'บันทึกของเสียเรียบร้อยแล้ว' : 'ปรับยอดสต็อกเรียบร้อยแล้ว');
-        this.adjustForm.reset({ type: 'waste', adjust_date: new Date(), quantity: 0.5, note: '' });
+        this.adjustForm.reset({ type: 'waste', adjust_date: toLocalDatetimeInput(new Date()), quantity: 0.5, note: '' });
         this.loadSummary();
         this.reload$.next();
       },

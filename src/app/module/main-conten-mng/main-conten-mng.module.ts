@@ -4,7 +4,6 @@ import { MainContentMngRoutingModule } from './main-conten-mng-routing.module';
 import { MainContentMngComponent } from './main-conten-mng.component';
 import { Dashboard } from './dashboard/dashboard';
 import { Users } from './users/users';
-import { AddUserItemDialog } from './users/add-user-item-dialog/add-user-item-dialog';
 import { Sales } from './sales/sales';
 import { Expenses } from './expenses/expenses';
 import { Reports } from './reports/reports';
@@ -20,7 +19,6 @@ import { MatDialogModule } from '@angular/material/dialog';
     MainContentMngRoutingModule,
     Dashboard,
     Users,
-    AddUserItemDialog,
     Sales,
     Expenses,
     Reports,

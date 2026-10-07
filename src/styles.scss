@@ -317,6 +317,7 @@ html.dark-theme {
   .summary-card,
   .summary-tile,
   .top-seller-slider,
+  .main-panel,
   .dashboard-side > mat-card,
   .info-item,
   .calendar-card mat-calendar,
@@ -332,6 +333,16 @@ html.dark-theme {
     background: #241a15 !important;
     color: #f3e8e0 !important;
     border-color: #4a2e20 !important;
+  }
+
+  .trend-section,
+  .animation-section,
+  .dashboard-table {
+    border-top-color: #4a2e20 !important;
+  }
+
+  .section-header p {
+    color: #b9a79b !important;
   }
 
   .cluck-bubble {
@@ -637,4 +648,74 @@ html.dark-theme {
 
 html.dark-theme .mat-mdc-card.stat-card:hover {
   box-shadow: 0 18px 34px rgba(251, 146, 60, 0.3);
+}
+
+// Shared colored banner for every page's title block (matches the user-profile page's banner) —
+// applies to any ".page-header" containing an "h3"/"h4" + ".subtitle", which is the standard
+// header markup used across Sales, Expenses, Inventory, Purchases, Suppliers, Reports, Products,
+// Users and Settings. !important is needed because each page also has its own component-scoped
+// ".subtitle { color: #6b7280 }" rule, which ties with this rule on specificity — without it the
+// winner would depend on unpredictable style-injection order.
+.page-header {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 1.25rem 1.75rem;
+  background: linear-gradient(120deg, #ea580c, #b91c1c, #ea580c);
+  background-size: 200% 200%;
+  animation: header-glow 10s ease infinite;
+  box-shadow: 0 12px 28px rgba(185, 28, 28, 0.25);
+}
+
+// a soft diagonal shine sweeps across every so often — subtle, not distracting
+.page-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(75deg, transparent 40%, rgba(255, 255, 255, 0.09) 50%, transparent 60%);
+  background-size: 300% 300%;
+  animation: header-shine 7s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes header-glow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes header-shine {
+  0% { background-position: 200% 0%; }
+  55%, 100% { background-position: -50% 0%; }
+}
+.page-header > * {
+  position: relative;
+  z-index: 1;
+}
+.page-header h3,
+.page-header h4 {
+  color: #fff !important;
+  margin: 0;
+}
+.page-header .subtitle {
+  display: inline-block;
+  color: #fff !important;
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  margin: 0.5rem 0 0;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.page-header .edit-hint {
+  color: #fff;
+}
+// dark mode's global ".subtitle { color: #b9a79b }" override (see html.dark-theme block above)
+// has higher specificity (html.dark-theme .subtitle) than the light-mode rule above, so it wins
+// there and makes the banner subtitle grayish instead of white — this restores white in dark mode.
+html.dark-theme .page-header .subtitle {
+  color: #fff !important;
 }

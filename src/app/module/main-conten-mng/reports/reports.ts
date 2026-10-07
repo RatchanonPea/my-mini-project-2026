@@ -16,13 +16,14 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ApiService, ReportGroupBy, ReportPeriod, SummaryTotals } from '../../../services/api';
 import { toYmd } from '../../../common/helper';
 import { Pager } from '../../../shared/pager/pager';
+import { ReportChart, ReportChartSeries } from '../../../shared/report-chart/report-chart';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule,
-    MatIconModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatTableModule, MatButtonToggleModule, Pager,
+    MatIconModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatTableModule, MatButtonToggleModule, Pager, ReportChart,
   ],
   templateUrl: './reports.html',
   styleUrls: ['./reports.scss'],
@@ -49,6 +50,12 @@ export class Reports implements OnInit {
   periods: ReportPeriod[] = [];
   pagedPeriods: ReportPeriod[] = [];
   loading = false;
+
+  // Plain properties, computed once when periods loads — not getters. A getter returning a fresh
+  // array on every change-detection pass makes Angular see a "new" input on every check, which
+  // sent the chart into an endless destroy/recreate loop that never got a frame to actually paint.
+  chartLabels: string[] = [];
+  chartSeries: ReportChartSeries[] = [];
 
   readonly pageSize = 10;
   pageIndex = 0;
@@ -116,6 +123,18 @@ export class Reports implements OnInit {
     return `${this.ddmm(d)}/${d.getUTCFullYear()}`;
   }
 
+  private updateChartData(): void {
+    // periods arrives newest-first (matching the table below), but a trend chart reads naturally
+    // left-to-right in chronological order, so the chart alone gets it reversed.
+    const chronological = [...this.periods].reverse();
+    this.chartLabels = chronological.map((p) => this.periodLabel(p.period));
+    this.chartSeries = [
+      { label: 'ยอดขาย', data: chronological.map((p) => p.sales_total), color: '#16a34a' },
+      { label: 'ค่าใช้จ่ายอื่น', data: chronological.map((p) => p.expense_total), color: '#b91c1c' },
+      { label: 'กำไร', data: chronological.map((p) => p.profit), color: '#ea580c' },
+    ];
+  }
+
   periodLabel(period: string): string {
     const d = new Date(period + 'T00:00:00Z');
     const groupBy = this.form.controls.groupBy.value;
@@ -145,11 +164,14 @@ export class Reports implements OnInit {
         this.periods = r.periods;
         this.pageIndex = 0;
         this.updatePage();
+        this.updateChartData();
         this.loading = false;
       },
       error: () => {
         this.periods = [];
         this.pagedPeriods = [];
+        this.chartLabels = [];
+        this.chartSeries = [];
         this.loading = false;
       },
     });

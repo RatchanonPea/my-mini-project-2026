@@ -13,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { ApiService, ReportGroupBy } from '../../../services/api';
 import { toYmd } from '../../../common/helper';
+import { ReportChart, ReportChartSeries } from '../../../shared/report-chart/report-chart';
 
 export interface DashboardTopProduct {
   id: number;
@@ -46,6 +47,7 @@ const STAT_DEFS = [
     MatSelectModule,
     MatFormFieldModule,
     FormsModule,
+    ReportChart,
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss'],
@@ -70,6 +72,11 @@ export class Dashboard implements OnInit, OnDestroy {
   displayedColumns: string[] = ['id', 'name', 'sold', 'revenue'];
   dataSource = new MatTableDataSource<DashboardTopProduct>([]);
 
+  chartLabels: string[] = [];
+  chartSeries: ReportChartSeries[] = [];
+  // how many periods of trailing history the trend chart shows, per grouping
+  private readonly TREND_SPAN: Record<ReportGroupBy, number> = { day: 14, week: 8, month: 12, year: 6 };
+
   ngOnInit(): void {
     this.loadSummary();
   }
@@ -80,6 +87,44 @@ export class Dashboard implements OnInit, OnDestroy {
       this.dataSource.data = s.top_products.map((t, i) => ({ id: i + 1, name: t.product_name, sold: t.sold, revenue: t.revenue }));
       this.periodLabel = this.formatPeriod(s.period.from, s.period.to);
     });
+    this.loadTrend();
+  }
+
+  // A short trend leading up to (and including) the period shown in the stat cards — gives the
+  // big numbers above some context instead of leaving them as an isolated snapshot.
+  private loadTrend(): void {
+    const span = this.TREND_SPAN[this.groupBy];
+    const from = new Date(this.selectedDate);
+    if (this.groupBy === 'year') from.setFullYear(from.getFullYear() - (span - 1));
+    else if (this.groupBy === 'month') from.setMonth(from.getMonth() - (span - 1));
+    else if (this.groupBy === 'week') from.setDate(from.getDate() - (span - 1) * 7);
+    else from.setDate(from.getDate() - (span - 1));
+
+    this.api.getReportBreakdown(toYmd(from), toYmd(this.selectedDate), this.groupBy).subscribe({
+      next: (r) => {
+        // periods arrives newest-first — reversed here so the trend reads left-to-right in
+        // chronological order, same as the Reports page's chart.
+        const chronological = [...r.periods].reverse();
+        this.chartLabels = chronological.map((p) => this.trendLabel(p.period));
+        this.chartSeries = [
+          { label: 'ยอดขาย', data: chronological.map((p) => p.sales_total), color: '#16a34a' },
+          { label: 'ค่าใช้จ่ายอื่น', data: chronological.map((p) => p.expense_total), color: '#b91c1c' },
+          { label: 'กำไร', data: chronological.map((p) => p.profit), color: '#ea580c' },
+        ];
+      },
+      error: () => {
+        this.chartLabels = [];
+        this.chartSeries = [];
+      },
+    });
+  }
+
+  private trendLabel(period: string): string {
+    const d = new Date(period + 'T00:00:00Z');
+    if (this.groupBy === 'year') return d.getUTCFullYear().toString();
+    if (this.groupBy === 'month') return `${Dashboard.THAI_MONTHS[d.getUTCMonth()].slice(0, 3)} ${d.getUTCFullYear()}`;
+    if (this.groupBy === 'week') return this.ddmm(d);
+    return this.ddmm(d);
   }
 
   // Gregorian-year formatting (matches dd/MM/yyyy shown everywhere else) — 'th-TH' Intl formatting

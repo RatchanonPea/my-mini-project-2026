@@ -1,0 +1,169 @@
+.user-profile-page { padding: 1.5rem; }
+
+.profile-banner {
+  position: relative;
+  border-radius: 20px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #ea580c, #b91c1c);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(185, 28, 28, 0.25);
+}
+
+.back-btn {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.12);
+}
+.back-btn mat-icon { margin-right: 0.25rem; }
+
+.banner-tag {
+  display: inline-block;
+  margin: 1rem 0.5rem 0 0.75rem;
+  padding: 0.25rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.banner-main {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.banner-info h2 { margin: 0 0 0.5rem; font-size: 1.6rem; font-weight: 700; }
+.banner-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.chip {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+}
+.role-chip { background: rgba(255, 255, 255, 0.28); }
+
+.status-chip.status-active { background: #e6f4ea; color: #2e7d32; }
+.status-chip.status-inactive { background: #fdecea; color: #b91c1c; }
+
+// Inside the orange/red banner the soft tinted chip above blends into the background, so it
+// gets a high-contrast white pill with a colored dot there instead — everywhere else (the
+// summary card's white background) keeps the softer tinted version, which reads fine there.
+.banner-chips .status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.banner-chips .status-chip::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 4px currentColor;
+}
+.banner-chips .status-chip.status-active { background: #fdf8f1; color: #1e7a34; }
+.banner-chips .status-chip.status-inactive { background: #fdf8f1; color: #b91c1c; }
+
+.not-found { padding: 0 0.25rem; }
+
+.profile-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .profile-body { grid-template-columns: 1fr; }
+}
+
+.profile-form-card, .account-summary-card, .activity-card { padding: 1.5rem; }
+.profile-form-card mat-card-header,
+.account-summary-card mat-card-header,
+.activity-card mat-card-header { padding: 0; margin-bottom: 1rem; }
+.profile-form-card mat-card-content,
+.account-summary-card mat-card-content,
+.activity-card mat-card-content { padding: 0; }
+
+.right-col { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.activity-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.activity-list li { display: flex; align-items: flex-start; gap: 0.75rem; }
+.activity-body { min-width: 0; }
+.activity-desc { font-size: 0.88rem; font-weight: 600; overflow-wrap: anywhere; }
+.activity-time { font-size: 0.75rem; opacity: 0.65; margin-top: 0.15rem; }
+.no-activity { opacity: 0.7; font-size: 0.85rem; margin: 0.5rem 0 0; }
+
+.activity-badge {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #eee;
+  color: #555;
+}
+.action-create { background: #e6f4ea; color: #2e7d32; }
+.action-update { background: #fff3cd; color: #8a5a00; }
+.action-delete { background: #fdecea; color: #b91c1c; }
+.action-receive { background: #e0f2fe; color: #0369a1; }
+.action-cancel { background: #eeeeee; color: #616161; }
+
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.form-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+.eye-icon { cursor: pointer; }
+
+.summary-list {
+  margin: 0.5rem 0 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  row-gap: 0.85rem;
+  column-gap: 1.25rem;
+}
+.summary-list dt { color: #7c6a5e; font-size: 0.85rem; }
+.summary-list dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+
+:host-context(html.dark-theme) {
+  .status-chip.status-active { background: rgba(76, 175, 80, 0.2); color: #81c784; }
+  .status-chip.status-inactive { background: rgba(185, 28, 28, 0.25); color: #fca5a5; }
+  .summary-list dt { color: #b9a79b; }
+  .activity-badge { background: #3a3a3a; color: #ddd; }
+  .action-create { background: rgba(76, 175, 80, 0.2); color: #81c784; }
+  .action-update { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+  .action-delete { background: rgba(185, 28, 28, 0.25); color: #fca5a5; }
+  .action-receive { background: rgba(3, 105, 161, 0.25); color: #7dd3fc; }
+  .action-cancel { background: #3a3a3a; color: #bdbdbd; }
+}
