@@ -5,6 +5,8 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { auditInterceptor } from './services/audit.interceptor';
+import { authInterceptor } from './services/auth.interceptor';
+import { loadingInterceptor } from './services/loading.interceptor';
 import { retryOnReconnectInterceptor } from './services/retry.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -12,7 +14,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([auditInterceptor, retryOnReconnectInterceptor])),
+    provideHttpClient(withInterceptors([loadingInterceptor, authInterceptor, auditInterceptor, retryOnReconnectInterceptor])),
     provideAnimationsAsync()
   ]
 };

@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, catchError, map, of } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of, throwError } from 'rxjs';
 
 interface LoginResponse {
   success: boolean;
   message?: string;
+  accessToken?: string;
+  refreshToken?: string;
   returnObject?: {
     user_id: number;
     username: string;
@@ -46,6 +48,8 @@ export class AuthService {
             (thaiName || englishName || user.username || username);
           const role = user.role_name ?? user.role ?? '';
 
+          if (response.accessToken) localStorage.setItem('accessToken', response.accessToken);
+          if (response.refreshToken) localStorage.setItem('refreshToken', response.refreshToken);
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('currentUser', displayName);
           localStorage.setItem('currentUserRole', role);
@@ -62,6 +66,25 @@ export class AuthService {
       catchError((error) => {
         console.error('Auth login failed', error);
         return of(false);
+      })
+    );
+  }
+
+  getAccessToken(): string | null {
+    return localStorage.getItem('accessToken');
+  }
+
+  /** Exchanges the stored refresh token for a new access token; errors out (-> caller logs out) if it can't. */
+  refreshAccessToken(): Observable<string> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token'));
+    }
+    return this.http.post<{ accessToken?: string }>('/api/auth/refresh-token', { refreshToken }).pipe(
+      map((response) => {
+        if (!response?.accessToken) throw new Error('No access token in refresh response');
+        localStorage.setItem('accessToken', response.accessToken);
+        return response.accessToken;
       })
     );
   }

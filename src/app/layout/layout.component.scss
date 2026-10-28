@@ -23,9 +23,9 @@
 }
 
 .content-header {
-  background-color: #f8f9fa;
+  background-color: var(--app-page-bg);
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--app-border);
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -56,7 +56,7 @@
   min-width: 0;
   padding: 1.5rem;
   overflow-y: auto;
-  background-color: #f8f9fa;
+  background-color: var(--app-page-bg);
 }
 
 // Responsive
@@ -90,4 +90,22 @@
   .content-body {
     padding: 0.75rem;
   }
+}
+
+// thin indeterminate bar pinned to the very top while any API request is running
+.global-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  height: 3px;
+}
+
+// phone drawer: dims the page behind the open menu, tap it to close
+.sidebar-backdrop {
+  position: fixed;
+  inset: 64px 0 0 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
 }

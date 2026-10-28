@@ -1,3 +1,4 @@
+import { RoleChip } from '../../../../shared/role-chip/role-chip';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -15,7 +16,7 @@ import { Pager } from '../../../../shared/pager/pager';
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, Pager],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, Pager, RoleChip],
   templateUrl: './user-profile.html',
   styleUrls: ['./user-profile.scss'],
 })

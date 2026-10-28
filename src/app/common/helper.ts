@@ -1,4 +1,11 @@
-import Swal from "sweetalert2";
+import type { SweetAlertOptions, SweetAlertResult } from "sweetalert2";
+
+// sweetalert2 (~78 kB) is loaded on first use instead of being part of the initial bundle: the route
+// guards/interceptors import this file, which used to pull it into the first download.
+const Swal = {
+  fire: (options: SweetAlertOptions): Promise<SweetAlertResult> =>
+    import("sweetalert2").then((m) => m.default.fire(options)),
+};
 
 // A quiet top-right toast that auto-dismisses, shown alongside the blocking confirm dialogs below
 // (not instead of them). Built as a plain DOM element rather than a second Swal.fire() call,
@@ -757,4 +764,21 @@ export function toYmd(date: Date): string {
 // "YYYY-MM-DDTHH:mm" — the value <input type="datetime-local"> reads and writes, in wall-clock time.
 export function toLocalDatetimeInput(date: Date): string {
   return `${toYmd(date)}T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+// After "edit" on a list page that edits in a form above the table (not a dialog): bring the form into
+// view and flash it, so on a phone - where the form is off-screen - it is obvious editing has started.
+export function ScrollToEditForm(selector: string): void {
+  setTimeout(() => {
+    const el = document.querySelector<HTMLElement>(selector);
+    if (!el) return;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+    if (!reduceMotion && el.animate) {
+      el.animate(
+        [{ boxShadow: '0 0 0 3px rgba(234, 88, 12, 0.85)' }, { boxShadow: '0 0 0 12px rgba(234, 88, 12, 0)' }],
+        { duration: 900, easing: 'ease-out' }
+      );
+    }
+  }, 0);
 }

@@ -1,3 +1,4 @@
+import { NoData } from '../../../shared/no-data/no-data';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -21,7 +22,7 @@ import { ReportChart, ReportChartSeries } from '../../../shared/report-chart/rep
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [
+  imports: [NoData, 
     CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule,
     MatIconModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatTableModule, MatButtonToggleModule, Pager, ReportChart,
   ],

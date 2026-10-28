@@ -1,3 +1,4 @@
+import { NoData } from '../../../shared/no-data/no-data';
 import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
@@ -39,7 +40,7 @@ interface GridItem {
 
 @Component({
   selector: 'app-users',
-  imports: [Pager, MatPaginatorModule, MatTableModule, CommonModule, FormsModule, MatButtonModule, MatIconModule, MatChipsModule, MatInputModule, MatFormFieldModule],
+  imports: [NoData, Pager, MatPaginatorModule, MatTableModule, CommonModule, FormsModule, MatButtonModule, MatIconModule, MatChipsModule, MatInputModule, MatFormFieldModule],
   templateUrl: './users.html',
   styleUrl: './users.scss',
 })

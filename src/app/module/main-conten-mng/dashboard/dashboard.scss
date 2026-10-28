@@ -47,7 +47,7 @@
 
 // .dashboard-header .subtitle {
 //   margin: 0.25rem 0 0;
-//   color: #6b7280;
+//   color: var(--app-text-muted);
 //   font-size: 0.9rem;
 //   animation: swing 1.6s infinite;
 // }
@@ -55,7 +55,7 @@
 /* element */
 .dashboard-header .subtitle {
   margin: 0.25rem 0 0;
-  color: #6b7280;
+  color: var(--app-text-muted);
   font-size: 0.9rem;
 
   display: inline-block;
@@ -259,7 +259,7 @@
 .summary-tile {
   padding: 1rem;
   border-radius: 18px;
-  background: #ffffff;
+  background: var(--app-surface);
   box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
 }
 
@@ -272,7 +272,7 @@
 .summary-value {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--app-text);
 }
 
 .top-seller-slider {
@@ -357,7 +357,7 @@
 
   .quote-author {
     font-size: 0.82rem;
-    color: #475569;
+    color: var(--app-text-soft);
     text-align: right;
   }
 
@@ -371,7 +371,7 @@
   .info-item {
     padding: 1rem;
     border-radius: 16px;
-    background: #f8fafc;
+    background: var(--app-surface-alt);
     box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
   }
 
@@ -384,7 +384,7 @@
   .info-value {
     font-size: 1.05rem;
     font-weight: 700;
-    color: #111827;
+    color: var(--app-text);
   }
 
 
@@ -455,7 +455,7 @@
     font-family: inherit;
     font-size: 0.85rem;
     border-radius: 18px;
-    background: #ffffff;
+    background: var(--app-surface);
   }
 
 .demo-inline-calendar-card {
@@ -547,3 +547,8 @@
 }
 
 
+
+:host-context(html.dark-theme) .status-badge {
+  &.allowed { background: rgba(76, 175, 80, 0.2); color: #81c784; }
+  &.blocked { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+}

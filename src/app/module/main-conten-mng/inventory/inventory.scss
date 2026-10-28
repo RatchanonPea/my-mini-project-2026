@@ -1,6 +1,6 @@
 .inventory-page { padding: 1.5rem; }
 .page-header { margin-bottom: 1.5rem; }
-.subtitle { color: #6b7280; }
+.subtitle { color: var(--app-text-muted); }
 .form-row { display: grid; gap: 1rem; margin-bottom: 1rem; }
 .full-width { width: 100%; }
 .form-actions { margin-top: 0.5rem; }

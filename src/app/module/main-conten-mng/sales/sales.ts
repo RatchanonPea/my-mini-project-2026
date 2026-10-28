@@ -1,3 +1,4 @@
+import { NoData } from '../../../shared/no-data/no-data';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -15,12 +16,12 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { Pager } from '../../../shared/pager/pager';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ApiService, ProductItem, SaleItem } from '../../../services/api';
-import { ConfirmDelete, DialogErrorHtmlConfirm, DialogSuccess, toYmd } from '../../../common/helper';
+import { ConfirmDelete, DialogErrorHtmlConfirm, DialogSuccess, toYmd, ScrollToEditForm } from '../../../common/helper';
 
 @Component({
   selector: 'app-sales',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule, Pager, MatDatepickerModule, MatNativeDateModule, NgxMatSelectSearchModule],
+  imports: [NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule, Pager, MatDatepickerModule, MatNativeDateModule, NgxMatSelectSearchModule],
   templateUrl: './sales.html',
   styleUrls: ['./sales.scss']
 })
@@ -133,6 +134,7 @@ export class Sales implements OnInit {
     this.editingId = item.item_id;
     this.loadFormDateItems(item.sale_date.slice(0, 10));
     this.form.setValue({ product_id: item.product_id, quantity: item.quantity });
+    ScrollToEditForm('.sales-card');
   }
 
   cancelEdit(): void {

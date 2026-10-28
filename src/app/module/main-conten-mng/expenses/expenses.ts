@@ -1,3 +1,4 @@
+import { NoData } from '../../../shared/no-data/no-data';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -16,12 +17,12 @@ import { Pager } from '../../../shared/pager/pager';
 import { SelectSearch } from '../../../shared/select-search/select-search';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ApiService, Category, ExpenseItem } from '../../../services/api';
-import { DialogErrorHtmlConfirm, DialogSuccess, toYmd } from '../../../common/helper';
+import { DialogErrorHtmlConfirm, DialogSuccess, toYmd, ScrollToEditForm } from '../../../common/helper';
 
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, Pager, MatSelectModule, MatDatepickerModule, MatNativeDateModule, NgxMatSelectSearchModule],
+  imports: [NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, Pager, MatSelectModule, MatDatepickerModule, MatNativeDateModule, NgxMatSelectSearchModule],
   templateUrl: './expenses.html',
   styleUrls: ['./expenses.scss']
 })
@@ -102,6 +103,7 @@ export class Expenses implements OnInit {
       expense_date: new Date(item.expense_date),
       amount: item.amount,
     });
+    ScrollToEditForm('.expense-entry-card');
   }
 
   reset(): void {

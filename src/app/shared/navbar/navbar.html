@@ -1,8 +1,8 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container-fluid">
     <app-chicken class="navbar-chicken" [size]="34"></app-chicken>
-    <a class="navbar-brand" href="#">
-      <img class="navbar-logo" src="assets/images/Logo/CheckenLogo.jpg" alt="Checken Logo" />
+    <a class="navbar-brand" href="#" aria-label="Arre ไก่หมุน หน้าหลัก">
+      <img class="navbar-logo" src="assets/images/Logo/CheckenLogo.jpg" alt="" />
       <span class="brand-label">
         <span class="brand-title" [attr.aria-label]="brandTitle">@for (letter of brandLetters; track $index) {<span class="brand-letter" aria-hidden="true">{{ letter === ' ' ? '\u00a0' : letter }}</span>}</span>
         <span class="brand-subtitle" [attr.aria-label]="brandSubtitle">@for (letter of brandSubLetters; track $index) {<span class="brand-letter" aria-hidden="true">{{ letter === ' ' ? '\u00a0' : letter }}</span>}</span>
@@ -11,39 +11,39 @@
 
     <div class="d-flex align-items-center position-relative gap-2">
       <button class="btn btn-theme-toggle" type="button" (click)="theme.toggle()" [attr.aria-label]="theme.mode() === 'dark' ? 'สลับเป็นโหมดสว่าง' : 'สลับเป็นโหมดมืด'" [title]="theme.mode() === 'dark' ? 'โหมดสว่าง' : 'โหมดมืด'">
-        <i class="fas" [ngClass]="theme.mode() === 'dark' ? 'fa-sun' : 'fa-moon'"></i>
+        <i class="fas" [ngClass]="theme.mode() === 'dark' ? 'fa-sun' : 'fa-moon'" aria-hidden="true"></i>
       </button>
 
       <div class="navbar-user" *ngIf="currentUser" #alertsWrap>
-        <button class="btn btn-theme-toggle" type="button" (click)="toggleAlerts()" aria-label="การแจ้งเตือน" title="การแจ้งเตือน">
-          <i class="fas fa-bell"></i>
+        <button class="btn btn-theme-toggle" type="button" (click)="toggleAlerts()" [attr.aria-label]="unreadCount > 0 ? 'การแจ้งเตือน ยังไม่ได้อ่าน ' + unreadCount + ' รายการ' : 'การแจ้งเตือน'" aria-haspopup="true" [attr.aria-expanded]="isAlertsOpen" title="การแจ้งเตือน">
+          <i class="fas fa-bell" aria-hidden="true"></i>
           <span class="alert-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
         </button>
 
-        <div class="dropdown-panel alerts-panel" [class.open]="isAlertsOpen" aria-hidden="{{ !isAlertsOpen }}">
+        <div class="dropdown-panel alerts-panel" [class.open]="isAlertsOpen" [attr.inert]="isAlertsOpen ? null : ''" role="region" aria-label="การแจ้งเตือน">
           <div class="alerts-header">
             <h3>การแจ้งเตือน</h3>
             <div class="alerts-menu-wrap">
-              <button class="btn-alerts-menu" type="button" (click)="toggleAlertsMenu($event)" aria-label="ตัวเลือกเพิ่มเติม">
-                <i class="fas fa-ellipsis"></i>
+              <button class="btn-alerts-menu" type="button" (click)="toggleAlertsMenu($event)" aria-label="ตัวเลือกเพิ่มเติม" aria-haspopup="true" [attr.aria-expanded]="isAlertsMenuOpen">
+                <i class="fas fa-ellipsis" aria-hidden="true"></i>
               </button>
               <div class="alerts-menu" *ngIf="isAlertsMenuOpen">
                 <button type="button" (click)="markAllRead()">
-                  <i class="fas fa-check"></i> ทำเครื่องหมายทั้งหมดว่าอ่านแล้ว
+                  <i class="fas fa-check" aria-hidden="true"></i> ทำเครื่องหมายทั้งหมดว่าอ่านแล้ว
                 </button>
               </div>
             </div>
           </div>
 
           <div class="alerts-tabs">
-            <button type="button" [class.active]="alertTab === 'all'" (click)="setAlertTab('all')">ทั้งหมด</button>
-            <button type="button" [class.active]="alertTab === 'unread'" (click)="setAlertTab('unread')">ยังไม่ได้อ่าน</button>
+            <button type="button" [class.active]="alertTab === 'all'" [attr.aria-pressed]="alertTab === 'all'" (click)="setAlertTab('all')">ทั้งหมด</button>
+            <button type="button" [class.active]="alertTab === 'unread'" [attr.aria-pressed]="alertTab === 'unread'" (click)="setAlertTab('unread')">ยังไม่ได้อ่าน</button>
           </div>
 
           <div class="alerts-list">
             @for (item of filteredNotifications; track item.log_id) {
-              <div class="alert-item" (click)="openAlert(item)">
-                <span class="alert-icon" [style.background]="iconFor(item.entity).bg"><i class="fas" [ngClass]="iconFor(item.entity).icon"></i></span>
+              <div class="alert-item" role="button" tabindex="0" (click)="openAlert(item)" (keydown.enter)="openAlert(item)" (keydown.space)="$event.preventDefault(); openAlert(item)">
+                <span class="alert-icon" [style.background]="iconFor(item.entity).bg"><i class="fas" [ngClass]="iconFor(item.entity).icon" aria-hidden="true"></i></span>
                 <div class="alert-body">
                   <div class="alert-title">{{ item.description || item.entity }}</div>
                   <div class="alert-desc">โดย {{ item.user_name || 'ระบบ' }}</div>
@@ -59,13 +59,13 @@
       </div>
 
       <div class="navbar-user" *ngIf="currentUser">
-        <button class="btn btn-user-toggle" type="button" (click)="toggleDropdown()">
-          <span class="avatar-circle"><i class="fas fa-user"></i></span>
+        <button class="btn btn-user-toggle" type="button" (click)="toggleDropdown()" aria-label="เมนูผู้ใช้" aria-haspopup="true" [attr.aria-expanded]="isDropdownOpen">
+          <span class="avatar-circle"><i class="fas fa-user" aria-hidden="true"></i></span>
           <!-- <span class="user-name">{{ currentUser }}</span> -->
-          <i class="fas fa-chevron-down ms-2"></i>
+          <i class="fas fa-chevron-down ms-2" aria-hidden="true"></i>
         </button>
 
-        <div class="dropdown-panel" [class.open]="isDropdownOpen" aria-hidden="{{ !isDropdownOpen }}">
+        <div class="dropdown-panel" [class.open]="isDropdownOpen" [attr.inert]="isDropdownOpen ? null : ''" role="region" aria-label="เมนูผู้ใช้">
           <div class="panel-header">
             <div class="panel-avatar">
               <span>{{ currentUser.charAt(0) }}</span>
@@ -78,7 +78,7 @@
 
           <div class="panel-actions">
             <button class="btn btn-logout" (click)="logout()">
-              <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+              <i class="fas fa-sign-out-alt" aria-hidden="true"></i> ออกจากระบบ
             </button>
           </div>
         </div>

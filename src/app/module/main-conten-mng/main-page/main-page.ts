@@ -1,3 +1,4 @@
+import { NoData } from '../../../shared/no-data/no-data';
 import { AfterViewInit, Component, DestroyRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { ConfirmDelete, ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess } from '../../../common/helper';
+import { ConfirmDelete, ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess, ScrollToEditForm } from '../../../common/helper';
 import { ApiService, Category, ProductItem } from '../../../services/api';
 import { AuthService } from '../../../services/auth';
 import { Pager } from '../../../shared/pager/pager';
@@ -18,7 +19,7 @@ import { SelectSearch } from '../../../shared/select-search/select-search';
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [Pager, CommonModule, FormsModule, ReactiveFormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatPaginatorModule, MatIconModule, MatSelectModule, NgxMatSelectSearchModule],
+  imports: [NoData, Pager, CommonModule, FormsModule, ReactiveFormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatPaginatorModule, MatIconModule, MatSelectModule, NgxMatSelectSearchModule],
   templateUrl: './main-page.html',
   styleUrls: ['./main-page.scss'],
 })
@@ -228,6 +229,7 @@ export class MainPage implements AfterViewInit {
       category_id: item.category_id ?? null,
       is_active: item.is_active
     };
+    ScrollToEditForm('.form-card');
   }
 
   removeItem(product_id: number): void {

@@ -1,3 +1,4 @@
+import { NoData } from '../../../shared/no-data/no-data';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ApiService, PurchaseOrder, PurchaseStatus, Supplier } from '../../../services/api';
-import { ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess, toYmd } from '../../../common/helper';
+import { ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess, toYmd, ScrollToEditForm } from '../../../common/helper';
 import { Pager } from '../../../shared/pager/pager';
 import { StockDetailDialog } from '../inventory/stock-detail-dialog/stock-detail-dialog';
 
@@ -31,7 +32,7 @@ const CUSTOM_PRICE = 'custom';
 @Component({
   selector: 'app-purchases',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatDialogModule, Pager, NgxMatSelectSearchModule],
+  imports: [NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatDialogModule, Pager, NgxMatSelectSearchModule],
   templateUrl: './purchases.html',
   styleUrls: ['./purchases.scss'],
 })
@@ -193,6 +194,7 @@ export class Purchases implements OnInit {
       custom_cost: known ? null : Number(item.unit_cost),
       note: item.note ?? '',
     });
+    ScrollToEditForm('.purchase-entry-card');
   }
 
   reset(): void {

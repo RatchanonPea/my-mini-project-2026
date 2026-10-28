@@ -1,3 +1,4 @@
+import { NoData } from '../../../../shared/no-data/no-data';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -17,7 +18,7 @@ import { LatLng, LocationPicker } from '../../../../shared/location-picker/locat
 @Component({
   selector: 'app-supplier-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSlideToggleModule, MatTableModule, Pager, LocationPicker],
+  imports: [NoData, CommonModule, RouterModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSlideToggleModule, MatTableModule, Pager, LocationPicker],
   templateUrl: './supplier-profile.html',
   styleUrls: ['./supplier-profile.scss'],
 })

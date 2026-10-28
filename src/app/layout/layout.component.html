@@ -1,12 +1,14 @@
+<mat-progress-bar class="global-loader" mode="indeterminate" *ngIf="loading.active()" aria-label="กำลังโหลดข้อมูล"></mat-progress-bar>
 <app-navbar></app-navbar>
 
 <div class="main-content">
-  <app-sidebar [collapsed]="sidebarCollapsed"></app-sidebar>
+  <div class="sidebar-backdrop" *ngIf="mobileMenuOpen" (click)="closeMobileMenu()" aria-hidden="true"></div>
+  <app-sidebar [collapsed]="sidebarCollapsed && !isPhone" [mobileOpen]="mobileMenuOpen"></app-sidebar>
 
   <div class="content-wrapper" [class.sidebar-collapsed]="sidebarCollapsed">
     <div class="content-header">
-      <button class="btn toggle-sidebar" type="button" aria-label="ย่อ/ขยายเมนู" (click)="toggleSidebar()">
-        <i class="fas fa-bars"></i>
+      <button class="btn toggle-sidebar" type="button" aria-label="ย่อ/ขยายเมนู" [attr.aria-expanded]="isPhone ? mobileMenuOpen : !sidebarCollapsed" (click)="toggleSidebar()">
+        <i class="fas fa-bars" aria-hidden="true"></i>
       </button>
       <h4 class="mb-0">{{ pageTitle() }}</h4>
     </div>

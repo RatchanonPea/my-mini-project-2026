@@ -115,7 +115,7 @@
             <dd>{{ user?.code || (isNew ? 'จะสร้างอัตโนมัติ' : '-') }}</dd>
 
             <dt>สิทธิ์การใช้งาน</dt>
-            <dd>{{ currentRoleName }}</dd>
+            <dd><app-role-chip [role]="currentRoleName"></app-role-chip></dd>
 
             <dt>สถานะ</dt>
             <dd>

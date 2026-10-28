@@ -106,10 +106,7 @@
             <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" tabindex="0" title="กดเพื่อดูโปรไฟล์ร้าน" (click)="openProfile(row)" (keydown.enter)="openProfile(row)"></tr>
             <tr class="mat-mdc-row no-data-row" *matNoDataRow>
               <td class="mat-mdc-cell" [attr.colspan]="displayedColumns.length">
-                <div class="no-data-message">
-                  <mat-icon>storage</mat-icon>
-                  No Data
-                </div>
+                <app-no-data></app-no-data>
               </td>
             </tr>
           </table>

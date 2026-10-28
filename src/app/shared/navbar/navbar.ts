@@ -201,6 +201,13 @@ export class Navbar implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.isAlertsOpen = false;
+    this.isAlertsMenuOpen = false;
+    this.isDropdownOpen = false;
+  }
+
   toggleAlerts(): void {
     this.isAlertsOpen = !this.isAlertsOpen;
     this.isAlertsMenuOpen = false;

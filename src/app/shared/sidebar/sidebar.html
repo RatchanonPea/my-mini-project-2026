@@ -1,4 +1,4 @@
-<div class="sidebar" [class.collapsed]="collapsed">
+<nav class="sidebar" [class.collapsed]="collapsed" [class.open]="mobileOpen" aria-label="เมนูหลัก">
   <div class="sidebar-header">
     <h5 *ngIf="!collapsed">เมนูหลัก</h5>
   </div>
@@ -8,10 +8,10 @@
       <a [routerLink]="item.path" routerLinkActive="active" class="menu-link"
          [class.has-children]="item.children && item.children.length > 0"
          (click)="toggleSubmenu(item, menuItemEl)">
-        <i [class]="item.icon" class="menu-icon"></i>
+        <i [class]="item.icon" class="menu-icon" aria-hidden="true"></i>
         <span class="menu-text" *ngIf="!collapsed">{{ item.label }}</span>
         <i *ngIf="item.children && item.children.length > 0 && !collapsed"
-           class="fas fa-chevron-down submenu-toggle"
+           class="fas fa-chevron-down submenu-toggle" aria-hidden="true"
            [class.rotated]="item.expanded"></i>
       </a>
 
@@ -19,11 +19,11 @@
           class="submenu">
         <li *ngFor="let child of item.children" class="submenu-item">
           <a [routerLink]="child.path" routerLinkActive="active" class="submenu-link">
-            <i [class]="child.icon" class="submenu-icon"></i>
+            <i [class]="child.icon" class="submenu-icon" aria-hidden="true"></i>
             <span class="submenu-text">{{ child.label }}</span>
           </a>
         </li>
       </ul>
     </li>
   </ul>
-</div>
+</nav>

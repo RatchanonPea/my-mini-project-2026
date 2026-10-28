@@ -1,3 +1,4 @@
+import { NoData } from '../../../shared/no-data/no-data';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -34,7 +35,7 @@ const STAT_DEFS = [
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
+  imports: [NoData, 
     CommonModule,
     MatCardModule,
     MatTableModule,

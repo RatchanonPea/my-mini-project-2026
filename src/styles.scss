@@ -274,6 +274,84 @@ th.mat-mdc-header-cell.mat-mdc-table-sticky {
   }
 }
 
+// Material chips set their colours through component tokens, so each one needs the tokens
+// and the !important overrides; kept in one place instead of repeated per role.
+@mixin dark-chip($from, $to, $border, $text) {
+  background: linear-gradient(135deg, $from 0%, $to 100%) !important;
+  border-color: $border !important;
+  color: $text !important;
+  --mdc-chip-label-text-color: #{$text};
+  --mat-chip-label-text-color: #{$text};
+  --mdc-chip-with-icon-icon-color: #{$text};
+  --mat-chip-with-icon-icon-color: #{$text};
+  box-shadow: none;
+
+  .mdc-evolution-chip__text-name,
+  mat-icon {
+    color: $text !important;
+  }
+}
+
+// ---------- Theme tokens: components use these instead of hard-coded colours, ThemeService swaps them ----------
+:root {
+  --app-page-bg: #f8f9fa;
+  --app-surface: #ffffff;
+  --app-surface-alt: #f8fafc;
+  --app-border: #dee2e6;
+  --app-text: #111827;
+  --app-text-soft: #475569;
+  --app-text-muted: #6b7280;       // 4.8:1 on --app-surface
+  --app-accent: #ea580c;
+  --app-accent-strong: #c2410c;    // 5.2:1 with white: use for small text / filled controls with white text
+  --app-focus-ring: #c2410c;
+}
+
+html.dark-theme {
+  --app-page-bg: #17110e;
+  --app-surface: #241a15;
+  --app-surface-alt: #2b1e18;
+  --app-border: #4a2e20;
+  --app-text: #f3e8e0;
+  --app-text-soft: #d4c2b6;
+  --app-text-muted: #b9a79b;
+  --app-accent: #fb923c;
+  --app-accent-strong: #fdba74;
+  --app-focus-ring: #fdba74;
+}
+
+// ---------- Accessibility ----------
+// visible keyboard focus everywhere (mouse clicks don't trigger :focus-visible)
+:focus-visible {
+  outline: 3px solid var(--app-focus-ring);
+  outline-offset: 2px;
+}
+
+// touch devices (counter tablet / phone): taps within 44px of a small control still hit it. The extra
+// hit area is an invisible pseudo-element, so nothing about the layout or look of the control changes.
+@media (pointer: coarse) {
+  .btn,
+  .mat-mdc-button-base,
+  .mat-button-toggle-button,
+  .pager-btn,
+  .btn-alerts-menu,
+  .alerts-tabs button,
+  .alerts-menu button,
+  .menu-link,
+  .submenu-link {
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      transform: translate(-50%, -50%);
+    }
+  }
+}
+
 // ---------- Dark mode (toggled by adding .dark-theme to <html>, see ThemeService) ----------
 html.dark-theme {
   color-scheme: dark;
@@ -283,7 +361,7 @@ html.dark-theme {
   .content-header,
   .content-body,
   .main-content {
-    background: #17110e !important;
+    background: #17110e;
     color: #f3e8e0;
   }
 
@@ -300,7 +378,7 @@ html.dark-theme {
   .quote-text,
   .summary-value,
   .info-value {
-    color: #f3e8e0 !important;
+    color: #f3e8e0;
   }
 
   .subtitle,
@@ -310,7 +388,7 @@ html.dark-theme {
   .quote-author,
   .settings-card p,
   mat-card-subtitle {
-    color: #b9a79b !important;
+    color: #b9a79b;
   }
 
   // surfaces that were hard-coded white / pale
@@ -318,9 +396,7 @@ html.dark-theme {
   .summary-tile,
   .top-seller-slider,
   .main-panel,
-  .dashboard-side > mat-card,
   .info-item,
-  .calendar-card mat-calendar,
   .table-wrapper,
   .grid,
   .table-container,
@@ -330,6 +406,14 @@ html.dark-theme {
   .dialog-footer,
   .summary-row,
   .total-box {
+    background: #241a15;
+    color: #f3e8e0;
+    border-color: #4a2e20;
+  }
+
+  // nested selectors in the dashboard's own stylesheet out-rank a plain override
+  .dashboard-side > mat-card,
+  .calendar-card mat-calendar {
     background: #241a15 !important;
     color: #f3e8e0 !important;
     border-color: #4a2e20 !important;
@@ -338,11 +422,11 @@ html.dark-theme {
   .trend-section,
   .animation-section,
   .dashboard-table {
-    border-top-color: #4a2e20 !important;
+    border-top-color: #4a2e20;
   }
 
   .section-header p {
-    color: #b9a79b !important;
+    color: #b9a79b;
   }
 
   .cluck-bubble {
@@ -362,7 +446,7 @@ html.dark-theme {
 
   // tables
   .mat-mdc-header-row {
-    background-color: #5b2410 !important;
+    background-color: #5b2410;
   }
 
   th.mat-mdc-header-cell,
@@ -422,53 +506,9 @@ html.dark-theme {
   }
 
   // users table chips (role / status) need dark-friendly colours
-  .role-manager.mat-mdc-chip {
-    background: linear-gradient(135deg, #17331f 0%, #1f4a2b 100%) !important;
-    border-color: #4caf50 !important;
-    color: #a5e8b6 !important;
-    --mdc-chip-label-text-color: #a5e8b6;
-    --mat-chip-label-text-color: #a5e8b6;
-    --mdc-chip-with-icon-icon-color: #a5e8b6;
-    --mat-chip-with-icon-icon-color: #a5e8b6;
-    box-shadow: none;
-
-    .mdc-evolution-chip__text-name,
-    mat-icon {
-      color: #a5e8b6 !important;
-    }
-  }
-
-  .role-admin.mat-mdc-chip {
-    background: linear-gradient(135deg, #3a1518 0%, #52202a 100%) !important;
-    border-color: #ef5350 !important;
-    color: #ffb4ab !important;
-    --mdc-chip-label-text-color: #ffb4ab;
-    --mat-chip-label-text-color: #ffb4ab;
-    --mdc-chip-with-icon-icon-color: #ffb4ab;
-    --mat-chip-with-icon-icon-color: #ffb4ab;
-    box-shadow: none;
-
-    .mdc-evolution-chip__text-name,
-    mat-icon {
-      color: #ffb4ab !important;
-    }
-  }
-
-  .role-user.mat-mdc-chip {
-    background: linear-gradient(135deg, #14243d 0%, #1c3557 100%) !important;
-    border-color: #60a5fa !important;
-    color: #93c5fd !important;
-    --mdc-chip-label-text-color: #93c5fd;
-    --mat-chip-label-text-color: #93c5fd;
-    --mdc-chip-with-icon-icon-color: #93c5fd;
-    --mat-chip-with-icon-icon-color: #93c5fd;
-    box-shadow: none;
-
-    .mdc-evolution-chip__text-name,
-    mat-icon {
-      color: #93c5fd !important;
-    }
-  }
+  .role-manager.mat-mdc-chip { @include dark-chip(#17331f, #1f4a2b, #4caf50, #a5e8b6); }
+  .role-admin.mat-mdc-chip { @include dark-chip(#3a1518, #52202a, #ef5350, #ffb4ab); }
+  .role-user.mat-mdc-chip { @include dark-chip(#14243d, #1c3557, #60a5fa, #93c5fd); }
 
   .status-active {
     background-color: rgba(76, 175, 80, 0.2);
@@ -486,17 +526,17 @@ html.dark-theme {
   }
 
   // purchase status / ledger chips and the low-stock alert
-  .po-ordered { background: rgba(245, 158, 11, 0.2) !important; color: #fbbf24 !important; }
-  .po-received { background: rgba(76, 175, 80, 0.2) !important; color: #81c784 !important; }
-  .po-cancelled { background: #3a3a3a !important; color: #bdbdbd !important; }
-  .lt-receive { background: rgba(76, 175, 80, 0.2) !important; color: #81c784 !important; }
-  .lt-sale { background: rgba(251, 146, 60, 0.2) !important; color: #fdba74 !important; }
-  .lt-waste { background: rgba(239, 68, 68, 0.2) !important; color: #fca5a5 !important; }
-  .lt-adjust { background: rgba(129, 140, 248, 0.2) !important; color: #a5b4fc !important; }
-  .qty-in { color: #81c784 !important; }
-  .qty-out { color: #fca5a5 !important; }
-  .low-stock-alert { background: rgba(239, 68, 68, 0.15) !important; border-color: #ef4444 !important; color: #fca5a5 !important; }
-  .order-total { background: rgba(251, 146, 60, 0.12) !important; }
+  .po-ordered { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+  .po-received { background: rgba(76, 175, 80, 0.2); color: #81c784; }
+  .po-cancelled { background: #3a3a3a; color: #bdbdbd; }
+  .lt-receive { background: rgba(76, 175, 80, 0.2); color: #81c784; }
+  .lt-sale { background: rgba(251, 146, 60, 0.2); color: #fdba74; }
+  .lt-waste { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+  .lt-adjust { background: rgba(129, 140, 248, 0.2); color: #a5b4fc; }
+  .qty-in { color: #81c784; }
+  .qty-out { color: #fca5a5; }
+  .low-stock-alert { background: rgba(239, 68, 68, 0.15); border-color: #ef4444; color: #fca5a5; }
+  .order-total { background: rgba(251, 146, 60, 0.12); }
 }
 
 // ---------- Motion: smooth enter / leave / page transitions ----------
@@ -663,7 +703,7 @@ html.dark-theme .mat-mdc-card.stat-card:hover {
   padding: 1.25rem 1.75rem;
   background: linear-gradient(120deg, #ea580c, #b91c1c, #ea580c);
   background-size: 200% 200%;
-  animation: header-glow 10s ease infinite;
+  animation: header-glow 18s ease-in-out infinite;
   box-shadow: 0 12px 28px rgba(185, 28, 28, 0.25);
 }
 
@@ -672,9 +712,9 @@ html.dark-theme .mat-mdc-card.stat-card:hover {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(75deg, transparent 40%, rgba(255, 255, 255, 0.09) 50%, transparent 60%);
+  background: linear-gradient(75deg, transparent 40%, rgba(255, 255, 255, 0.07) 50%, transparent 60%);
   background-size: 300% 300%;
-  animation: header-shine 7s ease-in-out infinite;
+  animation: header-shine 12s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
 }
@@ -718,4 +758,182 @@ html.dark-theme .mat-mdc-card.stat-card:hover {
 // there and makes the banner subtitle grayish instead of white — this restores white in dark mode.
 html.dark-theme .page-header .subtitle {
   color: #fff !important;
+}
+
+// ---------- Phone tables: each row becomes a compact card, two fields per line ----------
+// (column titles come from data-label, set by ResponsiveTableService)
+@media (max-width: 600px) {
+  table.mat-mdc-table,
+  .grid table {
+    display: block;
+    width: 100% !important;
+    // users.scss forces a 1080px table inside its own scroll box
+    min-width: 0 !important;
+    background: transparent;
+  }
+
+  // titles move into each cell; the header row stays in the DOM, visually hidden, for screen readers
+  table.mat-mdc-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  table.mat-mdc-table tbody {
+    display: block;
+  }
+
+  table.mat-mdc-table tr.mat-mdc-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 4px;
+    height: auto;
+    margin: 0 0 10px;
+    padding: 6px 4px 2px;
+    border: 1px solid var(--app-border);
+    border-left: 4px solid var(--app-accent);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(124, 45, 18, 0.1);
+    overflow: hidden;
+  }
+
+  table.mat-mdc-table td.mat-mdc-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 1px;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.3;
+    border: 0;
+    border-left: 0 !important;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    // sticky action columns are inline-styled by the CDK
+    position: static !important;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  // small caption above each value
+  table.mat-mdc-table td.mat-mdc-cell::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--app-text-muted);
+  }
+
+  // long values (email, notes, names...) get the whole line
+  table.mat-mdc-table td.mat-mdc-cell[data-wide] {
+    grid-column: 1 / -1;
+  }
+
+  // row numbers add nothing on a card; empty cells would only draw blank space
+  table.mat-mdc-table td.mat-mdc-cell[data-skip],
+  table.mat-mdc-table td.mat-mdc-cell[data-empty] {
+    display: none;
+  }
+
+  table.mat-mdc-table td.mat-mdc-cell:not([data-label])::before,
+  table.mat-mdc-table td.mat-mdc-cell.mat-column-action::before {
+    display: none;
+  }
+
+  // edit / delete buttons: one slim row at the bottom of the card
+  table.mat-mdc-table td.mat-mdc-cell.mat-column-action {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0.15rem 0.3rem;
+    margin-top: 2px;
+    border-top: 1px solid var(--app-border);
+  }
+
+  // the "No Data" row spans every column: centre it
+  table.mat-mdc-table tr.no-data-row {
+    display: block;
+    border-left-width: 1px;
+    box-shadow: none;
+  }
+
+  table.mat-mdc-table tr.no-data-row td.mat-mdc-cell {
+    flex-direction: row;
+    justify-content: center;
+    text-align: center;
+  }
+
+  table.mat-mdc-table tr.no-data-row td.mat-mdc-cell::before {
+    display: none;
+  }
+
+  .table-wrapper,
+  .grid,
+  .table-container {
+    overflow-x: visible;
+    padding: 4px 0;
+  }
+
+  // every page shows its cards at the same width: slim page padding, and cards that hold a table
+  // keep a 12px inner gutter (the table rows sit inside it); pages without a card get the same gutter
+  .content-body [class$='-page'],
+  .content-body .main-content {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .content-body mat-card:has(table.mat-mdc-table) {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .content-body .grid,
+  .content-body .main-page table.mat-mdc-table {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box;
+  }
+
+  // slimmer action buttons
+  table.mat-mdc-table td.mat-column-action .mat-mdc-icon-button {
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+  }
+
+  // a pill with several lines of text turns into an oval: use a soft rectangle on narrow screens
+  .page-header .subtitle {
+    border-radius: 16px;
+  }
+}
+
+// Theme switch (see ThemeService): a single smooth cross-fade of the whole page
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.45s;
+  animation-timing-function: ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+// while the page cross-fades (see ThemeService) nothing inside it animates on its own
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
 }

@@ -13,6 +13,8 @@ import { AuthService } from '../../services/auth';
 })
 export class Sidebar implements OnInit {
   @Input() collapsed = false;
+  /** phones only: slides the menu in over the page */
+  @Input() mobileOpen = false;
   menuItems: MenuItem[] = [];
   currentUserRole: string | null = null;
 
