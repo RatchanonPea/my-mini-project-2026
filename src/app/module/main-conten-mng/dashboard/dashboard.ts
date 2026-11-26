@@ -5,16 +5,19 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { AppDateModule } from '../../../shared/app-date/app-date';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
-import { ApiService, ReportGroupBy } from '../../../services/api';
+import { ApiService, InventorySummary, ReportGroupBy, ReportPeriod } from '../../../services/api';
+import { RouterLink } from '@angular/router';
 import { toYmd } from '../../../common/helper';
 import { ReportChart, ReportChartSeries } from '../../../shared/report-chart/report-chart';
+import { RowDrawer, RowDrawerData, money, openDrawer } from '../../../shared/row-drawer/row-drawer';
+import { MatDialog } from '@angular/material/dialog';
 
 export interface DashboardTopProduct {
   id: number;
@@ -24,12 +27,12 @@ export interface DashboardTopProduct {
 }
 
 const STAT_DEFS = [
-  { title: 'ยอดขาย', color: 'primary', prefix: '฿ ' },
-  { title: 'ค่าใช้จ่าย', color: 'warn', prefix: '฿ ' },
-  { title: 'กำไรสุทธิ', color: 'accent', prefix: '฿ ' },
-  { title: 'รายการขาย', color: 'info', prefix: '' },
-  { title: 'ต้นทุนไก่', color: 'accent', prefix: '฿ ' },
-  { title: 'กำไรจากไก่', color: 'primary', prefix: '฿ ' },
+  { title: 'ยอดขาย', color: 'primary', icon: 'payments', prefix: '฿ ' },
+  { title: 'ค่าใช้จ่ายดำเนินงาน', color: 'warn', icon: 'receipt_long', prefix: '฿ ' },
+  { title: 'กำไรก่อนหักต้นทุนไก่', color: 'accent', icon: 'trending_up', prefix: '฿ ' },
+  { title: 'รายการขาย', color: 'info', icon: 'shopping_bag', prefix: '' },
+  { title: 'ต้นทุนไก่', color: 'accent', icon: 'egg_alt', prefix: '฿ ' },
+  { title: 'กำไรจากไก่', color: 'primary', icon: 'savings', prefix: '฿ ' },
 ];
 
 @Component({
@@ -41,7 +44,7 @@ const STAT_DEFS = [
     MatTableModule,
     MatTabsModule,
     MatDatepickerModule,
-    MatNativeDateModule,
+    AppDateModule,
     MatIconModule,
     MatButtonModule,
     MatButtonToggleModule,
@@ -49,6 +52,7 @@ const STAT_DEFS = [
     MatFormFieldModule,
     FormsModule,
     ReportChart,
+    RouterLink,
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss'],
@@ -61,6 +65,10 @@ export class Dashboard implements OnInit, OnDestroy {
   readonly groupByLabel: Record<string, string> = { day: 'รายวัน', week: 'รายสัปดาห์', month: 'รายเดือน', year: 'รายปี' };
   readonly groupByOptions: ReportGroupBy[] = ['day', 'week', 'month', 'year'];
 
+  // current stock, not tied to the period picker
+  stock: InventorySummary | null = null;
+  stockFailed = false;
+
   selectedDate: Date = new Date();
   groupBy: ReportGroupBy = 'day';
   periodLabel = '';
@@ -70,6 +78,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   stats = STAT_DEFS.map((def) => ({ ...def, value: def.prefix + '0', amount: 0 }));
 
+  private dialog = inject(MatDialog);
   displayedColumns: string[] = ['id', 'name', 'sold', 'revenue'];
   dataSource = new MatTableDataSource<DashboardTopProduct>([]);
 
@@ -80,6 +89,10 @@ export class Dashboard implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadSummary();
+    this.api.getInventorySummary().subscribe({
+      next: (stock) => (this.stock = stock),
+      error: () => (this.stockFailed = true),
+    });
   }
 
   private loadSummary(): void {
@@ -105,12 +118,12 @@ export class Dashboard implements OnInit, OnDestroy {
       next: (r) => {
         // periods arrives newest-first — reversed here so the trend reads left-to-right in
         // chronological order, same as the Reports page's chart.
-        const chronological = [...r.periods].reverse();
+        const chronological = this.withEmptyPeriods([...r.periods].reverse(), from, span);
         this.chartLabels = chronological.map((p) => this.trendLabel(p.period));
         this.chartSeries = [
           { label: 'ยอดขาย', data: chronological.map((p) => p.sales_total), color: '#16a34a' },
-          { label: 'ค่าใช้จ่ายอื่น', data: chronological.map((p) => p.expense_total), color: '#b91c1c' },
-          { label: 'กำไร', data: chronological.map((p) => p.profit), color: '#ea580c' },
+          { label: 'ค่าใช้จ่ายดำเนินงาน', data: chronological.map((p) => p.expense_total), color: '#b91c1c' },
+          { label: 'กำไรก่อนหักต้นทุนไก่', data: chronological.map((p) => p.profit), color: '#ea580c' },
         ];
       },
       error: () => {
@@ -118,6 +131,26 @@ export class Dashboard implements OnInit, OnDestroy {
         this.chartSeries = [];
       },
     });
+  }
+
+  // The API only returns periods that have data. A trend with one lonely bar says nothing, so the quiet
+  // days / months / years are put back as zero. Weeks are left as sent: their start day is the API's call.
+  private withEmptyPeriods(periods: ReportPeriod[], from: Date, span: number): ReportPeriod[] {
+    if (this.groupBy === 'week' || !periods.length) return periods;
+    const keyLength = this.groupBy === 'day' ? 10 : this.groupBy === 'month' ? 7 : 4;
+    const byKey = new Map(periods.map((p) => [p.period.slice(0, keyLength), p]));
+    const filled = Array.from({ length: span }, (_, i) => {
+      const date = new Date(from);
+      if (this.groupBy === 'year') date.setFullYear(from.getFullYear() + i, 0, 1);
+      else if (this.groupBy === 'month') date.setMonth(from.getMonth() + i, 1);
+      else date.setDate(from.getDate() + i);
+      const ymd = toYmd(date);
+      return byKey.get(ymd.slice(0, keyLength)) ?? {
+        period: ymd, sales_total: 0, sale_qty: 0, chicken_sold: 0, expense_total: 0, chicken_received: 0, purchase_cost: 0, profit: 0,
+      };
+    });
+    // never drop real figures: if any period did not land in a slot, show the data as it came
+    return periods.every((p) => filled.includes(p)) ? filled : periods;
   }
 
   private trendLabel(period: string): string {
@@ -232,5 +265,20 @@ export class Dashboard implements OnInit, OnDestroy {
     d.setFullYear(year);
     this.selectedDate = d;
     this.loadSummary();
+  }
+
+  openRow(item: DashboardTopProduct): void {
+    const total = this.totalRevenue;
+    openDrawer<RowDrawer, RowDrawerData>(this.dialog, RowDrawer, {
+      title: item.name,
+      subtitle: `สินค้าขายดีอันดับ ${item.id} · ${this.periodLabel}`,
+      icon: 'emoji_events',
+      highlight: { label: 'รายได้', value: money(item.revenue) },
+      fields: [
+        { label: 'ขายแล้ว', value: `${item.sold} ชิ้น` },
+        { label: 'เฉลี่ยต่อชิ้น', value: item.sold ? money(item.revenue / item.sold) : null },
+        { label: 'สัดส่วนใน Top 5', value: total ? `${Math.round((item.revenue / total) * 100)}%` : null },
+      ],
+    });
   }
 }

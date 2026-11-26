@@ -1,6 +1,6 @@
 .dashboard-page {
   padding: 1.5rem;
-  color: #1f2937;
+  color: var(--app-text);
 }
 
 .dashboard-header {
@@ -45,53 +45,6 @@
   font-weight: 500;
 }
 
-// .dashboard-header .subtitle {
-//   margin: 0.25rem 0 0;
-//   color: var(--app-text-muted);
-//   font-size: 0.9rem;
-//   animation: swing 1.6s infinite;
-// }
-
-/* element */
-.dashboard-header .subtitle {
-  margin: 0.25rem 0 0;
-  color: var(--app-text-muted);
-  font-size: 0.9rem;
-
-  display: inline-block;
-  /* 🔥 สำคัญ ไม่งั้นไม่แกว่ง */
-  transform-origin: top center;
-
-  animation: swing 1.6s ease-in-out infinite;
-}
-
-/* keyframes */
-@keyframes swing {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  20% {
-    transform: rotate(6deg);
-  }
-
-  40% {
-    transform: rotate(-4deg);
-  }
-
-  60% {
-    transform: rotate(3deg);
-  }
-
-  80% {
-    transform: rotate(-2deg);
-  }
-
-  100% {
-    transform: rotate(0deg);
-  }
-}
-
 // Proportional, matching the same 2-column card convention as Sales/Expenses/Purchases
 // (minmax(300px, 0.9fr) 1.6fr there) — not a hard pixel cap, so it scales cleanly instead of
 // leaving the side column looking like a small box floating in leftover space.
@@ -100,26 +53,6 @@
   grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.9fr);
   align-items: start;
   gap: 1rem;
-}
-
-.stats-panel {
-  display: block;
-}
-
-.dashboard-cards {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  min-width: 0;
-
-  // minmax(0, 1fr) on the track only caps how small the TRACK can get — each item still defaults
-  // to min-width:auto, which lets a stat tile's intrinsic content (the large "฿ 0" number + 1.5rem
-  // padding) refuse to shrink below its natural size and overflow .main-panel's right edge, so it
-  // visually spills onto the calendar column under browser zoom. min-width:0 on the item itself
-  // (not just the track) is what actually lets it shrink.
-  > mat-card {
-    min-width: 0;
-  }
 }
 
 .dashboard-main {
@@ -173,15 +106,9 @@
 
   p {
     margin: 0;
-    color: #64748b;
-    font-size: 0.82rem;
+    color: var(--app-text-muted);
+    font-size: 0.875rem;
   }
-}
-
-.trend-section,
-.animation-section {
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.18);
 }
 
 @media (max-width: 900px) {
@@ -204,7 +131,7 @@
   }
 
   .dashboard-header .subtitle {
-    font-size: 0.85rem;
+    font-size: 0.875rem;
   }
 
   .slider-item {
@@ -243,85 +170,6 @@
   }
 }
 
-.summary-card {
-  width: 100%;
-  border-radius: 20px !important;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1) !important;
-  background: linear-gradient(180deg, #ffffff 0%, #eef4ff 100%);
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.summary-tile {
-  padding: 1rem;
-  border-radius: 18px;
-  background: var(--app-surface);
-  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
-}
-
-.summary-label {
-  font-size: 0.78rem;
-  color: #64748b;
-  margin-bottom: 0.5rem;
-}
-
-.summary-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--app-text);
-}
-
-.top-seller-slider {
-  width: 100%;
-  border-radius: 20px !important;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1) !important;
-  background: linear-gradient(180deg, #ffffff 0%, #f7fcff 100%);
-}
-
-.slider-track {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-}
-
-.slider-item {
-  min-width: 220px;
-  flex: 0 0 auto;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #ea580c 0%, #b91c1c 100%);
-  color: white;
-  padding: 1rem;
-  display: grid;
-  gap: 0.8rem;
-}
-
-.slider-image {
-  width: 100%;
-  height: 120px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.slider-info {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.slider-title {
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.slider-meta {
-  font-size: 0.85rem;
-  opacity: 0.9;
-}
-
 // this lost its own selector at some point and its properties ended up stuck inside .slider-meta
 // above (a small text span, unrelated) — restored here. min-width:0 + overflow:hidden are the
 // actual fix for the zoom overlap bug: without them this column's content (the calendar) can
@@ -340,99 +188,6 @@
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
     background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);
   }
-
-  .quote-box {
-    padding: 1rem;
-    border-radius: 18px;
-    background: rgba(234, 88, 12, 0.08);
-    border: 1px solid rgba(234, 88, 12, 0.18);
-  }
-
-  .quote-text {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: #1f2937;
-    margin-bottom: 0.75rem;
-  }
-
-  .quote-author {
-    font-size: 0.82rem;
-    color: var(--app-text-soft);
-    text-align: right;
-  }
-
-  .info-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 0.75rem;
-  }
-
-  .info-item {
-    padding: 1rem;
-    border-radius: 16px;
-    background: var(--app-surface-alt);
-    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12);
-  }
-
-  .info-label {
-    color: #64748b;
-    font-size: 0.82rem;
-    margin-bottom: 0.35rem;
-  }
-
-  .info-value {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--app-text);
-  }
-
-
-
-.card-stats {
-  min-height: 140px;
-  border-radius: 16px;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.5rem;
-  text-align: center;
-}
-
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
-.stat-label {
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 0.75rem;
-  font-weight: 600;
-  opacity: 0.9;
-}
-
-.bg-primary {
-  background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
-  color: #fff;
-}
-
-.bg-warn {
-  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-  color: #fff;
-}
-
-.bg-accent {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: #fff;
-}
-
-.bg-info {
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-  color: #fff;
-}
 
   // overflow:hidden here is the hard safety net: if the calendar's internal rendering ever wants
   // to be wider than this card (its column shrank further than the calendar's natural size), it
@@ -453,7 +208,7 @@
     width: 100%;
     max-width: 100%;
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     border-radius: 18px;
     background: var(--app-surface);
   }
@@ -492,7 +247,7 @@
       }
 
       .mdc-tab__content {
-        font-size: 0.85rem;
+        font-size: 0.875rem;
         font-weight: 500;
       }
     }
@@ -508,7 +263,7 @@
     justify-content: center;
     padding: 0.25rem 0.75rem;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 500;
@@ -525,30 +280,282 @@
   }
 }
 
-@media (max-width: 640px) {
-  .dashboard-cards {
-    grid-template-columns: 1fr;
+:host-context(html.dark-theme) .status-badge {
+  &.allowed { background: rgba(76, 175, 80, 0.2); color: #81c784; }
+  &.blocked { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+}
+
+// ---------- Top row: the shop's own number (chickens in stock) leads, money reads as a ledger ----------
+.overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stock-panel,
+.money-panel {
+  min-width: 0;
+  padding: 1.5rem;
+
+  h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+// the hero tile: peach into rose, with a soft light in the corner
+.content-body .stock-panel.mat-mdc-card.mat-mdc-card,
+.stock-panel.mat-mdc-card.mat-mdc-card {
+  position: relative;
+  overflow: hidden;
+  align-items: flex-start;
+  background:
+    radial-gradient(70% 70% at 100% 0%, var(--butter-a), transparent 70%),
+    linear-gradient(140deg, var(--peach-a), var(--rose-b));
+}
+
+.stock-panel h5,
+.stock-panel .stock-note {
+  color: var(--peach-ink);
+}
+
+.stock-number {
+  margin-top: auto;
+  font-size: clamp(3.5rem, 8vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: var(--app-accent-strong);
+
+  span {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--app-text-soft);
+  }
+}
+
+.stock-note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+  color: var(--app-text-muted);
+
+  &.low {
+    color: #b91c1c;
+    font-weight: 600;
+  }
+}
+
+.stock-panel.is-low .stock-number {
+  color: #b91c1c;
+}
+
+:host-context(html.dark-theme) .stock-note.low,
+:host-context(html.dark-theme) .stock-panel.is-low .stock-number {
+  color: #fca5a5;
+}
+
+// ---------- Money: profit leads, sales and expenses side by side, supporting figures below ----------
+.money-pair,
+.money-sub {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.75rem 0 0;
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
   }
 
-  .dashboard-page {
-    padding: 1rem;
+  dd {
+    margin: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+}
+
+// raised pastel tiles: top highlight plus a soft shadow in the tile's own ink
+.profit-hero,
+.money-tile,
+.money-sub > div {
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--fill-a), var(--fill-b));
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 10px 22px -12px var(--ink);
+}
+
+// one icon style everywhere: a flat tint of the tile's own ink, seated in the tile (no drop shadow,
+// which made them look like they hovered above it)
+.orb-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+  color: var(--ink);
+}
+
+// pair and small tiles share the hero's layout: icon on the left, centred against label + figure
+.money-tile,
+.money-sub > div {
+  --icon: 44px;
+  --pad: 1rem;
+
+  position: relative;
+  min-height: 78px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.75rem 0.75rem 0.75rem calc(var(--pad) + var(--icon) + 0.75rem);
+
+  .orb-icon {
+    position: absolute;
+    left: var(--pad);
+    top: 50%;
+    width: var(--icon);
+    height: var(--icon);
+    transform: translateY(-50%);
+  }
+}
+
+.money-sub > div {
+  --icon: 38px;
+  --pad: 0.75rem;
+}
+
+.profit-hero {
+  --fill-a: var(--butter-a);
+  --fill-b: var(--peach-b);
+  --ink: var(--butter-ink);
+
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  padding: 1.1rem 1.25rem;
+
+  &.is-loss {
+    --fill-a: var(--rose-a);
+    --fill-b: var(--rose-b);
+    --ink: var(--rose-ink);
   }
 
-  .stat-card {
-    .card-stats {
-      min-height: 120px;
-      padding: 1rem;
-    }
+  // decorative bubble in the corner
+  &::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    bottom: -60px;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.22);
+    pointer-events: none;
+  }
 
-    .stat-number {
-      font-size: 2rem;
+  > div {
+    min-width: 0;
+  }
+
+  .orb-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+
+    mat-icon {
+      width: 30px;
+      height: 30px;
+      font-size: 30px;
     }
   }
 }
 
+.tile-label {
+  font-weight: 600;
+}
 
+.hero-value {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
 
-:host-context(html.dark-theme) .status-badge {
-  &.allowed { background: rgba(76, 175, 80, 0.2); color: #81c784; }
-  &.blocked { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+.money-pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  dd {
+    font-size: 1.75rem;
+    line-height: 1.3;
+  }
+}
+
+.money-tile {
+  &:nth-child(1) { --fill-a: var(--mint-a); --fill-b: var(--mint-b); --ink: var(--mint-ink); }
+  &:nth-child(2) { --fill-a: var(--rose-a); --fill-b: var(--rose-b); --ink: var(--rose-ink); }
+}
+
+.money-sub {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  > div:nth-child(1) { --fill-a: var(--lilac-a); --fill-b: var(--lilac-b); --ink: var(--lilac-ink); }
+  > div:nth-child(2) { --fill-a: var(--sky-a); --fill-b: var(--sky-b); --ink: var(--sky-ink); }
+  > div:nth-child(3) { --fill-a: var(--peach-a); --fill-b: var(--peach-b); --ink: var(--peach-ink); }
+
+  dt {
+    font-size: 0.9375rem;
+  }
+
+  dd {
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 900px) {
+  .overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .money-pair,
+  .money-sub {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+// one entrance when the page opens
+.overview > *,
+.grid-layout > * {
+  animation: rise-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.overview > :nth-child(2) { animation-delay: 0.08s; }
+.grid-layout > :nth-child(1) { animation-delay: 0.16s; }
+.grid-layout > :nth-child(2) { animation-delay: 0.24s; }
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overview > *,
+  .grid-layout > * {
+    animation: none;
+  }
 }

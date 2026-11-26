@@ -1,3 +1,4 @@
+import { TodayButton } from '../../../shared/calendar-today/calendar-today';
 import { NoData } from '../../../shared/no-data/no-data';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -10,21 +11,26 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepicker, MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { AppDateModule } from '../../../shared/app-date/app-date';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { ApiService, ReportGroupBy, ReportPeriod, SummaryTotals } from '../../../services/api';
-import { toYmd } from '../../../common/helper';
+import { DialogErrorHtmlConfirm, toYmd } from '../../../common/helper';
+import { buildReportDoc } from '../../../common/print-docs';
+import { PrintService } from '../../../services/print';
 import { Pager } from '../../../shared/pager/pager';
 import { ReportChart, ReportChartSeries } from '../../../shared/report-chart/report-chart';
+import { RowDrawer, RowDrawerData, money, openDrawer } from '../../../shared/row-drawer/row-drawer';
+import { MatDialog } from '@angular/material/dialog';
+import { formatNumber } from '@angular/common';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [NoData, 
+  imports: [TodayButton, NoData, 
     CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule,
-    MatIconModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatTableModule, MatButtonToggleModule, Pager, ReportChart,
+    MatIconModule, MatSelectModule, MatDatepickerModule, AppDateModule, MatTableModule, MatButtonToggleModule, Pager, ReportChart,
   ],
   templateUrl: './reports.html',
   styleUrls: ['./reports.scss'],
@@ -33,6 +39,8 @@ export class Reports implements OnInit {
   private api = inject(ApiService);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
+  private printer = inject(PrintService);
+  private dialog = inject(MatDialog);
 
   readonly groupByLabel: Record<string, string> = { day: 'รายวัน', week: 'รายสัปดาห์', month: 'รายเดือน', year: 'รายปี' };
   displayedColumns = ['period', 'sales_total', 'sale_qty', 'purchase_cost', 'chicken_received', 'expense_total', 'profit'];
@@ -48,6 +56,8 @@ export class Reports implements OnInit {
   });
 
   summary: SummaryTotals | null = null;
+  // the range/grouping the shown numbers were generated for (the form may have been edited since)
+  private generated: { from: string; to: string; groupBy: ReportGroupBy } | null = null;
   periods: ReportPeriod[] = [];
   pagedPeriods: ReportPeriod[] = [];
   loading = false;
@@ -137,8 +147,11 @@ export class Reports implements OnInit {
   }
 
   periodLabel(period: string): string {
+    return this.periodLabelFor(period, this.form.controls.groupBy.value);
+  }
+
+  private periodLabelFor(period: string, groupBy: ReportGroupBy): string {
     const d = new Date(period + 'T00:00:00Z');
-    const groupBy = this.form.controls.groupBy.value;
     if (groupBy === 'year') return d.getUTCFullYear().toString();
     if (groupBy === 'month') return `${Reports.THAI_MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
     if (groupBy === 'week') {
@@ -158,6 +171,7 @@ export class Reports implements OnInit {
     const from = toYmd(v.dateStart);
     const to = toYmd(v.dateEnd);
     this.loading = true;
+    this.generated = { from, to, groupBy: v.groupBy };
 
     this.api.getReportSummary(from, to).subscribe((r) => (this.summary = r));
     this.api.getReportBreakdown(from, to, v.groupBy).subscribe({
@@ -176,6 +190,24 @@ export class Reports implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  printReport(): void {
+    if (!this.summary || !this.generated) return;
+    const { from, to, groupBy } = this.generated;
+    this.printer
+      .print(
+        buildReportDoc({
+          groupByLabel: this.groupByLabel[groupBy],
+          from,
+          to,
+          summary: this.summary,
+          periods: this.periods,
+          // periodLabel() reads the form's grouping: use the one the report was generated with
+          periodLabel: (period) => this.periodLabelFor(period, groupBy),
+        })
+      )
+      .catch(() => DialogErrorHtmlConfirm('เปิดหน้าพิมพ์ไม่สำเร็จ'));
   }
 
   private updatePage(): void {
@@ -223,5 +255,22 @@ export class Reports implements OnInit {
     const value = which === 'start' ? new Date(y, m, 1) : new Date(y, m + 1, 0);
     this.form.controls[which === 'start' ? 'dateStart' : 'dateEnd'].setValue(value);
     picker.close();
+  }
+
+  openRow(row: ReportPeriod): void {
+    const groupBy = this.generated?.groupBy ?? this.form.controls.groupBy.value;
+    openDrawer<RowDrawer, RowDrawerData>(this.dialog, RowDrawer, {
+      title: `สรุป${this.groupByLabel[groupBy]}`,
+      subtitle: this.periodLabelFor(row.period, groupBy),
+      icon: 'bar_chart',
+      highlight: { label: 'กำไรก่อนหักต้นทุนไก่', value: money(row.profit), negative: row.profit < 0 },
+      fields: [
+        { label: 'ยอดขาย', value: money(row.sales_total) },
+        { label: 'ค่าใช้จ่ายดำเนินงาน', value: money(row.expense_total) },
+        { label: 'ขายได้', value: `${formatNumber(row.chicken_sold, 'en-US', '1.0-2')} ตัว` },
+        { label: 'รับไก่เข้า', value: `${formatNumber(row.chicken_received, 'en-US', '1.0-2')} ตัว` },
+        { label: 'ซื้อไก่เข้า', value: money(row.purchase_cost) },
+      ],
+    });
   }
 }
