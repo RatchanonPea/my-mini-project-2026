@@ -3,6 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ApiService, Supplier, SupplyContract } from '../../../services/api';
 import { PrintService } from '../../../services/print';
+import { AuthService } from '../../../services/auth';
 import { ShopService } from '../../../services/shop';
 import { AgreementShop, buildSupplyAgreementDoc } from '../../../common/print-docs';
 import { DialogErrorHtmlConfirm } from '../../../common/helper';
@@ -18,9 +19,23 @@ export class SupplyAgreementService {
   private readonly printer = inject(PrintService);
   private readonly shop = inject(ShopService);
   private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
+
+  /** the agreement carries the owner's ID card number and address: managers / admins only (the API enforces it) */
+  get allowed(): boolean {
+    return this.auth.isManager();
+  }
+
+  private deny(): void {
+    DialogErrorHtmlConfirm('ข้อตกลงซื้อขายมีข้อมูลส่วนตัวของเจ้าของร้าน ทำหรือพิมพ์ได้เฉพาะผู้จัดการหรือแอดมิน');
+  }
 
   /** resolves with the recorded agreement, or null when the user cancelled or saving failed */
   async print(supplier: Supplier): Promise<SupplyContract | null> {
+    if (!this.allowed) {
+      this.deny();
+      return null;
+    }
     const settings = await this.shop.load();
     const branches = settings.branches.filter((b) => b.is_active);
 
@@ -89,6 +104,10 @@ export class SupplyAgreementService {
 
   /** Prints a recorded agreement again with the buyer / seller details it was made with. */
   async reprint(contract: SupplyContract): Promise<void> {
+    if (!this.allowed) {
+      this.deny();
+      return;
+    }
     try {
       const detail = await firstValueFrom(this.api.getSupplyContract(contract.contract_id));
       const snap = detail.snapshot;

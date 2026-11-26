@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, firstValueFrom, map, of, shareReplay, tap } from 'rxjs';
 import { ApiService, Branch, ShopProfile, ShopSettings } from './api';
+import { AuthService } from './auth';
 
 /** Used while the master data is unavailable (not saved yet, or the API is down): printing must still work. */
 export const DEFAULT_SHOP: ShopProfile = {
@@ -26,10 +27,18 @@ export const DEFAULT_SHOP: ShopProfile = {
 @Injectable({ providedIn: 'root' })
 export class ShopService {
   private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
   private cached$?: Observable<ShopSettings>;
+  /** what the API returns depends on who asks, so the cache belongs to one signed-in user */
+  private cachedFor: number | null = null;
 
   /** Cached after the first successful load; call refresh() after the settings page saves. */
   load(): Promise<ShopSettings> {
+    const userId = this.auth.getCurrentUserId();
+    if (userId !== this.cachedFor) {
+      this.cached$ = undefined;
+      this.cachedFor = userId;
+    }
     this.cached$ ??= this.api.getShop().pipe(
       map((settings) => ({ profile: settings.profile ?? DEFAULT_SHOP, branches: settings.branches ?? [], owner: settings.owner ?? null })),
       catchError(() => {

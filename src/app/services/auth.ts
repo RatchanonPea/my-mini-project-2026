@@ -113,6 +113,11 @@ export class AuthService {
     return localStorage.getItem('currentUserRole');
   }
 
+  /** managers / admins: the roles the API lets read and change personal and bank details */
+  isManager(): boolean {
+    return ['manager', 'admin'].includes((this.getCurrentUserRole() ?? '').trim().toLowerCase());
+  }
+
   getCurrentUserId(): number | null {
     try {
       const id = parseInt(JSON.parse(localStorage.getItem('userInfo') ?? '{}')?.user_id, 10);

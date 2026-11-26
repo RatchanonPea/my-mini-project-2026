@@ -53,7 +53,7 @@
                 <mat-hint align="end" appCharCount />
               </mat-form-field>
             </div>
-            <app-supplier-contract-fields [form]="form"></app-supplier-contract-fields>
+            <app-supplier-contract-fields [form]="form" [showPrivate]="canSeePrivate"></app-supplier-contract-fields>
             <div class="form-row">
               <label class="map-label">ปักหมุดตำแหน่งร้าน</label>
               <app-location-picker [lat]="lat" [lng]="lng" (locationChange)="onLocationChange($event)" (addressChange)="onAddressChange($event)"></app-location-picker>

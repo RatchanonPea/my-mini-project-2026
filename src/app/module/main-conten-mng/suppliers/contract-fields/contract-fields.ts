@@ -37,6 +37,8 @@ export const REQUIRED_CONTRACT_FIELDS: Record<ShopEntityType, string[]> = {
   juristic: ['legal_name', 'tax_id', 'contact_name', 'contact_position'],
 };
 const ALL_REQUIRED = [...new Set(Object.values(REQUIRED_CONTRACT_FIELDS).flat())];
+/** ID / tax number and bank account: hidden from roles that may not read or change them */
+const PRIVATE_FIELDS = ['tax_id', 'bank_name', 'bank_account_no', 'bank_account_name'];
 
 /**
  * "Contract details" block under a supplier form. Pick individual or juristic person first: the fields that
@@ -87,6 +89,7 @@ const ALL_REQUIRED = [...new Set(Object.values(REQUIRED_CONTRACT_FIELDS).flat())
             <mat-hint align="end" appCharCount />
             <mat-error>{{ isJuristic ? 'กรุณากรอกชื่อนิติบุคคล' : 'กรุณากรอกชื่อ-นามสกุล' }}</mat-error>
           </mat-form-field>
+          @if (showPrivate) {
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>{{ isJuristic ? 'เลขทะเบียนนิติบุคคล/เลขประจำตัวผู้เสียภาษี' : 'เลขประจำตัวประชาชน' }}</mat-label>
             <input matInput appThaiId formControlName="tax_id" inputmode="numeric" placeholder="X-XXXX-XXXXX-XX-X" autocomplete="off" />
@@ -94,6 +97,7 @@ const ALL_REQUIRED = [...new Set(Object.values(REQUIRED_CONTRACT_FIELDS).flat())
             <mat-hint>พิมพ์ได้เฉพาะตัวเลข 13 หลัก</mat-hint>
             <mat-error>{{ taxIdError }}</mat-error>
           </mat-form-field>
+          }
           @if (isJuristic) {
             <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label>ผู้มีอำนาจลงนาม</mat-label>
@@ -115,7 +119,11 @@ const ALL_REQUIRED = [...new Set(Object.values(REQUIRED_CONTRACT_FIELDS).flat())
 
       <section class="group">
         <h4><mat-icon aria-hidden="true">account_balance</mat-icon> การชำระเงิน <span class="optional">ไม่บังคับ</span></h4>
+        @if (!showPrivate) {
+          <p class="private-note"><mat-icon aria-hidden="true">lock</mat-icon> เลขประจำตัวและบัญชีธนาคารของผู้ขาย ดูและแก้ไขได้เฉพาะผู้จัดการหรือแอดมิน</p>
+        }
         <div class="fields">
+          @if (showPrivate) {
           <app-bank-select formControlName="bank_name" label="ธนาคาร" />
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>เลขที่บัญชี</mat-label>
@@ -129,6 +137,7 @@ const ALL_REQUIRED = [...new Set(Object.values(REQUIRED_CONTRACT_FIELDS).flat())
             <app-clear-button matSuffix />
             <mat-hint align="end" appCharCount />
           </mat-form-field>
+          }
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>เครดิต (วัน)</mat-label>
             <input matInput appDigitsOnly type="number" min="0" max="365" step="1" formControlName="credit_days" />
@@ -187,6 +196,9 @@ const ALL_REQUIRED = [...new Set(Object.values(REQUIRED_CONTRACT_FIELDS).flat())
     :host-context(html.dark-theme) .rule { background: rgba(248, 113, 113, 0.14); color: #fca5a5; }
     .rule mat-icon { font-size: 18px; width: 18px; height: 18px; flex: none; }
 
+    .private-note { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font-size: 0.875rem; color: var(--app-text-muted); }
+    .private-note mat-icon { flex: none; font-size: 18px; width: 18px; height: 18px; }
+
     .type-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 14px; }
     .type-label { font-weight: 600; }
 
@@ -222,6 +234,8 @@ export class SupplierContractFields implements OnInit, AfterViewInit {
   // typed loosely on purpose: the parent forms differ in their other controls
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Input({ required: true }) form!: FormGroup<any>;
+  /** false: the viewer may not see or change the ID / tax number and bank account */
+  @Input() showPrivate = true;
 
   get isJuristic(): boolean {
     return this.form.controls['entity_type']?.value === 'juristic';
@@ -243,11 +257,14 @@ export class SupplierContractFields implements OnInit, AfterViewInit {
   protected get missing(): number {
     return this.required.filter((key) => {
       const control: AbstractControl = this.form.controls[key];
+      if (control?.disabled) return false;
       return !control || String(control.value ?? '').trim() === '' || control.invalid;
     }).length;
   }
 
   ngOnInit(): void {
+    // disabled controls are left out of validation, so what is hidden never blocks saving
+    if (!this.showPrivate) PRIVATE_FIELDS.forEach((key) => this.form.controls[key].disable({ emitEvent: false }));
     // required fields depend on the kind of supplier: the form cannot be saved while any is missing
     this.applyRules();
     this.form.controls['entity_type'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.applyRules());

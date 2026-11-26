@@ -15,6 +15,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ApiService, Supplier } from '../../../services/api';
 import { ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess } from '../../../common/helper';
 import { SupplyAgreementService } from './supply-agreement';
+import { AuthService } from '../../../services/auth';
 import { Pager } from '../../../shared/pager/pager';
 import { LatLng, LocationPicker } from '../../../shared/location-picker/location-picker';
 import { ClearButton } from '../../../shared/clear-button/clear-button';
@@ -36,6 +37,7 @@ export class Suppliers implements OnInit {
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private agreements = inject(SupplyAgreementService);
+  private auth = inject(AuthService);
   private reload$ = new Subject<void>();
   @ViewChild(LocationPicker) private locationPicker?: LocationPicker;
 
@@ -184,9 +186,13 @@ export class Suppliers implements OnInit {
           label: 'เครดิต',
           value: supplier.credit_days === null || supplier.credit_days === undefined ? null : supplier.credit_days === 0 ? 'จ่ายสด' : `${supplier.credit_days} วัน`,
         },
-        { label: 'ธนาคาร', value: supplier.bank_name },
-        { label: 'เลขบัญชี', value: supplier.bank_account_no },
-        { label: 'ชื่อบัญชี', value: supplier.bank_account_name },
+        ...(this.auth.isManager()
+          ? [
+              { label: 'ธนาคาร', value: supplier.bank_name },
+              { label: 'เลขบัญชี', value: supplier.bank_account_no },
+              { label: 'ชื่อบัญชี', value: supplier.bank_account_name },
+            ]
+          : []),
       ],
       actions: [
         {

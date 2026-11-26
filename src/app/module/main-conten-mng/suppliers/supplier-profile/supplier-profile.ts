@@ -51,7 +51,8 @@ export class SupplierProfile implements OnInit {
   readonly contractSearch = new FormControl('', { nonNullable: true });
   readonly orderSearch = new FormControl('', { nonNullable: true });
   readonly contractColumns = ['code', 'created_at', 'quantity', 'unit_price', 'credit_days', 'status', 'action'];
-  readonly canEndContract = ['manager', 'admin'].includes(this.auth.getCurrentUserRole() ?? '');
+  readonly canEndContract = this.auth.isManager();
+  readonly canSeePrivate = this.auth.isManager();
 
   supplierId = 0;
   profile: SupplierProfileData | null = null;

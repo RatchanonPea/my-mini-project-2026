@@ -42,7 +42,11 @@ import { SupplyAgreementService } from '../supply-agreement';
       @if (loading()) { <p class="slip-meta">กำลังโหลด...</p> }
     </mat-dialog-content>
     <mat-dialog-actions class="slip-actions">
-      <button mat-flat-button class="is-primary" type="button" (click)="reprint()"><mat-icon>print</mat-icon> พิมพ์ซ้ำ</button>
+      @if (agreements.allowed) {
+        <button mat-flat-button class="is-primary" type="button" (click)="reprint()"><mat-icon>print</mat-icon> พิมพ์ซ้ำ</button>
+      } @else {
+        <button mat-flat-button class="is-primary" type="button" mat-dialog-close>ปิด</button>
+      }
     </mat-dialog-actions>
   `,
   styles: [`
@@ -53,12 +57,13 @@ import { SupplyAgreementService } from '../supply-agreement';
 export class ContractDetailDialog implements OnInit {
   readonly contract = inject<SupplyContract>(MAT_DIALOG_DATA);
   private api = inject(ApiService);
-  private agreements = inject(SupplyAgreementService);
+  readonly agreements = inject(SupplyAgreementService);
 
   detail = signal<SupplyContractDetail | null>(null);
   loading = signal(false);
 
   ngOnInit(): void {
+    if (!this.agreements.allowed) return; // the printed buyer details are not for this role
     this.loading.set(true);
     this.api.getSupplyContract(this.contract.contract_id).subscribe({
       next: (d) => { this.detail.set(d); this.loading.set(false); },
