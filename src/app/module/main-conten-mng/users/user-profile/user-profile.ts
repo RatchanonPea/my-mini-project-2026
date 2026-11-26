@@ -12,11 +12,17 @@ import { MatSelectModule } from '@angular/material/select';
 import { ApiService, ActivityLogItem, CreateUserPayload, Role, UpdateUserPayload, User } from '../../../../services/api';
 import { ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess } from '../../../../common/helper';
 import { Pager } from '../../../../shared/pager/pager';
+import { ShopService } from '../../../../services/shop';
+import { thaiNationalIdValidator } from '../../../../common/thai-id';
+import { ThaiIdInput } from '../../../../shared/thai-id/thai-id.directive';
+import { AddressInput } from '../../../../shared/thai-address/address-field';
+import { ClearButton } from '../../../../shared/clear-button/clear-button';
+import { CharCount } from '../../../../shared/char-count/char-count';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, Pager, RoleChip],
+  imports: [CharCount, ClearButton, CommonModule, RouterModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, ThaiIdInput, AddressInput, Pager, RoleChip],
   templateUrl: './user-profile.html',
   styleUrls: ['./user-profile.scss'],
 })
@@ -25,8 +31,11 @@ export class UserProfile implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private shopService = inject(ShopService);
 
   isNew = false;
+  /** this user is the shop owner / authorised signatory: contracts take their details */
+  isShopOwner = false;
   userId: number | null = null;
   user: User | null = null;
   roles: Role[] = [];
@@ -44,7 +53,7 @@ export class UserProfile implements OnInit {
   };
   readonly entityLabel: Record<string, string> = {
     product: 'สินค้า', expense: 'รายจ่าย', sale: 'ยอดขาย', user: 'ผู้ใช้', supplier: 'ร้านค้า',
-    purchase_order: 'ใบสั่งซื้อไก่', stock_adjustment: 'ปรับสต็อกไก่', inventory_settings: 'ตั้งค่าสต็อก',
+    purchase_order: 'ใบสั่งซื้อไก่', supply_contract: 'ข้อตกลงซื้อขายไก่', stock_adjustment: 'ปรับสต็อกไก่', inventory_settings: 'ตั้งค่าสต็อก',
   };
 
   form = this.fb.nonNullable.group({
@@ -54,9 +63,21 @@ export class UserProfile implements OnInit {
     lastName: ['', Validators.required],
     email: [''],
     phone: [''],
+    // ID card number + address: only needed for whoever signs contracts (the shop owner), so optional
+    national_id: ['', [thaiNationalIdValidator]],
+    address: [''],
     role_id: [null as number | null, Validators.required],
     is_active: [true],
   });
+
+  /** ID card number / address are not in the user list: fetched separately (managers only) */
+  private loadLegal(userId: number): void {
+    this.api.getUserLegal(userId).subscribe({
+      next: (legal) => this.form.patchValue({ national_id: legal.national_id ?? '', address: legal.address ?? '' }),
+      error: () => undefined,
+    });
+    void this.shopService.load().then((settings) => (this.isShopOwner = settings.profile?.owner_user_id === userId));
+  }
 
   get isPasswordRequired(): boolean {
     return this.isNew;
@@ -143,11 +164,14 @@ export class UserProfile implements OnInit {
             lastName: found.last_name ?? found.last_name_th ?? found.last_name_en ?? '',
             email: found.email ?? '',
             phone: found.phone ?? '',
+            national_id: '',
+            address: '',
             role_id: found.role_id ?? null,
             is_active: !(found.status === false || found.status === 0 || found.status === '0'),
           });
         }
         this.loading = false;
+        if (found) this.loadLegal(found.user_id);
       },
       error: () => {
         this.loading = false;
@@ -175,6 +199,8 @@ export class UserProfile implements OnInit {
         password_hash: v.password,
         email: v.email.trim() || undefined,
         phone: v.phone.trim() || undefined,
+        national_id: v.national_id.trim() || undefined,
+        address: v.address.trim() || undefined,
         role_id: v.role_id ?? undefined,
         status: v.is_active ? 1 : 0,
       };
@@ -199,6 +225,8 @@ export class UserProfile implements OnInit {
       last_name: v.lastName.trim(),
       email: v.email.trim() || undefined,
       phone: v.phone.trim() || undefined,
+      national_id: v.national_id.trim() || null,
+      address: v.address.trim() || null,
       role_id: v.role_id ?? undefined,
       status: v.is_active ? 1 : 0,
     };

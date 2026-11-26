@@ -15,6 +15,9 @@
             <span class="chip">{{ user.code }}</span>
           }
           <span class="chip role-chip">{{ currentRoleName }}</span>
+          @if (isShopOwner) {
+            <span class="chip owner-chip" title="ข้อมูลของคนนี้ถูกใช้เป็นผู้ซื้อ/ผู้ลงนามในสัญญา"><mat-icon aria-hidden="true">verified</mat-icon> เจ้าของร้าน</span>
+          }
           @if (!isNew) {
             <span class="chip status-chip" [ngClass]="form.controls.is_active.value ? 'status-active' : 'status-inactive'">
               {{ form.controls.is_active.value ? 'Active' : 'Inactive' }}
@@ -39,12 +42,15 @@
               <mat-form-field appearance="outline">
                 <mat-label>Username</mat-label>
                 <input matInput formControlName="username" maxlength="100" />
+                <app-clear-button matSuffix />
+                <mat-hint align="end" appCharCount />
                 <mat-error>กรุณากรอก Username</mat-error>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Password {{ isNew ? '' : '(เว้นว่างถ้าไม่เปลี่ยน)' }}</mat-label>
                 <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" maxlength="100" />
+                <mat-hint align="end" appCharCount />
                 <mat-icon matSuffix class="eye-icon" (click)="hidePassword = !hidePassword">
                   {{ hidePassword ? 'visibility_off' : 'visibility' }}
                 </mat-icon>
@@ -56,24 +62,42 @@
               <mat-form-field appearance="outline">
                 <mat-label>ชื่อ</mat-label>
                 <input matInput formControlName="firstName" maxlength="100" />
+                <app-clear-button matSuffix />
+                <mat-hint align="end" appCharCount />
                 <mat-error>กรุณากรอกชื่อ</mat-error>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>นามสกุล</mat-label>
                 <input matInput formControlName="lastName" maxlength="100" />
+                <app-clear-button matSuffix />
+                <mat-hint align="end" appCharCount />
                 <mat-error>กรุณากรอกนามสกุล</mat-error>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>อีเมล</mat-label>
                 <input matInput type="email" formControlName="email" maxlength="150" />
+                <app-clear-button matSuffix />
+                <mat-hint align="end" appCharCount />
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>เบอร์โทร</mat-label>
                 <input matInput formControlName="phone" maxlength="30" />
+                <app-clear-button matSuffix />
+                <mat-hint align="end" appCharCount />
               </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>เลขบัตรประชาชน</mat-label>
+                <input matInput appThaiId formControlName="national_id" inputmode="numeric" placeholder="X-XXXX-XXXXX-XX-X" autocomplete="off" />
+                <app-clear-button matSuffix />
+                <mat-hint>ใช้ในสัญญา กรอกเฉพาะเจ้าของร้าน/ผู้ลงนาม</mat-hint>
+                <mat-error>{{ form.controls.national_id.hasError('thaiIdChecksum') ? 'เลขบัตรประชาชนไม่ถูกต้อง (ตรวจสอบเลขอีกครั้ง)' : 'ต้องเป็นตัวเลข 13 หลัก' }}</mat-error>
+              </mat-form-field>
+
+              <app-address-field class="wide" formControlName="address" label="ที่อยู่ (ตามบัตรประชาชน/ที่ใช้ในสัญญา)" />
 
               <mat-form-field appearance="outline">
                 <mat-label>สิทธิ์การใช้งาน (Role)</mat-label>
@@ -149,6 +173,7 @@
               <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
                 <mat-label>ค้นหากิจกรรม</mat-label>
                 <input matInput formControlName="keyword" placeholder="ค้นหาจากรายละเอียด" />
+                <app-clear-button matSuffix />
               </mat-form-field>
               <div class="filter-actions">
                 <button mat-flat-button color="primary" type="submit"><mat-icon>search</mat-icon> ค้นหา</button>

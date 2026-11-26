@@ -6,7 +6,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatTableModule } from '@angular/material/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ConfirmDialog } from '../../../common/helper';
+import { ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess } from '../../../common/helper';
+import { switchMap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
@@ -15,6 +16,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { ApiService, User } from '../../../services/api';
 import { Pager } from '../../../shared/pager/pager';
 import { AuthService } from '../../../services/auth';
+import { RowDrawer, RowDrawerData, dateText, openDrawer } from '../../../shared/row-drawer/row-drawer';
+import { MatDialog } from '@angular/material/dialog';
+import { inject } from '@angular/core';
 
 
 interface GridItem {
@@ -47,6 +51,7 @@ interface GridItem {
 export class Users {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  private dialog = inject(MatDialog);
   clickedRows = new Set<GridItem>();
 
   pageEvent: any;
@@ -335,16 +340,43 @@ export class Users {
     this.router.navigate(['/main-conten-mng/users', item.id]);
   }
 
-  removeItem(id: number): void {
-    ConfirmDialog('ยืนยันการลบ', "คุณต้องการลบรายการนี้ใช่หรือไม่")
-      .then(async emit => {
-        if (emit) {
-          this.dataSource.data = this.dataSource.data.filter(item => item.id !== id);
-          this.items = this.items.filter(item => item.id !== id);
-          this.applySearch();
-          this.totalItems = this.dataSource.filteredData.length;
-        }
-      });
+  /** an account can't be switched off by the person using it: they would lock themself out */
+  isSelf(item: GridItem): boolean {
+    return item.id === this.authService.getCurrentUserId();
+  }
+
+  /** The API has no delete: an account is switched off (and can be switched back on). */
+  async toggleActive(item: GridItem): Promise<void> {
+    if (this.isSelf(item)) return;
+    const nextActive = item.status !== 'active';
+    const name = `${item.firstName} ${item.lastName}`.trim() || item.username;
+    const confirmed = await ConfirmDialog(
+      'ยืนยันการเปลี่ยนสถานะ',
+      nextActive ? `เปิดใช้งานผู้ใช้ "${name}" อีกครั้งใช่หรือไม่` : `ปิดการใช้งานผู้ใช้ "${name}" ใช่หรือไม่`,
+    );
+    if (!confirmed) return;
+
+    // ID card number / address are not in the user list: read them first so the update sends them back unchanged
+    this.apiService.getUserLegal(item.id).pipe(
+      switchMap((legal) => this.apiService.updateUser({
+        user_id: item.id,
+        username: item.username,
+        first_name: item.firstName.trim(),
+        last_name: item.lastName.trim(),
+        email: item.email || undefined,
+        phone: item.phone || undefined,
+        national_id: legal.national_id || null,
+        address: legal.address || null,
+        role_id: item.role_id,
+        status: nextActive ? 1 : 0,
+      })),
+    ).subscribe({
+      next: () => {
+        DialogSuccess(nextActive ? 'เปิดใช้งานผู้ใช้เรียบร้อยแล้ว' : 'ปิดการใช้งานผู้ใช้เรียบร้อยแล้ว');
+        this.loadUsers();
+      },
+      error: (err) => DialogErrorHtmlConfirm(err?.error?.message ?? 'เปลี่ยนสถานะผู้ใช้ไม่สำเร็จ'),
+    });
   }
 
   goToPage(index: number): void {
@@ -366,5 +398,32 @@ export class Users {
     console.log('ต่อหน้า:', event.pageSize);
   }
 
+  openRow(item: GridItem): void {
+    openDrawer<RowDrawer, RowDrawerData>(this.dialog, RowDrawer, {
+      title: `${item.firstName} ${item.lastName}`.trim() || item.username,
+      subtitle: item.code,
+      icon: 'person',
+      highlight: { label: 'ชื่อผู้ใช้', value: item.username },
+      fields: [
+        { label: 'สิทธิ์การใช้งาน', value: item.role },
+        { label: 'สถานะ', value: item.status === 'active' ? 'ใช้งานอยู่' : 'ปิดใช้งาน' },
+        { label: 'อีเมล', value: item.email },
+        { label: 'เบอร์โทร', value: item.phone },
+        { label: 'สร้างเมื่อ', value: dateText(item.date, 'dd/MM/yyyy', '+0700') },
+        { label: 'แก้ไขล่าสุด', value: dateText(item.updatedDate, 'dd/MM/yyyy HH:mm', '+0700'), meta: true },
+        { label: 'แก้ไขโดย', value: item.updatedBy, meta: true },
+      ],
+      actions: [
+        ...(this.isSelf(item)
+          ? []
+          : [{
+              label: item.status === 'active' ? 'ปิดการใช้งาน' : 'เปิดใช้งาน',
+              icon: item.status === 'active' ? 'block' : 'check_circle',
+              kind: item.status === 'active' ? ('warn' as const) : undefined,
+              run: () => void this.toggleActive(item),
+            }]),
+        { label: 'เปิดโปรไฟล์', icon: 'open_in_new', kind: 'primary', run: () => this.editItem(item) },
+      ],
+    });
+  }
 }
-
