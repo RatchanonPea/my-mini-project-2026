@@ -599,13 +599,13 @@ export class ApiService {
     );
   }
 
-  createSaleItem(item: { sale_date: string; product_id: number; quantity: number }): Observable<SaleItem> {
+  createSaleItem(item: { sale_date: string; product_id: number; quantity: number; unit_price: number }): Observable<SaleItem> {
     return this.http.post<any>(`${this.baseUrl}/sales/createSaleItem`, item).pipe(
       map((response) => this.extractData<SaleItem>(response))
     );
   }
 
-  updateSaleItem(item: { item_id: number; product_id: number; quantity: number }): Observable<SaleItem> {
+  updateSaleItem(item: { item_id: number; product_id: number; quantity: number; unit_price: number }): Observable<SaleItem> {
     return this.http.post<any>(`${this.baseUrl}/sales/updateSaleItem`, item).pipe(
       map((response) => this.extractData<SaleItem>(response))
     );

@@ -3230,3 +3230,13 @@ $m-moves: (
     align-items: center;
   }
 }
+
+// Sales entry form: a note under one field must not push its neighbour out of line.
+.content-body .sales-page.sales-page.sales-page .sales-card .form-row {
+  align-items: start;
+  row-gap: 0.85rem;
+
+  .mat-mdc-form-field-subscript-wrapper::before {
+    display: none;
+  }
+}

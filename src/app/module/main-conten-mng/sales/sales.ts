@@ -69,31 +69,46 @@ export class Sales implements OnInit {
   form = this.fb.nonNullable.group({
     product_id: [0, [Validators.required, Validators.min(1)]],
     quantity: [1, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]],
+    // starts at the product's price; what is typed here applies to this sale only
+    unit_price: [null as number | null, [Validators.required, Validators.min(0.01), Validators.max(999999)]],
   });
+
+  /** The price an edited line was sold at, kept unless the product is changed or the price retyped. */
+  private editingOriginal: { product_id: number; unit_price: number } | null = null;
+
+  useProductPrice(): void {
+    const productId = this.form.controls.product_id.value;
+    const price = this.editingOriginal?.product_id === productId
+      ? this.editingOriginal.unit_price
+      : this.selectedProduct?.price ?? null;
+    this.form.controls.unit_price.setValue(price === null ? null : Number(price));
+  }
 
   get isEditing(): boolean {
     return this.editingId !== null;
   }
 
-  get availableProducts(): ProductItem[] {
-    const current = this.formDateItems.find((i) => i.item_id === this.editingId);
-    const soldIds = new Set(this.formDateItems.map((i) => i.product_id));
-    return this.products.filter((p) => !soldIds.has(p.product_id) || p.product_id === current?.product_id);
+  /** How much of the picked product the day already has, so the same round is not typed in twice by mistake. */
+  get alreadySold(): number {
+    const productId = this.form.controls.product_id.value;
+    return this.formDateItems
+      .filter((i) => i.product_id === productId && i.item_id !== this.editingId)
+      .reduce((sum, i) => sum + i.quantity, 0);
   }
 
   get selectedProduct(): ProductItem | undefined {
     return this.products.find((p) => p.product_id === this.form.controls.product_id.value);
   }
 
-  // Search box inside the product dropdown — filters availableProducts by name as you type.
+  // Search box inside the product dropdown — filters the products by name as you type.
   productFilterCtrl = new FormControl('');
   filteredProducts$ = new ReplaySubject<ProductItem[]>(1);
 
   private filterProducts(): void {
     const search = (this.productFilterCtrl.value ?? '').trim().toLowerCase();
     const list = search
-      ? this.availableProducts.filter((p) => p.product_name.toLowerCase().includes(search))
-      : this.availableProducts;
+      ? this.products.filter((p) => p.product_name.toLowerCase().includes(search))
+      : this.products;
     this.filteredProducts$.next(list);
   }
 
@@ -204,7 +219,8 @@ export class Sales implements OnInit {
   editSale(item: SaleItem): void {
     this.editingId = item.item_id;
     this.loadFormDateItems(item.sale_date.slice(0, 10));
-    this.form.setValue({ product_id: item.product_id, quantity: item.quantity });
+    this.editingOriginal = { product_id: item.product_id, unit_price: Number(item.unit_price) };
+    this.form.setValue({ product_id: item.product_id, quantity: item.quantity, unit_price: Number(item.unit_price) });
     this.formOpen = true;
     ScrollToEditForm('.sales-card');
   }
@@ -218,11 +234,12 @@ export class Sales implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const { product_id, quantity } = this.form.getRawValue();
+    const { product_id, quantity, unit_price: price } = this.form.getRawValue();
+    const unit_price = Number(price);
     const editing = this.editingId;
     const request$ = editing
-      ? this.api.updateSaleItem({ item_id: editing, product_id, quantity })
-      : this.api.createSaleItem({ sale_date: toYmd(new Date()), product_id, quantity });
+      ? this.api.updateSaleItem({ item_id: editing, product_id, quantity, unit_price })
+      : this.api.createSaleItem({ sale_date: toYmd(new Date()), product_id, quantity, unit_price });
 
     this.saving = true;
     request$.subscribe({
@@ -260,8 +277,9 @@ export class Sales implements OnInit {
   private resetForm(): void {
     if (this.editingId !== null) this.formOpen = false; // leaving edit mode folds the form again
     this.editingId = null;
+    this.editingOriginal = null;
     this.loadFormDateItems(toYmd(new Date()));
-    this.form.reset({ product_id: 0, quantity: 1 });
+    this.form.reset({ product_id: 0, quantity: 1, unit_price: null });
   }
 
   openRow(item: SaleItem): void {

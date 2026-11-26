@@ -21,7 +21,7 @@
           <div class="form-row">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>สินค้า</mat-label>
-              <mat-select formControlName="product_id">
+              <mat-select formControlName="product_id" (selectionChange)="useProductPrice()">
                 <mat-option>
                   <ngx-mat-select-search [formControl]="productFilterCtrl" placeholderLabel="ค้นหาเมนู..." noEntriesFoundLabel="ไม่พบเมนู"></ngx-mat-select-search>
                 </mat-option>
@@ -29,6 +29,9 @@
                   <mat-option [value]="p.product_id">{{ p.product_name }} ({{ p.price | currency:'THB ':'symbol':'1.0-0' }})</mat-option>
                 }
               </mat-select>
+              @if (alreadySold) {
+                <mat-hint>{{ isEditing ? 'รายการอื่นของวันนั้น' : 'วันนี้บันทึกแล้ว' }} {{ alreadySold | number }} ชิ้น</mat-hint>
+              }
               <mat-error>กรุณาเลือกสินค้า</mat-error>
             </mat-form-field>
             <mat-form-field appearance="outline">
@@ -39,7 +42,12 @@
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>ราคา/ชิ้น</mat-label>
-              <input matInput type="text" [value]="selectedProduct ? selectedProduct.price : ''" readonly />
+              <input matInput appThousands formControlName="unit_price" />
+              <app-clear-button matSuffix />
+              @if (selectedProduct && form.controls.unit_price.value !== null && +form.controls.unit_price.value !== +selectedProduct.price) {
+                <mat-hint>ราคาปกติ {{ selectedProduct.price | number }}</mat-hint>
+              }
+              <mat-error>กรุณาใส่ราคามากกว่า 0</mat-error>
             </mat-form-field>
           </div>
           <div class="form-actions">
@@ -111,7 +119,7 @@
             </ng-container>
             <ng-container matColumnDef="price">
               <th mat-header-cell *matHeaderCellDef> ราคา/ชิ้น </th>
-              <td mat-cell *matCellDef="let item">{{ item.unit_price | currency:'THB ':'symbol':'1.0-0' }}</td>
+              <td mat-cell *matCellDef="let item">{{ item.unit_price | currency:'THB ':'symbol':'1.0-2' }}</td>
             </ng-container>
             <ng-container matColumnDef="total">
               <th mat-header-cell *matHeaderCellDef> รวม </th>
