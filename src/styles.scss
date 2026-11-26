@@ -3371,7 +3371,14 @@ $m-moves: (
     flex: 2.4;
     background: #c2410c;
     color: #fff;
-
-    &:disabled { opacity: 0.5; }
   }
+}
+
+.print-preview-help {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  background: #fef3c7;
+  color: #422006;
+  font-size: 1rem;
+  line-height: 1.5;
 }

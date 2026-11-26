@@ -46,9 +46,10 @@ export const dateTimeTh = (value: string | Date | null | undefined): string =>
  * paper copy and the user does not need to hide anything. The browser's print dialog lets them pick a
  * printer or "Save as PDF".
  *
- * On a computer the iframe is hidden and the dialog opens by itself. Phone browsers may ignore print()
- * from a hidden frame, or once the tap that asked for it is long past, so there the document is shown
- * full screen and printed straight from the tap on its own button.
+ * On a computer the iframe is hidden and the dialog opens by itself. Phone browsers are unreliable at
+ * printing any iframe, so there the document is shown full screen and what gets printed is the app's own
+ * window: a copy of the paper sits in it, and the print styles hide everything else. The tap on the
+ * button calls print() directly, and the browser's own "Print" menu gives the same sheet.
  */
 @Injectable({ providedIn: 'root' })
 export class PrintService {
@@ -120,7 +121,6 @@ export class PrintService {
     const zoom = el('button', 'pp-zoom', 'ขยายอ่าน');
     shut.type = go.type = zoom.type = 'button';
     let enlarged = false;
-    go.disabled = true;
     bar.append(shut, go);
 
     // the frame keeps the paper's real width so lines break as they will on paper; only the view is scaled
@@ -149,20 +149,40 @@ export class PrintService {
     const close = () => {
       window.removeEventListener('resize', fit);
       window.removeEventListener('popstate', close);
+      window.removeEventListener('beforeprint', onBeforePrint);
+      removePrintCopy();
       this.document.removeEventListener('keydown', onKey);
       overlay.remove();
       this.closePreview = null;
     };
 
+    const removePrintCopy = this.addPrintCopy(html);
+    const help = el('p', 'print-preview-help',
+      'ถ้าหน้าพิมพ์ไม่ขึ้น: เปิดเว็บนี้ด้วย Chrome หรือ Safari (ไม่ใช่ในแอป LINE) หรือใช้เมนูของเบราว์เซอร์ แล้วเลือก "พิมพ์" ขณะที่หน้านี้เปิดอยู่');
+    help.hidden = true;
+    help.setAttribute('role', 'status');
+    overlay.insertBefore(help, bar);
+    let printStarted = false;
+    const onBeforePrint = () => {
+      printStarted = true;
+      help.hidden = true;
+    };
+    window.addEventListener('beforeprint', onBeforePrint);
+
     frame.onload = () => {
       fit();
-      go.disabled = false;
       void frame.contentDocument?.fonts?.ready.then(fit);
     };
     go.addEventListener('click', () => {
-      // nothing may be awaited here: the phone only opens its print sheet for the tap itself
-      frame.contentWindow?.focus();
-      frame.contentWindow?.print();
+      // nothing may be awaited before print(): the phone only opens its print sheet for the tap itself
+      printStarted = false;
+      try {
+        window.print();
+      } catch {
+        help.hidden = false;
+      }
+      // some in-app browsers ignore print() without any error: say what to do instead
+      setTimeout(() => (help.hidden = printStarted), 1500);
     });
     shut.addEventListener('click', close);
     zoom.addEventListener('click', () => {
@@ -182,6 +202,51 @@ export class PrintService {
   }
 
   private closePreview: (() => void) | null = null;
+
+  /**
+   * Puts the paper into the app's own page, invisible on screen and the only thing on paper. A shadow
+   * root keeps the app's styles off it and its styles off the app. Returns the function that removes it.
+   */
+  private addPrintCopy(html: string): () => void {
+    const parsed = new DOMParser().parseFromString(html, 'text/html');
+    let css = parsed.querySelector('style')?.textContent ?? '';
+    // fonts and the page size only work from the main document
+    const pageRules = css.match(/@font-face\s*\{[^}]*\}|@page\s*\{[^}]*\}/g) ?? [];
+    for (const rule of pageRules) css = css.replace(rule, '');
+    css = css.replace(/(^|\n)(\s*)html\s*\{/, '$1$2.paper-root {').replace(/(^|\n)(\s*)body\s*\{/, '$1$2.paper {');
+
+    const host = this.document.createElement('div');
+    host.className = 'print-copy';
+    const root = host.attachShadow({ mode: 'open' });
+    const style = this.document.createElement('style');
+    style.textContent = `:host { all: initial; display: block; } .paper-root { display: block; } ${css}`;
+    const sheet = this.document.createElement('div');
+    sheet.className = 'paper-root';
+    const paper = this.document.createElement('div');
+    paper.className = 'paper';
+    paper.append(...Array.from(parsed.body.childNodes).map((node) => this.document.importNode(node, true)));
+    sheet.append(paper);
+    root.append(style, sheet);
+
+    const pageStyle = this.document.createElement('style');
+    pageStyle.textContent = `${pageRules.join('\n')}
+      @media screen { .print-copy { display: none !important; } }
+      @media print {
+        html, body { height: auto !important; min-height: 0 !important; overflow: visible !important;
+          margin: 0 !important; padding: 0 !important; background: #fff !important; }
+        body > *:not(.print-copy) { display: none !important; }
+      }`;
+
+    this.document.head.appendChild(pageStyle);
+    this.document.body.appendChild(host);
+    // hidden text does not ask for its font by itself
+    void this.document.fonts?.load('400 12px Kanit');
+    void this.document.fonts?.load('700 12px Kanit');
+    return () => {
+      host.remove();
+      pageStyle.remove();
+    };
+  }
 
   private render(doc: PrintDocument, shop: ShopProfile, branch: Branch | null, showBranchName: boolean, owner: ShopOwner | null): string {
     const assets = (path: string) => new URL(`assets/${path}`, this.document.baseURI).href;
