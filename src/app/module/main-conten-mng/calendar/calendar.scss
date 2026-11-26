@@ -1,0 +1,140 @@
+// Glass look: translucent panels with backdrop blur over soft colour blobs.
+:host {
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-strong: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-line: rgba(194, 65, 12, 0.16);
+  --glass-shadow: 0 8px 32px rgba(154, 52, 18, 0.14);
+  --glass-blur: blur(16px) saturate(170%);
+  display: block;
+}
+:host-context(html.dark-theme) {
+  --glass-bg: rgba(48, 34, 27, 0.5);
+  --glass-bg-strong: rgba(36, 26, 21, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-line: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.cal-page {
+  position: relative; padding: 1.5rem; min-height: 100%;
+  background:
+    radial-gradient(520px 320px at 8% 6%, rgba(251, 146, 60, 0.35), transparent 70%),
+    radial-gradient(480px 360px at 92% 18%, rgba(244, 114, 182, 0.22), transparent 70%),
+    radial-gradient(560px 380px at 60% 96%, rgba(56, 189, 248, 0.2), transparent 70%);
+}
+.page-header { margin-bottom: 1.5rem; }
+.cal-grid { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr); align-items: start; }
+@media (max-width: 1100px) { .cal-grid { grid-template-columns: 1fr; } }
+
+.cal-card, .side-card {
+  padding: 1.25rem; border-radius: 22px;
+  background: var(--glass-bg) !important; border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow) !important;
+}
+.side-card { position: sticky; top: 1rem; }
+.side-card mat-card-header { padding: 0; margin-bottom: 0.75rem; }
+.side-card mat-card-content { padding: 0; }
+
+.cal-toolbar { display: flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem; }
+.jump-field { margin: 0 0.25rem; font-size: 0.95rem; }
+.month-field { width: 9.5rem; }
+.year-field { width: 6.5rem; }
+.spacer { flex: 1; }
+.cal-summary {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--app-text-muted);
+  > span { padding: 0.3rem 0.8rem; border-radius: 999px; background: var(--glass-bg); border: 1px solid var(--glass-border); }
+  strong { color: var(--app-text); font-weight: 700; }
+}
+.cal-legend { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+.legend-chip { transition: opacity 0.15s, transform 0.15s; }
+.legend-chip:hover { box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15); }
+.legend-chip.off { opacity: 0.4; text-decoration: line-through; }
+
+.cal-weekdays, .cal-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.cal-weekdays > div { text-align: center; font-weight: 600; padding: 0.25rem 0; color: var(--app-text-muted); }
+
+.day {
+  min-height: 108px; padding: 5px 7px; border-radius: 14px; cursor: pointer;
+  border: 1px solid var(--glass-border); background: var(--glass-bg);
+  display: flex; flex-direction: column; gap: 3px; overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+// no transform on hover for these targets: lifting them moves the edge away from a resting cursor, so hover
+// drops, the element falls back, hover starts again, and it flickers up and down forever
+.day:hover { box-shadow: 0 6px 18px rgba(154, 52, 18, 0.16); border-color: rgba(234, 88, 12, 0.5); }
+.day:focus-visible { outline: 2px solid var(--app-focus-ring, #c2410c); outline-offset: 1px; }
+.day.out { opacity: 0.45; }
+.day.today .num { background: linear-gradient(135deg, #f97316, #c2410c); color: #fff; }
+.day.selected { border: 2px solid #ea580c; background: var(--glass-bg-strong); box-shadow: 0 6px 20px rgba(234, 88, 12, 0.22); }
+.num { align-self: flex-start; min-width: 1.6rem; text-align: center; border-radius: 999px; font-weight: 600; font-size: 0.875rem; padding: 0 4px; }
+.more { font-size: 0.875rem; color: var(--app-text-muted); }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 0.25rem; max-width: 100%; border: 1px solid rgba(255, 255, 255, 0.55); border-radius: 999px; padding: 0.1rem 0.6rem;
+  font: inherit; font-size: 0.875rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  backdrop-filter: blur(6px);
+}
+button.chip { cursor: pointer; text-align: left; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+button.chip:hover { box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15); }
+button.chip:focus-visible { outline: 2px solid var(--app-focus-ring, #c2410c); outline-offset: 1px; }
+.chip-icon { font-size: 0.95rem; width: 0.95rem; height: 0.95rem; flex: none; }
+.chip.sale { background: rgba(224, 242, 254, 0.85); color: #075985; }
+.chip.expense { background: rgba(252, 231, 243, 0.85); color: #9d174d; }
+.chip.order { background: rgba(237, 233, 254, 0.85); color: #5b21b6; }
+.chip.receive { background: rgba(220, 245, 227, 0.85); color: #2e7d32; }
+.chip.due { background: rgba(255, 243, 205, 0.9); color: #8a5a00; }
+.chip.due.overdue { background: rgba(253, 226, 226, 0.92); color: #b3261e; }
+.chip.paid { background: rgba(204, 251, 241, 0.85); color: #115e59; }
+.chip.stock { background: rgba(243, 244, 246, 0.9); color: #374151; }
+.chip.contract { background: rgba(255, 237, 213, 0.9); color: #9a3412; }
+
+.event-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.event-item {
+  display: flex; align-items: center; gap: 0.25rem; padding: 0.5rem 0.65rem; border-radius: 14px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.event-item:hover { box-shadow: 0 4px 14px rgba(154, 52, 18, 0.14); }
+.event-main { flex: 1; min-width: 0; display: grid; gap: 0.15rem; justify-items: start; text-align: left; background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; }
+.event-title { font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.event-meta { font-size: 0.875rem; color: var(--app-text-muted); }
+
+// Hover preview card (absolute inside .cal-page, placed from the chip's rectangle)
+.hover-card {
+  position: absolute; z-index: 20; width: 300px; padding: 0.85rem 1rem; border-radius: 18px; pointer-events: none;
+  background: var(--glass-bg-strong); border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
+  animation: hover-in 0.14s ease-out;
+}
+.hover-card.above { transform: translateY(-100%); }
+@keyframes hover-in { from { opacity: 0; translate: 0 4px; } to { opacity: 1; translate: 0 0; } }
+.hc-head { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.1rem 0.65rem 0.1rem 0.5rem; border-radius: 999px; font-size: 0.875rem; font-weight: 700; }
+.hc-head.sale { background: rgba(224, 242, 254, 0.9); color: #075985; }
+.hc-head.expense { background: rgba(252, 231, 243, 0.9); color: #9d174d; }
+.hc-head.order { background: rgba(237, 233, 254, 0.9); color: #5b21b6; }
+.hc-head.receive { background: rgba(220, 245, 227, 0.9); color: #2e7d32; }
+.hc-head.due { background: rgba(255, 243, 205, 0.95); color: #8a5a00; }
+.hc-head.paid { background: rgba(204, 251, 241, 0.9); color: #115e59; }
+.hc-head.stock { background: rgba(243, 244, 246, 0.95); color: #374151; }
+.hc-head.contract { background: rgba(255, 237, 213, 0.95); color: #9a3412; }
+.hc-status { margin-left: 0.35rem; font-weight: 600; opacity: 0.85; }
+.hc-status.overdue { color: #b3261e; opacity: 1; }
+.hc-title { margin-top: 0.5rem; font-weight: 700; font-size: 1rem; color: var(--app-text); }
+.hc-sub { color: var(--app-text-muted); font-size: 0.875rem; }
+.hc-amount { margin-top: 0.25rem; font-size: 1.25rem; font-weight: 800; color: var(--app-text); }
+.hc-hint { margin-top: 0.6rem; padding-top: 0.5rem; border-top: 1px solid var(--glass-line); font-size: 0.875rem; color: var(--app-text-muted); }
+
+@media (max-width: 600px) {
+  .cal-page { padding: 1rem; }
+  .day { min-height: 72px; padding: 2px 3px; }
+  .day .chip { font-size: 0.875rem; padding: 0 0.3rem; }
+  .month-field { width: 7.5rem; }
+  .year-field { width: 5.5rem; }
+  .side-card { position: static; }
+}
+@media (hover: none) { .hover-card { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .day, .event-item, button.chip, .legend-chip, .hover-card { transition: none; animation: none; }
+}

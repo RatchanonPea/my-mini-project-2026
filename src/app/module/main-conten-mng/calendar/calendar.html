@@ -1,0 +1,118 @@
+<div class="cal-page">
+  <div class="page-header">
+    <div>
+      <h3>ปฏิทิน (Calendar)</h3>
+      <p class="subtitle">รวมทุกอย่างของร้านไว้ที่เดียว: ยอดขาย รายจ่าย สั่งซื้อ/รับไก่ วันครบกำหนดจ่าย ปรับสต็อก และข้อตกลง · คลิกวัน แล้วคลิกรายการเพื่อดูรายละเอียด</p>
+    </div>
+  </div>
+
+  <div class="cal-grid">
+    <mat-card class="cal-card">
+      <div class="cal-toolbar">
+        <button mat-icon-button type="button" aria-label="ย้อนไป 1 ปี" title="ย้อนไป 1 ปี" (click)="jumpTo(month().getFullYear() - 1, month().getMonth())"><mat-icon>keyboard_double_arrow_left</mat-icon></button>
+        <button mat-icon-button type="button" aria-label="เดือนก่อน" (click)="shift(-1)"><mat-icon>chevron_left</mat-icon></button>
+        <mat-form-field class="jump-field month-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-select aria-label="เลือกเดือน" [value]="month().getMonth()" (selectionChange)="jumpTo(month().getFullYear(), $event.value)">
+            @for (n of monthNames; track $index) { <mat-option [value]="$index">{{ n }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="jump-field year-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-select aria-label="เลือกปี" [value]="month().getFullYear()" (selectionChange)="jumpTo($event.value, month().getMonth())">
+            @for (y of years(); track y) { <mat-option [value]="y">{{ y }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <button mat-icon-button type="button" aria-label="เดือนถัดไป" (click)="shift(1)"><mat-icon>chevron_right</mat-icon></button>
+        <button mat-icon-button type="button" aria-label="ไปข้างหน้า 1 ปี" title="ไปข้างหน้า 1 ปี" (click)="jumpTo(month().getFullYear() + 1, month().getMonth())"><mat-icon>keyboard_double_arrow_right</mat-icon></button>
+        <span class="spacer"></span>
+        <button mat-stroked-button type="button" (click)="goToday()">วันนี้</button>
+      </div>
+
+      <div class="cal-summary">
+        <span>ยอดขาย <strong>THB {{ summary().sales | number:'1.0-0' }}</strong></span>
+        <span>รายจ่าย <strong>THB {{ summary().expenses | number:'1.0-0' }}</strong></span>
+        <span>ค้างจ่ายผู้ขาย <strong>{{ summary().dueCount }} ใบ · THB {{ summary().dueTotal | number:'1.0-0' }}</strong></span>
+      </div>
+
+      <div class="cal-legend" role="group" aria-label="เลือกชนิดที่แสดง">
+        @for (t of types; track t) {
+          <button type="button" class="chip legend-chip" [ngClass]="meta[t].tone" [class.off]="hidden().has(t)"
+                  [attr.aria-pressed]="!hidden().has(t)" (click)="toggleType(t)">
+            <mat-icon class="chip-icon">{{ meta[t].icon }}</mat-icon>{{ meta[t].label }}
+          </button>
+        }
+      </div>
+
+      <div class="cal-weekdays">
+        @for (w of weekdays; track w) { <div>{{ w }}</div> }
+      </div>
+      <div class="cal-days">
+        @for (c of cells(); track c.ymd) {
+          <div class="day" role="button" tabindex="0"
+               [class.out]="!c.inMonth" [class.today]="c.isToday" [class.selected]="c.ymd === selected()"
+               (click)="selectDay(c)" (keydown.enter)="selectDay(c)" (keydown.space)="selectDay(c); $event.preventDefault()">
+            <span class="num">{{ c.day }}</span>
+            @for (e of c.events.slice(0, maxChips); track $index) {
+              <button type="button" class="chip" [ngClass]="meta[e.type].tone" [class.overdue]="e.status === 'overdue'"
+                      (mouseenter)="showHover(e, $event)" (mouseleave)="hideHover()" (focus)="showHover(e, $event)" (blur)="hideHover()"
+                      (click)="onClick(e); $event.stopPropagation()" (dblclick)="onDblClick(e); $event.stopPropagation()">{{ label(e) }}</button>
+            }
+            @if (c.events.length > maxChips) {
+              <span class="more">+{{ c.events.length - maxChips }} รายการ</span>
+            }
+          </div>
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="side-card">
+      <mat-card-header><mat-card-title>{{ selectedLabel() }}</mat-card-title></mat-card-header>
+      <mat-card-content>
+        @if (selectedEvents().length === 0) {
+          <app-no-data></app-no-data>
+        } @else {
+          <ul class="event-list">
+            @for (e of selectedEvents(); track $index) {
+              <li class="event-item">
+                <button type="button" class="event-main"
+                        (mouseenter)="showHover(e, $event)" (mouseleave)="hideHover()" (focus)="showHover(e, $event)" (blur)="hideHover()"
+                        (click)="onClick(e)" (dblclick)="onDblClick(e)">
+                  <span class="chip" [ngClass]="meta[e.type].tone" [class.overdue]="e.status === 'overdue'">
+                    <mat-icon class="chip-icon">{{ meta[e.type].icon }}</mat-icon>{{ meta[e.type].label }}{{ e.status === 'overdue' ? ' (เลยกำหนด)' : '' }}
+                  </span>
+                  <span class="event-title">{{ e.type === 'sale' ? 'ยอดขายทั้งวัน' : e.title }}</span>
+                  <span class="event-meta">
+                    @if (e.subtitle && e.type !== 'sale') { {{ e.subtitle }} }
+                    @if (e.amount !== null && e.type !== 'stock_adjust') { · THB {{ e.amount | number:'1.2-2' }} }
+                  </span>
+                </button>
+                @if (e.type === 'po_due') {
+                  <button mat-icon-button type="button" title="จ่ายเงิน" aria-label="จ่ายเงิน" (click)="pay(e)"><mat-icon>payments</mat-icon></button>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  @if (hover(); as h) {
+    <div class="hover-card" [class.above]="h.above" [style.left.px]="h.left" [style.top.px]="h.top" role="tooltip">
+      <div class="hc-head" [ngClass]="meta[h.event.type].tone">
+        <mat-icon class="chip-icon">{{ meta[h.event.type].icon }}</mat-icon>
+        <span>{{ meta[h.event.type].label }}</span>
+        @if (h.event.status && h.event.type !== 'sale' && h.event.type !== 'expense') {
+          <span class="hc-status" [class.overdue]="h.event.status === 'overdue'">{{ statusLabel(h.event) }}</span>
+        }
+      </div>
+      <div class="hc-title">{{ h.event.type === 'sale' ? 'ยอดขายทั้งวัน' : h.event.title }}</div>
+      @if (h.event.subtitle) {
+        <div class="hc-sub">{{ h.event.type === 'sale' ? h.event.subtitle + ' รายการ' : h.event.subtitle }}</div>
+      }
+      @if (h.event.amount !== null && h.event.type !== 'stock_adjust') {
+        <div class="hc-amount">THB {{ h.event.amount | number:'1.2-2' }}</div>
+      }
+      <div class="hc-hint">คลิก = ดูรายละเอียด · ดับเบิลคลิก = เปิดข้อมูล</div>
+    </div>
+  }
+</div>
