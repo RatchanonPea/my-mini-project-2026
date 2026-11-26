@@ -1,0 +1,58 @@
+.shop-page { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.shop-form { display: flex; flex-direction: column; gap: 1rem; }
+
+.type-row { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
+.type-label { font-weight: 600; }
+
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px 16px; padding-top: 6px; }
+.fields mat-hint { display: block; }
+
+mat-card { padding: 1rem; }
+mat-card-header { margin-bottom: 0.75rem; }
+
+.save-bar { display: flex; align-items: center; justify-content: flex-end; gap: 16px; flex-wrap: wrap; }
+.updated { color: var(--app-text-muted); font-size: 0.875rem; }
+
+.branch-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem; }
+.branch {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 10px 14px; border: 1px solid var(--app-border); border-radius: 12px;
+}
+.branch.inactive { opacity: 0.65; }
+.branch-name { font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.branch-line { margin-top: 2px; overflow-wrap: anywhere; }
+.muted { color: var(--app-text-muted); }
+.branch-actions { display: flex; flex-shrink: 0; }
+
+.badge { font-size: 0.7rem; font-weight: 600; padding: 1px 10px; border-radius: 999px; }
+.badge.main { background: rgba(234, 88, 12, 0.18); color: var(--app-accent-strong); }
+.badge.off { background: rgba(107, 114, 128, 0.25); color: var(--app-text-soft); }
+
+@media (max-width: 600px) {
+  .shop-page { padding: 0.75rem; }
+}
+
+.owner-field { grid-column: 1 / -1; }
+.role { opacity: 0.65; }
+
+.owner-card {
+  margin: 4px 0 16px; padding: 12px 14px; border: 1px solid var(--app-border); border-radius: 12px;
+  background: var(--app-surface-alt);
+}
+.owner-card.incomplete { border-color: rgba(220, 38, 38, 0.5); }
+.owner-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.owner-head mat-icon { color: #15803d; }
+.owner-card.incomplete .owner-head mat-icon { color: #b91c1c; }
+.owner-title { font-weight: 700; }
+.owner-sub { font-size: 0.875rem; color: var(--app-text-muted); }
+.owner-grid { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; }
+.owner-grid dt { color: var(--app-text-muted); font-size: 0.875rem; }
+.owner-grid dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.owner-grid dd.missing { color: #b91c1c; font-weight: 700; }
+.owner-warn {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin-top: 10px; padding: 8px 10px; border-radius: 10px; font-size: 0.9rem;
+  background: rgba(220, 38, 38, 0.1); color: #b91c1c;
+}
+:host-context(html.dark-theme) .owner-warn,
+:host-context(html.dark-theme) .owner-grid dd.missing { color: #fca5a5; }

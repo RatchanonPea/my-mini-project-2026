@@ -1,0 +1,209 @@
+<section class="shop-page">
+  <div class="page-header">
+    <div>
+      <h3>ตั้งค่าร้าน</h3>
+      <p class="subtitle">ข้อมูลที่ใช้พิมพ์หัวเอกสารและสัญญา กรอกครั้งเดียวใช้ได้ทุกเอกสาร</p>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="shop-form">
+    <mat-card>
+      <mat-card-header><mat-card-title>ผู้ทำสัญญา</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div class="type-row">
+          <span class="type-label">ประเภท</span>
+          <mat-button-toggle-group formControlName="entity_type" aria-label="ประเภทผู้ทำสัญญา">
+            <mat-button-toggle value="individual">บุคคลธรรมดา</mat-button-toggle>
+            <mat-button-toggle value="juristic">นิติบุคคล</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+
+        <div class="fields">
+          <mat-form-field appearance="outline">
+            <mat-label>ชื่อร้าน</mat-label>
+            <input matInput formControlName="shop_name" maxlength="200" />
+            <app-clear-button matSuffix />
+            <mat-hint align="end" appCharCount />
+            <mat-error>กรุณากรอกชื่อร้าน</mat-error>
+          </mat-form-field>
+
+          @if (isJuristic) {
+            <mat-form-field appearance="outline">
+              <mat-label>ชื่อนิติบุคคล (เช่น บริษัท ... จำกัด)</mat-label>
+              <input matInput formControlName="legal_name" maxlength="200" />
+              <app-clear-button matSuffix />
+              <mat-hint align="end" appCharCount />
+              <mat-error>กรุณากรอกชื่อนิติบุคคล</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>เลขทะเบียนนิติบุคคล/เลขประจำตัวผู้เสียภาษี</mat-label>
+              <input matInput appThaiId formControlName="tax_id" inputmode="numeric" placeholder="X-XXXX-XXXXX-XX-X" autocomplete="off" />
+              <app-clear-button matSuffix />
+              <mat-hint>พิมพ์ได้เฉพาะตัวเลข 13 หลัก</mat-hint>
+              <mat-error>{{ taxIdError }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>ตำแหน่งผู้ลงนาม (เช่น กรรมการผู้จัดการ)</mat-label>
+              <input matInput formControlName="signatory_position" maxlength="100" />
+              <app-clear-button matSuffix />
+              <mat-hint align="end" appCharCount />
+            </mat-form-field>
+          }
+
+          <mat-form-field appearance="outline" class="owner-field">
+            <mat-label>{{ isJuristic ? 'ผู้มีอำนาจลงนาม (เลือกจากผู้ใช้)' : 'เจ้าของร้าน (เลือกจากผู้ใช้)' }}</mat-label>
+            <mat-select formControlName="owner_user_id">
+              @for (o of owners; track o.user_id) {
+                <mat-option [value]="o.user_id">{{ o.name }}<span class="role"> · {{ o.role }}</span></mat-option>
+              }
+            </mat-select>
+            <mat-hint>เลือกได้เฉพาะผู้จัดการ/แอดมินที่ใช้งานอยู่</mat-hint>
+            <mat-error>กรุณาเลือกเจ้าของร้าน</mat-error>
+          </mat-form-field>
+        </div>
+
+        @if (ownerInfo; as o) {
+          <div class="owner-card" [class.incomplete]="ownerMissing.length">
+            <div class="owner-head">
+              <mat-icon aria-hidden="true">{{ ownerMissing.length ? 'error' : 'verified_user' }}</mat-icon>
+              <div>
+                <div class="owner-title">{{ isJuristic ? 'ผู้ลงนามที่จะพิมพ์ในสัญญา' : 'เจ้าของร้านที่จะพิมพ์ในสัญญา' }}</div>
+                <div class="owner-sub">ดึงจากข้อมูลผู้ใช้ ไม่ต้องกรอกซ้ำที่นี่</div>
+              </div>
+            </div>
+            <dl class="owner-grid">
+              <dt>ชื่อ</dt><dd>{{ o.name || '-' }}</dd>
+              <dt>เบอร์โทร</dt><dd>{{ o.phone || '-' }}</dd>
+              <dt>เลขบัตรประชาชน</dt><dd [class.missing]="!o.nationalId">{{ o.nationalId ? formatId(o.nationalId) : 'ยังไม่มี' }}</dd>
+              <dt>ที่อยู่</dt><dd [class.missing]="!o.address">{{ o.address || 'ยังไม่มี' }}</dd>
+            </dl>
+            @if (ownerMissing.length) {
+              <div class="owner-warn">
+                ผู้ใช้นี้ยังไม่มี: {{ ownerMissing.join(', ') }}
+                <a mat-stroked-button [routerLink]="['/main-conten-mng/users', o.userId]"><mat-icon aria-hidden="true">edit</mat-icon> ไปกรอกที่โปรไฟล์ผู้ใช้</a>
+              </div>
+            }
+          </div>
+        }
+
+        <mat-slide-toggle formControlName="is_vat">จดทะเบียนภาษีมูลค่าเพิ่ม (VAT)</mat-slide-toggle>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>บัญชีธนาคารของร้าน</mat-card-title>
+        <mat-card-subtitle>ไม่บังคับ</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="fields">
+          <app-bank-select formControlName="bank_name" label="ธนาคาร" />
+          <mat-form-field appearance="outline">
+            <mat-label>เลขที่บัญชี</mat-label>
+            <input matInput appDigitsOnly formControlName="bank_account_no" maxlength="20" inputmode="numeric" autocomplete="off" />
+            <app-clear-button matSuffix />
+            <mat-hint align="end" appCharCount />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>ชื่อบัญชี</mat-label>
+            <input matInput formControlName="bank_account_name" maxlength="200" />
+            <app-clear-button matSuffix />
+            <mat-hint align="end" appCharCount />
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>ค่าเริ่มต้นในข้อตกลงซื้อขาย</mat-card-title>
+        <mat-card-subtitle>เติมในสัญญาให้อัตโนมัติ ถ้าเว้นไว้จะเป็นเส้นให้เขียนมือ</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="fields">
+          <mat-form-field appearance="outline">
+            <mat-label>ทำสัญญาที่ (สถานที่)</mat-label>
+            <input matInput formControlName="contract_place" maxlength="200" placeholder="เช่น ร้านอารีไก่หมุน สาขาหลัก" />
+            <app-clear-button matSuffix />
+            <mat-hint align="end" appCharCount />
+            <mat-hint>ที่ที่เซ็นสัญญา (พิมพ์หลัง "ข้อตกลงฉบับนี้ทำขึ้นที่")</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>เครดิตปกติ (วัน)</mat-label>
+            <input matInput appDigitsOnly type="number" min="0" max="365" step="1" formControlName="default_credit_days" placeholder="เช่น 7" />
+            <app-clear-button matSuffix />
+            <mat-hint>จ่ายเงินผู้ขายภายในกี่วันหลังรับของ เช่น 7 (0 = จ่ายสด)</mat-hint>
+            <mat-error>ใส่จำนวนวันเต็ม 0-365</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>ส่งช้าเกินกี่ชั่วโมงให้ปฏิเสธได้</mat-label>
+            <input matInput appDigitsOnly type="number" min="0" max="720" step="1" formControlName="late_delivery_hours" placeholder="เช่น 24" />
+            <app-clear-button matSuffix />
+            <mat-hint>ส่งช้ากว่านัดเกินกี่ชั่วโมง ร้านไม่รับของรอบนั้นได้ เช่น 24</mat-hint>
+            <mat-error>ใส่จำนวนชั่วโมงเต็ม 0-720</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>แจ้งยกเลิกล่วงหน้า (วัน)</mat-label>
+            <input matInput appDigitsOnly type="number" min="0" max="365" step="1" formControlName="cancel_notice_days" placeholder="เช่น 30" />
+            <app-clear-button matSuffix />
+            <mat-hint>เลิกสัญญาก่อนครบกำหนด ต้องบอกล่วงหน้ากี่วัน เช่น 30</mat-hint>
+            <mat-error>ใส่จำนวนวันเต็ม 0-365</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="save-bar">
+      <span class="updated">{{ updatedInfo }}</span>
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving || loading">
+        <mat-icon aria-hidden="true">save</mat-icon> บันทึกข้อมูลร้าน
+      </button>
+    </div>
+  </form>
+
+  <mat-card class="branches-card">
+    <mat-card-header>
+      <mat-card-title>สาขา</mat-card-title>
+      <mat-card-subtitle>ที่อยู่ของสาขาหลักจะพิมพ์ในหัวเอกสารและสัญญา</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="branch-list">
+        @for (b of branches; track b.branch_id) {
+          <div class="branch" [class.inactive]="!b.is_active">
+            <div class="branch-main">
+              <div class="branch-name">
+                {{ b.name }}
+                @if (b.is_main) { <span class="badge main">สาขาหลัก</span> }
+                @if (!b.is_active) { <span class="badge off">ปิดใช้งาน</span> }
+              </div>
+              <div class="branch-line">{{ b.address || 'ยังไม่ได้ใส่ที่อยู่' }}</div>
+              <div class="branch-line muted">
+                {{ b.phone ? 'โทร ' + b.phone : '' }}{{ b.phone && b.email ? ' · ' : '' }}{{ b.email }}
+              </div>
+            </div>
+            <div class="branch-actions">
+              <button mat-icon-button type="button" (click)="editBranch(b)" [attr.aria-label]="'แก้ไขสาขา ' + b.name" title="แก้ไข">
+                <mat-icon aria-hidden="true">edit</mat-icon>
+              </button>
+              @if (!b.is_main) {
+                @if (b.is_active) {
+                  <button mat-icon-button type="button" (click)="makeMain(b)" [attr.aria-label]="'ตั้ง ' + b.name + ' เป็นสาขาหลัก'" title="ตั้งเป็นสาขาหลัก">
+                    <mat-icon aria-hidden="true">star</mat-icon>
+                  </button>
+                }
+                <button mat-icon-button type="button" (click)="toggleActive(b)" [attr.aria-label]="b.is_active ? 'ปิดใช้สาขา ' + b.name : 'เปิดใช้สาขา ' + b.name" [title]="b.is_active ? 'ปิดใช้งาน' : 'เปิดใช้งาน'">
+                  <mat-icon aria-hidden="true">{{ b.is_active ? 'block' : 'check_circle' }}</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
+        } @empty {
+          <p class="muted">{{ loading ? 'กำลังโหลด...' : 'ยังไม่มีสาขา' }}</p>
+        }
+      </div>
+      <button mat-stroked-button type="button" (click)="addBranch()"><mat-icon aria-hidden="true">add_business</mat-icon> เพิ่มสาขา</button>
+    </mat-card-content>
+  </mat-card>
+</section>
