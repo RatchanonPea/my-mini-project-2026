@@ -16,11 +16,13 @@
       <mat-form-field appearance="outline" class="field">
         <mat-label>ชื่อสินค้า</mat-label>
         <input matInput [(ngModel)]="newItem.product_name" [disabled]="!canManageProducts" placeholder="เช่น ไก่ย่าง" (keydown.enter)="$event.preventDefault(); addItem()" />
+        <app-clear-button matSuffix />
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="field">
         <mat-label>ราคา</mat-label>
-        <input matInput type="number" [(ngModel)]="newItem.price" [disabled]="!canManageProducts" placeholder="เช่น 160" (keydown.enter)="$event.preventDefault(); addItem()" />
+        <input matInput appThousands [(ngModel)]="newItem.price" [disabled]="!canManageProducts" placeholder="เช่น 160" (keydown.enter)="$event.preventDefault(); addItem()" />
+        <app-clear-button matSuffix />
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="field">
@@ -95,7 +97,7 @@
       </ng-container>
 
       <!-- <ng-container matColumnDef="action" stickyEnd>
-        <th mat-header-cell *matHeaderCellDef class="text-center"> Action </th>
+        <th mat-header-cell *matHeaderCellDef class="text-center"> จัดการ </th>
         <td mat-cell *matCellDef="let item" class="text-center">
           <button mat-stroked-button color="warn" (click)="removeItem(item.id)">Delete</button>
         </td>
@@ -109,9 +111,9 @@
         <td mat-cell *matCellDef="let item"> {{ item.updated_by_name || '-' }} </td>
       </ng-container>
       <ng-container matColumnDef="action" stickyEnd>
-        <th mat-header-cell *matHeaderCellDef class="text-center"> Action </th>
+        <th mat-header-cell *matHeaderCellDef class="text-center"> จัดการ </th>
 
-        <td mat-cell *matCellDef="let item" class="text-center">
+        <td mat-cell *matCellDef="let item" class="text-center" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
           <!-- ✏️ EDIT -->
           <button mat-icon-button color="primary" [disabled]="!canManageProducts" (click)="editItem(item)" aria-label="แก้ไขสินค้า">
             <mat-icon aria-hidden="true">edit</mat-icon>
@@ -125,7 +127,7 @@
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" tabindex="0" title="กดเพื่อดูรายละเอียด" (click)="openRow(row)" (keydown.enter)="openRow(row)"></tr>
       <tr class="mat-mdc-row no-data-row" *matNoDataRow>
         <td class="mat-mdc-cell" [attr.colspan]="displayedColumns.length">
           <app-no-data></app-no-data>

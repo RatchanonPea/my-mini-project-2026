@@ -30,7 +30,7 @@
   display: inline-block;
   padding: 0.2rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -38,3 +38,11 @@
 .po-ordered { background: #fff3cd; color: #8a5a00; }
 .po-received { background: #e6f4ea; color: #2e7d32; }
 .po-cancelled { background: #eeeeee; color: #616161; }
+
+.po-overdue { background: #fdecea; color: #b91c1c; margin-left: 0.4rem; }
+.owed-row { margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.9rem; border-radius: 12px; background: #fff3cd; color: #8a5a00; font-weight: 600; }
+.owed-row.bad { background: #fdecea; color: #b91c1c; }
+:host-context(html.dark-theme) {
+  .po-overdue, .owed-row.bad { background: rgba(185, 28, 28, 0.25); color: #fca5a5; }
+  .owed-row { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+}

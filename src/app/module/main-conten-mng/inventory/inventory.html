@@ -75,12 +75,14 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>วันที่และเวลา</mat-label>
                 <input matInput type="datetime-local" formControlName="adjust_date" />
+                <app-clear-button matSuffix />
               </mat-form-field>
             </div>
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>{{ isWaste ? 'จำนวนที่เสีย (ตัว)' : 'จำนวนที่ปรับ (ตัว, ลบ = ลดสต็อก)' }}</mat-label>
-                <input matInput type="number" step="0.5" formControlName="quantity" />
+                <input matInput appThousands formControlName="quantity" />
+                <app-clear-button matSuffix />
                 @if (adjustForm.controls.quantity.hasError('halfStep')) {
                   <mat-error>ใส่ได้ทีละ 0.5 ตัว</mat-error>
                 } @else {
@@ -91,7 +93,9 @@
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>หมายเหตุ</mat-label>
-                <input matInput formControlName="note" maxlength="500" />
+                <textarea matInput formControlName="note" maxlength="500" rows="2"></textarea>
+                <app-clear-button matSuffix />
+                <mat-hint align="end" appCharCount />
               </mat-form-field>
             </div>
             <div class="form-actions">
@@ -112,14 +116,16 @@
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>เตือนเมื่อเหลือไม่เกิน (ตัว)</mat-label>
-                <input matInput type="number" step="0.5" min="0" formControlName="low_stock_threshold" />
+                <input matInput appThousands min="0" formControlName="low_stock_threshold" />
+                <app-clear-button matSuffix />
                 <mat-error>ใส่ค่า 0 ขึ้นไป ทีละ 0.5</mat-error>
               </mat-form-field>
             </div>
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>ต้นทุนมาตรฐานต่อตัว (บาท)</mat-label>
-                <input matInput type="number" step="0.5" min="0" formControlName="unit_cost" />
+                <input matInput appThousands min="0" formControlName="unit_cost" />
+                <app-clear-button matSuffix />
                 <mat-hint>ใช้จนกว่าจะรับไก่ครั้งแรก หลังจากนั้นใช้ราคาเฉลี่ยที่รับจริง</mat-hint>
                 <mat-error>ใส่ค่า 0 ขึ้นไป</mat-error>
               </mat-form-field>
@@ -197,7 +203,7 @@
               </td>
             </ng-container>
             <ng-container matColumnDef="action" stickyEnd>
-              <th mat-header-cell *matHeaderCellDef class="text-center"> Action </th>
+              <th mat-header-cell *matHeaderCellDef class="text-center"> จัดการ </th>
               <td mat-cell *matCellDef="let row" class="text-center" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
                 @if (canEdit(row)) {
                   <button mat-icon-button type="button" aria-label="แก้ไข" title="แก้ไขรายการนี้ (ต้องยืนยันจากผู้จัดการ/แอดมิน)" (click)="editRow(row)"><mat-icon>edit</mat-icon></button>

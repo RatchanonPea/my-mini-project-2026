@@ -1,3 +1,5 @@
+import { TodayButton } from '../../../shared/calendar-today/calendar-today';
+import { ThousandsInput } from '../../../shared/number-format/thousands.directive';
 import { NoData } from '../../../shared/no-data/no-data';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,14 +14,19 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { AppDateModule } from '../../../shared/app-date/app-date';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { ApiService, PurchaseOrder, PurchaseStatus, Supplier } from '../../../services/api';
+import { ApiService, PagedResult, PurchaseOrder, PurchasePayment, PurchaseStatus, Supplier, SupplyContract } from '../../../services/api';
 import { ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess, toYmd, ScrollToEditForm } from '../../../common/helper';
+import { buildPurchaseOrderDoc } from '../../../common/print-docs';
+import { PrintService } from '../../../services/print';
 import { Pager } from '../../../shared/pager/pager';
 import { StockDetailDialog } from '../inventory/stock-detail-dialog/stock-detail-dialog';
+import { ClearButton } from '../../../shared/clear-button/clear-button';
+import { CharCount } from '../../../shared/char-count/char-count';
+import { RowAction, openDrawer } from '../../../shared/row-drawer/row-drawer';
 
 /** Chickens are counted in whole chickens, in steps of 0.5. */
 export function halfStep(control: AbstractControl): ValidationErrors | null {
@@ -32,7 +39,7 @@ const CUSTOM_PRICE = 'custom';
 @Component({
   selector: 'app-purchases',
   standalone: true,
-  imports: [NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatDialogModule, Pager, NgxMatSelectSearchModule],
+  imports: [CharCount, ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, AppDateModule, MatDialogModule, Pager, NgxMatSelectSearchModule],
   templateUrl: './purchases.html',
   styleUrls: ['./purchases.scss'],
 })
@@ -43,11 +50,12 @@ export class Purchases implements OnInit {
   private dialog = inject(MatDialog);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private printer = inject(PrintService);
   private reload$ = new Subject<void>();
 
   readonly customPrice = CUSTOM_PRICE;
   readonly statusLabel: Record<string, string> = { ordered: 'สั่งแล้ว', received: 'รับแล้ว', cancelled: 'ยกเลิก' };
-  displayedColumns = ['code', 'order_date', 'supplier', 'quantity', 'unit_cost', 'total', 'status', 'received_date', 'updated_at', 'updated_by_name', 'action'];
+  displayedColumns = ['code', 'order_date', 'supplier', 'quantity', 'unit_cost', 'total', 'status', 'received_date', 'due', 'updated_at', 'updated_by_name', 'action'];
   dataSource = new MatTableDataSource<PurchaseOrder>([]);
   prices: number[] = [];
   standardCost = 150;
@@ -58,6 +66,12 @@ export class Purchases implements OnInit {
   total = 0;
   totalQuantity = 0;
   totalAmount = 0;
+  /** received orders not yet paid (whole list, not just this page) and how many are past their due date */
+  unpaidCount = 0;
+  unpaidAmount = 0;
+  overdueCount = 0;
+  /** the chosen supplier's agreement in force: its price and credit are the defaults of a new order */
+  activeContract: SupplyContract | null = null;
 
   editingId: number | null = null;
   saving = false;
@@ -66,6 +80,7 @@ export class Purchases implements OnInit {
     keyword: [''],
     date: [null as Date | null],
     status: ['' as PurchaseStatus | ''],
+    payment: ['' as PurchasePayment | ''],
   });
 
   form = this.fb.nonNullable.group({
@@ -121,10 +136,12 @@ export class Purchases implements OnInit {
     this.api.getPurchasePrices().subscribe((p) => {
       this.prices = p.prices;
       this.standardCost = p.standard_cost;
-      if (!this.editingId) {
+      if (!this.editingId && this.activeContract?.unit_price == null) {
         this.form.controls.price_choice.setValue(p.standard_cost);
       }
     });
+
+    this.form.controls.supplier_id.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id) => this.loadContract(id));
 
     this.form.controls.price_choice.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((choice) => {
       const custom = this.form.controls.custom_cost;
@@ -142,15 +159,19 @@ export class Purchases implements OnInit {
         keyword: this.filterForm.controls.keyword.value ?? '',
         date: this.filterForm.controls.date.value ? toYmd(this.filterForm.controls.date.value) : null,
         status: this.filterForm.controls.status.value ?? '',
+        payment: this.filterForm.controls.payment.value ?? '',
         page: this.pageIndex + 1,
         pageSize: this.pageSize,
-      }).pipe(catchError(() => of({ items: [], total: 0, total_quantity: 0, total_amount: 0, page: 1, pageSize: this.pageSize })))),
+      }).pipe(catchError(() => of<PagedResult<PurchaseOrder>>({ items: [], total: 0, total_quantity: 0, total_amount: 0, page: 1, pageSize: this.pageSize })))),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe((result) => {
       this.dataSource.data = result.items;
       this.total = result.total;
       this.totalQuantity = result.total_quantity ?? 0;
       this.totalAmount = result.total_amount;
+      this.unpaidCount = result.unpaid_count ?? 0;
+      this.unpaidAmount = result.unpaid_amount ?? 0;
+      this.overdueCount = result.overdue_count ?? 0;
     });
 
     this.reload$.next();
@@ -164,8 +185,51 @@ export class Purchases implements OnInit {
     }
   }
 
+  /** looks up the supplier's active agreement; a new order starts at its price (an edited order keeps its own) */
+  private loadContract(supplierId: number | null): void {
+    this.activeContract = null;
+    if (!supplierId) return;
+    this.api.getSupplierContracts(supplierId).subscribe({
+      next: (list) => {
+        if (this.form.controls.supplier_id.value !== supplierId) return; // the user moved on to another supplier
+        this.activeContract = list.find((c) => c.status === 'active') ?? null;
+        const price = this.activeContract?.unit_price;
+        if (this.editingId || price === null || price === undefined) return;
+        const agreed = Number(price);
+        if (this.prices.includes(agreed)) {
+          this.form.controls.price_choice.setValue(agreed);
+        } else {
+          this.form.controls.price_choice.setValue(CUSTOM_PRICE);
+          this.form.controls.custom_cost.setValue(agreed);
+        }
+      },
+      error: () => (this.activeContract = null),
+    });
+  }
+
+  async pay(item: PurchaseOrder): Promise<void> {
+    const total = Number(item.total_cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (!(await ConfirmDialog('ยืนยันการจ่ายเงิน', `${item.code}: จ่ายให้ ${item.supplier_name ?? 'ผู้ขาย'} THB ${total} (วันนี้)`))) return;
+    this.api.payPurchase(item.po_id, toYmd(new Date())).subscribe({
+      next: () => { DialogSuccess('บันทึกการจ่ายเงินเรียบร้อยแล้ว'); this.reload$.next(); },
+      error: (err) => DialogErrorHtmlConfirm(err?.error?.message ?? 'บันทึกการจ่ายเงินไม่สำเร็จ'),
+    });
+  }
+
   openDetail(po: PurchaseOrder): void {
-    this.dialog.open(StockDetailDialog, { width: '520px', maxWidth: '95vw', data: { kind: 'purchase', po } });
+    // same choices as the buttons in the table row
+    const actions: RowAction[] = [{ label: 'พิมพ์', icon: 'print', run: () => this.printOrder(po) }];
+    if (po.status === 'received' && !po.paid_date) {
+      actions.push({ label: 'จ่ายเงินแล้ว', icon: 'payments', kind: 'primary', run: () => void this.pay(po) });
+    }
+    if (po.status === 'ordered') {
+      actions.push(
+        { label: 'ยกเลิกใบสั่ง', icon: 'cancel', kind: 'warn', run: () => void this.cancel(po) },
+        { label: 'แก้ไข', icon: 'edit', run: () => this.edit(po) },
+        { label: 'รับไก่เข้าสต็อก', icon: 'inventory', kind: 'primary', run: () => void this.receive(po) },
+      );
+    }
+    openDrawer(this.dialog, StockDetailDialog, { kind: 'purchase', po, actions });
   }
 
   search(): void {
@@ -174,7 +238,7 @@ export class Purchases implements OnInit {
   }
 
   clearFilter(): void {
-    this.filterForm.reset({ keyword: '', date: null, status: '' });
+    this.filterForm.reset({ keyword: '', date: null, status: '', payment: '' });
     this.search();
   }
 
@@ -242,7 +306,7 @@ export class Purchases implements OnInit {
   }
 
   async receive(item: PurchaseOrder): Promise<void> {
-    if (!(await ConfirmDialog('ยืนยันการรับไก่เข้าสต็อก', `${item.code}: ${item.quantity} ตัว ตัวละ ${item.unit_cost} บาท`))) {
+    if (!(await ConfirmDialog('ยืนยันการรับไก่เข้าสต็อก', this.receiveDetailHtml(item)))) {
       return;
     }
     this.api.receivePurchase(item.po_id, toYmd(new Date())).subscribe({
@@ -252,6 +316,39 @@ export class Purchases implements OnInit {
       },
       error: (err) => DialogErrorHtmlConfirm(err?.error?.message ?? 'รับของไม่สำเร็จ'),
     });
+  }
+
+  /** Detail table shown in the "receive stock" confirmation. User-entered text is escaped: the dialog renders HTML. */
+  private receiveDetailHtml(item: PurchaseOrder): string {
+    const esc = (value: unknown) =>
+      String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+    const date = (value?: string | null) => (value ? new Date(value).toLocaleDateString('en-GB', { timeZone: 'Asia/Bangkok' }) : '-');
+    const baht = (value: number) => `THB ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const total = item.total_cost ?? Number(item.quantity) * Number(item.unit_cost);
+
+    const rows: [string, string][] = [
+      ['รหัสใบสั่งซื้อ', esc(item.code)],
+      ['วันที่สั่ง', date(item.order_date)],
+      ['ผู้ขาย', esc(item.supplier_name || '-')],
+      ['จำนวน', `${esc(item.quantity)} ตัว`],
+      ['ราคา/ตัว', baht(item.unit_cost)],
+      ['วันที่รับเข้าสต็อก', `${date(new Date().toISOString())} (วันนี้)`],
+    ];
+    if (item.note) rows.push(['หมายเหตุ', esc(item.note)]);
+
+    const line = (label: string, value: string, strong = false) =>
+      `<tr><td style="padding:4px 12px 4px 0;color:#6b7280;white-space:nowrap;vertical-align:top">${label}</td>` +
+      `<td style="padding:4px 0;font-weight:${strong ? 700 : 600};${strong ? 'font-size:1.1em;color:#c2410c;' : ''}">${value}</td></tr>`;
+
+    return `<table style="border-collapse:collapse;width:100%">` +
+      rows.map(([label, value]) => line(label, value)).join('') +
+      `<tr><td colspan="2" style="padding-top:6px"><hr style="margin:0;border:0;border-top:1px dashed #d1d5db"></td></tr>` +
+      line('ยอดรวม', baht(total), true) +
+      `</table>`;
+  }
+
+  printOrder(item: PurchaseOrder): void {
+    this.printer.print(buildPurchaseOrderDoc(item)).catch(() => DialogErrorHtmlConfirm('เปิดหน้าพิมพ์ไม่สำเร็จ'));
   }
 
   async cancel(item: PurchaseOrder): Promise<void> {

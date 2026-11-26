@@ -1,5 +1,8 @@
+import { TodayButton } from '../../../shared/calendar-today/calendar-today';
+import { ThousandsInput } from '../../../shared/number-format/thousands.directive';
 import { NoData } from '../../../shared/no-data/no-data';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -10,7 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { AppDateModule } from '../../../shared/app-date/app-date';
 import { MatIconModule } from '@angular/material/icon';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { Pager } from '../../../shared/pager/pager';
@@ -18,11 +21,14 @@ import { SelectSearch } from '../../../shared/select-search/select-search';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ApiService, Category, ExpenseItem } from '../../../services/api';
 import { DialogErrorHtmlConfirm, DialogSuccess, toYmd, ScrollToEditForm } from '../../../common/helper';
+import { ClearButton } from '../../../shared/clear-button/clear-button';
+import { RowDrawer, RowDrawerData, dateText, money, openDrawer } from '../../../shared/row-drawer/row-drawer';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, Pager, MatSelectModule, MatDatepickerModule, MatNativeDateModule, NgxMatSelectSearchModule],
+  imports: [ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, Pager, MatSelectModule, MatDatepickerModule, AppDateModule, NgxMatSelectSearchModule],
   templateUrl: './expenses.html',
   styleUrls: ['./expenses.scss']
 })
@@ -30,7 +36,12 @@ export class Expenses implements OnInit {
   private api = inject(ApiService);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
+  private route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
   private reload$ = new Subject<void>();
+  private revealHistory = false;
+  /** expense to show in the side panel once the first result is in (arrived from the calendar) */
+  private openId = 0;
 
   displayedColumns = ['id', 'code', 'category', 'description', 'date', 'amount', 'updated_at', 'updated_by_name', 'action'];
   categories: Category[] = [];
@@ -75,7 +86,25 @@ export class Expenses implements OnInit {
       this.dataSource.data = result.items;
       this.total = result.total;
       this.totalAmount = result.total_amount;
+      if (this.revealHistory) {
+        this.revealHistory = false;
+        ScrollToEditForm('.expense-history-card', 'start');
+      }
+      if (this.openId) {
+        const row = result.items.find((i) => i.expense_id === this.openId);
+        this.openId = 0;
+        if (row) this.openRow(row);
+      }
     });
+
+    // Arrived from the calendar (?date=YYYY-MM-DD): show that day.
+    const dateParam = this.route.snapshot.queryParamMap.get('date');
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateParam ?? '')) {
+      const [y, m, d] = dateParam!.split('-').map(Number);
+      this.filterForm.controls.date.setValue(new Date(y, m - 1, d));
+      this.revealHistory = true;
+      this.openId = Number(this.route.snapshot.queryParamMap.get('openExpense'));
+    }
 
     this.reload$.next();
   }
@@ -144,5 +173,22 @@ export class Expenses implements OnInit {
 
   categoryName(item: ExpenseItem): string {
     return item.category_name ?? this.categories.find((c) => c.category_id === item.category_id)?.category_name ?? '-';
+  }
+
+  openRow(item: ExpenseItem): void {
+    openDrawer<RowDrawer, RowDrawerData>(this.dialog, RowDrawer, {
+      title: 'ค่าใช้จ่าย',
+      subtitle: item.code,
+      icon: 'receipt_long',
+      highlight: { label: 'จำนวนเงิน', value: money(item.amount) },
+      fields: [
+        { label: 'หมวด', value: this.categoryName(item) },
+        { label: 'รายละเอียด', value: item.description },
+        { label: 'วันที่', value: dateText(item.expense_date) },
+        { label: 'แก้ไขล่าสุด', value: dateText(item.updated_at, 'dd/MM/yyyy HH:mm', 'UTC'), meta: true },
+        { label: 'แก้ไขโดย', value: item.updated_by_name, meta: true },
+      ],
+      actions: [{ label: 'แก้ไข', icon: 'edit', kind: 'primary', run: () => this.edit(item) }],
+    });
   }
 }

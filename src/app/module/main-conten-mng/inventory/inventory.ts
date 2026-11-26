@@ -1,3 +1,5 @@
+import { TodayButton } from '../../../shared/calendar-today/calendar-today';
+import { ThousandsInput } from '../../../shared/number-format/thousands.directive';
 import { NoData } from '../../../shared/no-data/no-data';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,7 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { AppDateModule } from '../../../shared/app-date/app-date';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -21,11 +23,14 @@ import { Pager } from '../../../shared/pager/pager';
 import { halfStep } from '../purchases/purchases';
 import { StockDetailDialog } from './stock-detail-dialog/stock-detail-dialog';
 import { EditLedgerDialog } from './edit-ledger-dialog/edit-ledger-dialog';
+import { ClearButton } from '../../../shared/clear-button/clear-button';
+import { CharCount } from '../../../shared/char-count/char-count';
+import { RowAction, openDrawer } from '../../../shared/row-drawer/row-drawer';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, MatNativeDateModule, MatDialogModule, Pager],
+  imports: [CharCount, ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, AppDateModule, MatDialogModule, Pager],
   templateUrl: './inventory.html',
   styleUrls: ['./inventory.scss'],
 })
@@ -115,7 +120,9 @@ export class Inventory implements OnInit {
   }
 
   openDetail(row: LedgerItem): void {
-    this.dialog.open(StockDetailDialog, { width: '520px', maxWidth: '95vw', data: { kind: 'ledger', row } });
+    // same rule as the pencil in the table: rows that can't be edited only get "close"
+    const actions: RowAction[] = this.canEdit(row) ? [{ label: 'แก้ไข', icon: 'edit', kind: 'primary', run: () => this.editRow(row) }] : [];
+    openDrawer(this.dialog, StockDetailDialog, { kind: 'ledger', row, actions });
   }
 
   // Sale rows are a daily aggregate of many sale-item rows (edited on the Sales page instead), so

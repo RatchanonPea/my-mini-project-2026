@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { ThousandsInput } from '../../../../shared/number-format/thousands.directive';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -8,6 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { ApiService, LedgerItem, User } from '../../../../services/api';
+import { ClearButton } from '../../../../shared/clear-button/clear-button';
+import { CharCount } from '../../../../shared/char-count/char-count';
 
 function halfStep(control: AbstractControl): ValidationErrors | null {
   const value = Number(control.value);
@@ -20,7 +23,7 @@ const APPROVER_ROLE_IDS = [1, 2];
 @Component({
   selector: 'app-edit-ledger-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule],
+  imports: [CharCount, ClearButton, ThousandsInput, CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule],
   template: `
     <h2 mat-dialog-title class="dialog-title">
       <mat-icon>edit</mat-icon>
@@ -34,18 +37,21 @@ const APPROVER_ROLE_IDS = [1, 2];
           @if (row.type === 'receive') {
             <mat-form-field appearance="outline">
               <mat-label>จำนวน (ตัว)</mat-label>
-              <input matInput type="number" step="0.5" formControlName="quantity" />
+              <input matInput appThousands formControlName="quantity" />
+              <app-clear-button matSuffix />
               <mat-error>ใส่ได้ทีละ 0.5 และมากกว่า 0</mat-error>
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>ราคาต่อตัว (บาท)</mat-label>
-              <input matInput type="number" step="0.01" formControlName="unit_cost" />
+              <input matInput appThousands formControlName="unit_cost" />
+              <app-clear-button matSuffix />
               <mat-error>กรุณากรอกราคา 0 ขึ้นไป</mat-error>
             </mat-form-field>
           } @else {
             <mat-form-field appearance="outline">
               <mat-label>{{ row.type === 'waste' ? 'จำนวนที่เสีย (ตัว)' : 'จำนวนที่ปรับ (ตัว, ลบ = ลดสต็อก)' }}</mat-label>
-              <input matInput type="number" step="0.5" formControlName="quantity" />
+              <input matInput appThousands formControlName="quantity" />
+              <app-clear-button matSuffix />
               @if (form.controls.quantity.hasError('halfStep')) {
                 <mat-error>ใส่ได้ทีละ 0.5 ตัว</mat-error>
               } @else {
@@ -55,6 +61,7 @@ const APPROVER_ROLE_IDS = [1, 2];
             <mat-form-field appearance="outline">
               <mat-label>วันที่และเวลา</mat-label>
               <input matInput type="datetime-local" formControlName="adjust_date" />
+              <app-clear-button matSuffix />
             </mat-form-field>
           }
           @if (row.note) {
@@ -65,7 +72,9 @@ const APPROVER_ROLE_IDS = [1, 2];
           }
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>หมายเหตุการแก้ไข</mat-label>
-            <input matInput formControlName="edit_note" maxlength="500" placeholder="เหตุผลที่แก้ไขรายการนี้" />
+            <textarea matInput formControlName="edit_note" maxlength="500" placeholder="เหตุผลที่แก้ไขรายการนี้" rows="2"></textarea>
+            <app-clear-button matSuffix />
+            <mat-hint align="end" appCharCount />
           </mat-form-field>
         </div>
 
@@ -112,17 +121,17 @@ const APPROVER_ROLE_IDS = [1, 2];
   `,
   styles: `
     .dialog-title { display: flex; align-items: center; gap: 0.6rem; }
-    .dialog-title small { font-size: 0.85rem; opacity: 0.7; margin-left: 0.25rem; }
-    .hint { margin: 0 0 1rem; font-size: 0.85rem; opacity: 0.75; }
+    .dialog-title small { font-size: 0.875rem; opacity: 0.7; margin-left: 0.25rem; }
+    .hint { margin: 0 0 1rem; font-size: 0.875rem; opacity: 0.75; }
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
     .full-width { grid-column: 1 / -1; }
     .approval-title { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; margin: 1.25rem 0 0.75rem; }
     .eye-icon { cursor: pointer; }
-    .approve-error { color: #b91c1c; font-size: 0.85rem; margin: -0.25rem 0 0; }
+    .approve-error { color: #b91c1c; font-size: 0.875rem; margin: -0.25rem 0 0; }
     .original-note { padding: 0.6rem 0.85rem; border-radius: 8px; background: rgba(124, 45, 18, 0.06); }
-    .original-note-label { display: block; font-size: 0.75rem; font-weight: 600; opacity: 0.7; margin-bottom: 0.2rem; }
+    .original-note-label { display: block; font-size: 0.875rem; font-weight: 600; opacity: 0.7; margin-bottom: 0.2rem; }
     .original-note p { margin: 0; overflow-wrap: anywhere; }
-    .last-edit-info { font-size: 0.8rem; opacity: 0.7; margin: 0.75rem 0 0; }
+    .last-edit-info { font-size: 0.875rem; opacity: 0.7; margin: 0.75rem 0 0; }
     :host-context(html.dark-theme) .approve-error { color: #fca5a5; }
     :host-context(html.dark-theme) .original-note { background: rgba(255, 255, 255, 0.06); }
   `,

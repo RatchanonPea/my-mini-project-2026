@@ -22,7 +22,7 @@
             </mat-form-field>
           </div>
           <div class="form-row">
-            <mat-form-field appearance="outline" class="full-width">
+            <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
               <mat-label>ผู้ขาย / ร้านที่สั่ง</mat-label>
               <mat-select formControlName="supplier_id">
                 <mat-option>
@@ -33,12 +33,16 @@
                 }
               </mat-select>
               <mat-error>กรุณาเลือกผู้ขาย</mat-error>
+              @if (activeContract) {
+                <mat-hint>ข้อตกลง {{ activeContract.code }}{{ activeContract.unit_price !== null ? ' · ราคา ' + (activeContract.unit_price | number:'1.0-2') + ' บาท/ตัว' : '' }}{{ activeContract.credit_days !== null ? ' · เครดิต ' + (activeContract.credit_days === 0 ? 'จ่ายสด' : activeContract.credit_days + ' วัน') : '' }}</mat-hint>
+              }
             </mat-form-field>
           </div>
           <div class="form-row">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>จำนวน (ตัว)</mat-label>
-              <input matInput type="number" step="0.5" min="0.5" formControlName="quantity" />
+              <input matInput appThousands min="0.5" formControlName="quantity" />
+              <app-clear-button matSuffix />
               @if (form.controls.quantity.hasError('halfStep')) {
                 <mat-error>ใส่ได้ทีละ 0.5 ตัว (เช่น 1, 1.5, 2)</mat-error>
               } @else {
@@ -61,7 +65,8 @@
             <div class="form-row" animate.enter="fade-in">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>ราคาต่อตัว (กรอกเอง)</mat-label>
-                <input matInput type="number" min="0" step="0.5" formControlName="custom_cost" placeholder="เช่น 145" />
+                <input matInput appThousands min="0" formControlName="custom_cost" placeholder="เช่น 145" />
+                <app-clear-button matSuffix />
                 <mat-error>กรุณากรอกราคาต่อตัว (0 ขึ้นไป)</mat-error>
               </mat-form-field>
             </div>
@@ -69,7 +74,9 @@
           <div class="form-row">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>หมายเหตุ</mat-label>
-              <input matInput formControlName="note" maxlength="500" />
+              <textarea matInput formControlName="note" maxlength="500" rows="2"></textarea>
+              <app-clear-button matSuffix />
+              <mat-hint align="end" appCharCount />
             </mat-form-field>
           </div>
           <div class="order-total">
@@ -116,6 +123,15 @@
               <mat-option value="cancelled">ยกเลิก</mat-option>
             </mat-select>
           </mat-form-field>
+          <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+            <mat-label>การจ่ายเงิน</mat-label>
+            <mat-select formControlName="payment">
+              <mat-option value="">ทั้งหมด</mat-option>
+              <mat-option value="unpaid">ค้างจ่าย</mat-option>
+              <mat-option value="overdue">เกินกำหนดจ่าย</mat-option>
+              <mat-option value="paid">จ่ายแล้ว</mat-option>
+            </mat-select>
+          </mat-form-field>
           <div class="filter-actions">
             <button mat-flat-button color="primary" type="submit"><mat-icon>search</mat-icon> ค้นหา</button>
             <button mat-stroked-button type="button" (click)="clearFilter()">ล้าง</button>
@@ -156,6 +172,21 @@
               <th mat-header-cell *matHeaderCellDef> วันที่รับ </th>
               <td mat-cell *matCellDef="let po">{{ po.received_date ? (po.received_date | date:'dd/MM/yyyy':'UTC') : '-' }}</td>
             </ng-container>
+            <ng-container matColumnDef="due">
+              <th mat-header-cell *matHeaderCellDef> ครบกำหนดจ่าย </th>
+              <td mat-cell *matCellDef="let po">
+                @if (po.status !== 'received') {
+                  -
+                } @else if (po.paid_date) {
+                  <span class="po-status po-received">จ่ายแล้ว {{ po.paid_date | date:'dd/MM/yyyy':'UTC' }}</span>
+                } @else if (po.due_date) {
+                  {{ po.due_date | date:'dd/MM/yyyy':'UTC' }}
+                  @if (po.is_overdue) { <span class="po-status po-overdue">เกินกำหนด</span> }
+                } @else {
+                  <span class="po-status po-ordered">ยังไม่จ่าย</span>
+                }
+              </td>
+            </ng-container>
             <ng-container matColumnDef="updated_at">
               <th mat-header-cell *matHeaderCellDef> แก้ไขล่าสุด </th>
               <td mat-cell *matCellDef="let po">{{ po.updated_at ? (po.updated_at | date:'dd/MM/yyyy HH:mm':'UTC') : '-' }}</td>
@@ -165,8 +196,12 @@
               <td mat-cell *matCellDef="let po">{{ po.updated_by_name || '-' }}</td>
             </ng-container>
             <ng-container matColumnDef="action" stickyEnd>
-              <th mat-header-cell *matHeaderCellDef class="text-center"> Action </th>
+              <th mat-header-cell *matHeaderCellDef class="text-center"> จัดการ </th>
               <td mat-cell *matCellDef="let po" class="text-center" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+                <button mat-icon-button type="button" aria-label="พิมพ์ใบสั่งซื้อ" title="พิมพ์ใบสั่งซื้อ" (click)="printOrder(po)"><mat-icon>print</mat-icon></button>
+                @if (po.status === 'received' && !po.paid_date) {
+                  <button mat-icon-button type="button" color="primary" aria-label="จ่ายเงินแล้ว" title="บันทึกว่าจ่ายเงินแล้ว" (click)="pay(po)"><mat-icon>payments</mat-icon></button>
+                }
                 @if (po.status === 'ordered') {
                   <button mat-icon-button type="button" color="primary" aria-label="รับไก่เข้าสต็อก" title="รับไก่เข้าสต็อก" (click)="receive(po)"><mat-icon>inventory</mat-icon></button>
                   <button mat-icon-button type="button" aria-label="แก้ไข" title="แก้ไข" (click)="edit(po)"><mat-icon>edit</mat-icon></button>
@@ -184,6 +219,12 @@
           </table>
         </div>
         <app-pager [total]="total" [pageSize]="pageSize" [pageIndex]="pageIndex" (pageChange)="onPageChange($event)"></app-pager>
+        @if (unpaidCount > 0) {
+          <div class="owed-row" [class.bad]="overdueCount > 0">
+            <mat-icon aria-hidden="true">{{ overdueCount > 0 ? 'warning' : 'schedule' }}</mat-icon>
+            <span>ค้างจ่ายผู้ขาย {{ unpaidCount }} ใบ รวม {{ unpaidAmount | currency:'THB ':'symbol':'1.0-2' }}@if (overdueCount > 0) { · เกินกำหนด {{ overdueCount }} ใบ }</span>
+          </div>
+        }
         <div class="summary-row">
           <span>รวม {{ total }} ใบ / {{ totalQuantity | number:'1.0-2' }} ตัว</span>
           <strong>{{ totalAmount | currency:'THB ':'symbol':'1.0-2' }}</strong>

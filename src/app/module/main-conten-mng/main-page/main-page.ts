@@ -1,4 +1,5 @@
 import { NoData } from '../../../shared/no-data/no-data';
+import { ThousandsInput } from '../../../shared/number-format/thousands.directive';
 import { AfterViewInit, Component, DestroyRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -15,11 +16,14 @@ import { ApiService, Category, ProductItem } from '../../../services/api';
 import { AuthService } from '../../../services/auth';
 import { Pager } from '../../../shared/pager/pager';
 import { SelectSearch } from '../../../shared/select-search/select-search';
+import { ClearButton } from '../../../shared/clear-button/clear-button';
+import { RowDrawer, RowDrawerData, dateText, money, openDrawer } from '../../../shared/row-drawer/row-drawer';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [NoData, Pager, CommonModule, FormsModule, ReactiveFormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatPaginatorModule, MatIconModule, MatSelectModule, NgxMatSelectSearchModule],
+  imports: [ClearButton, ThousandsInput, NoData, Pager, CommonModule, FormsModule, ReactiveFormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatPaginatorModule, MatIconModule, MatSelectModule, NgxMatSelectSearchModule],
   templateUrl: './main-page.html',
   styleUrls: ['./main-page.scss'],
 })
@@ -33,6 +37,7 @@ export class MainPage implements AfterViewInit {
   items: ProductItem[] = [];
   categories: Category[] = [];
   private destroyRef = inject(DestroyRef);
+  private dialog = inject(MatDialog);
   categorySearch = new SelectSearch<Category>((c, q) => c.category_name.toLowerCase().includes(q), this.destroyRef);
   newItem: Partial<ProductItem> = {
     product_name: '',
@@ -276,5 +281,26 @@ export class MainPage implements AfterViewInit {
 
   getTotalPrice(): number {
     return this.items.reduce((sum, item) => sum + (item.price || 0), 0);
+  }
+
+  openRow(item: ProductItem): void {
+    openDrawer<RowDrawer, RowDrawerData>(this.dialog, RowDrawer, {
+      title: item.product_name,
+      subtitle: item.product_code,
+      icon: 'restaurant',
+      highlight: { label: 'ราคา', value: money(item.price) },
+      fields: [
+        { label: 'หมวดหมู่', value: item.category_name },
+        { label: 'รหัสในระบบ', value: item.product_id },
+        { label: 'แก้ไขล่าสุด', value: dateText(item.updated_at, 'dd/MM/yyyy HH:mm', 'UTC'), meta: true },
+        { label: 'แก้ไขโดย', value: item.updated_by_name, meta: true },
+      ],
+      actions: this.canManageProducts
+        ? [
+            { label: 'ลบ', icon: 'delete', kind: 'warn', run: () => this.removeItem(item.product_id) },
+            { label: 'แก้ไข', icon: 'edit', kind: 'primary', run: () => this.editItem(item) },
+          ]
+        : [],
+    });
   }
 }

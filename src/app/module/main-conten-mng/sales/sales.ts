@@ -1,9 +1,12 @@
+import { TodayButton } from '../../../shared/calendar-today/calendar-today';
+import { ThousandsInput } from '../../../shared/number-format/thousands.directive';
 import { NoData } from '../../../shared/no-data/no-data';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ReplaySubject, Subject, catchError, of, switchMap } from 'rxjs';
+import { ReplaySubject, Subject, catchError, firstValueFrom, of, switchMap } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,24 +15,33 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { AppDateModule } from '../../../shared/app-date/app-date';
 import { Pager } from '../../../shared/pager/pager';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ApiService, ProductItem, SaleItem } from '../../../services/api';
 import { ConfirmDelete, DialogErrorHtmlConfirm, DialogSuccess, toYmd, ScrollToEditForm } from '../../../common/helper';
+import { buildSalesDoc } from '../../../common/print-docs';
+import { PrintService } from '../../../services/print';
+import { ClearButton } from '../../../shared/clear-button/clear-button';
+import { RowDrawer, RowDrawerData, dateText, money, openDrawer } from '../../../shared/row-drawer/row-drawer';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-sales',
   standalone: true,
-  imports: [NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule, Pager, MatDatepickerModule, MatNativeDateModule, NgxMatSelectSearchModule],
+  imports: [ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule, Pager, MatDatepickerModule, AppDateModule, NgxMatSelectSearchModule],
   templateUrl: './sales.html',
   styleUrls: ['./sales.scss']
 })
 export class Sales implements OnInit {
   private api = inject(ApiService);
   private fb = inject(FormBuilder);
+  private printer = inject(PrintService);
   private destroyRef = inject(DestroyRef);
+  private route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
   private reload$ = new Subject<void>();
+  private revealHistory = false;
 
   displayedColumns = ['id', 'code', 'date', 'product', 'quantity', 'price', 'total', 'updated_at', 'updated_by_name', 'action'];
   products: ProductItem[] = [];
@@ -44,6 +56,7 @@ export class Sales implements OnInit {
   private formDateItems: SaleItem[] = [];
   editingId: number | null = null;
   saving = false;
+  printing = false;
 
   filterForm = this.fb.group({
     keyword: [''],
@@ -102,7 +115,19 @@ export class Sales implements OnInit {
       this.total = result.total;
       this.totalQuantity = result.total_quantity ?? 0;
       this.totalAmount = result.total_amount;
+      if (this.revealHistory) {
+        this.revealHistory = false;
+        ScrollToEditForm('.history-card', 'start');
+      }
     });
+
+    // Arrived from the calendar (?date=YYYY-MM-DD): show that day.
+    const dateParam = this.route.snapshot.queryParamMap.get('date');
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateParam ?? '')) {
+      const [y, m, d] = dateParam!.split('-').map(Number);
+      this.filterForm.controls.date.setValue(new Date(y, m - 1, d));
+      this.revealHistory = true;
+    }
 
     this.reload$.next();
     this.loadFormDateItems(toYmd(new Date()));
@@ -120,6 +145,12 @@ export class Sales implements OnInit {
     this.reload$.next();
   }
 
+  /** Empty date = no date filter: the table lists every day (the filter starts on today). */
+  showAllDays(): void {
+    this.filterForm.controls.date.setValue(null);
+    this.search();
+  }
+
   clearFilter(): void {
     this.filterForm.reset({ keyword: '', date: new Date() });
     this.search();
@@ -128,6 +159,33 @@ export class Sales implements OnInit {
   onPageChange(pageIndex: number): void {
     this.pageIndex = pageIndex;
     this.reload$.next();
+  }
+
+  /**
+   * Prints what the history table is filtered to (date and search text, or every day when the date is
+   * empty), all of it - not just the page on screen. The server caps a page at 100 rows, so it pages through.
+   */
+  async printSales(): Promise<void> {
+    if (this.printing) return;
+    this.printing = true;
+    const keyword = (this.filterForm.controls.keyword.value ?? '').trim();
+    const picked = this.filterForm.controls.date.value;
+    const date = picked ? toYmd(picked) : null;
+    const MAX_ROWS = 5000;
+
+    try {
+      const items: SaleItem[] = [];
+      for (let page = 1; ; page++) {
+        const result = await firstValueFrom(this.api.searchSales({ keyword, date, page, pageSize: 100 }));
+        items.push(...result.items);
+        if (!result.items.length || items.length >= result.total || items.length >= MAX_ROWS) break;
+      }
+      await this.printer.print(buildSalesDoc({ date, keyword, items: items.slice(0, MAX_ROWS), truncated: items.length > MAX_ROWS }));
+    } catch {
+      DialogErrorHtmlConfirm('เตรียมข้อมูลสำหรับพิมพ์ไม่สำเร็จ');
+    } finally {
+      this.printing = false;
+    }
   }
 
   editSale(item: SaleItem): void {
@@ -188,5 +246,26 @@ export class Sales implements OnInit {
     this.editingId = null;
     this.loadFormDateItems(toYmd(new Date()));
     this.form.reset({ product_id: 0, quantity: 1 });
+  }
+
+  openRow(item: SaleItem): void {
+    openDrawer<RowDrawer, RowDrawerData>(this.dialog, RowDrawer, {
+      title: 'รายการขาย',
+      subtitle: item.code,
+      icon: 'point_of_sale',
+      highlight: { label: 'ยอดรวม', value: money(item.total_price) },
+      fields: [
+        { label: 'สินค้า', value: item.product_name },
+        { label: 'จำนวน', value: item.quantity },
+        { label: 'ราคา/ชิ้น', value: money(item.unit_price) },
+        { label: 'วันที่ขาย', value: dateText(item.sale_date) },
+        { label: 'แก้ไขล่าสุด', value: dateText(item.updated_at, 'dd/MM/yyyy HH:mm', 'UTC'), meta: true },
+        { label: 'แก้ไขโดย', value: item.updated_by_name, meta: true },
+      ],
+      actions: [
+        { label: 'ลบ', icon: 'delete', kind: 'warn', run: () => void this.removeSale(item.item_id) },
+        { label: 'แก้ไข', icon: 'edit', kind: 'primary', run: () => this.editSale(item) },
+      ],
+    });
   }
 }

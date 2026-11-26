@@ -1,11 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { RowAction } from '../../../../shared/row-drawer/row-drawer';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ApiService, LedgerItem, PurchaseOrder, SalesOfDayLine } from '../../../../services/api';
 
-export type StockDetailData = { kind: 'ledger'; row: LedgerItem } | { kind: 'purchase'; po: PurchaseOrder };
+export type StockDetailData = ({ kind: 'ledger'; row: LedgerItem } | { kind: 'purchase'; po: PurchaseOrder }) & {
+  /** buttons offered by the page that opened the panel */
+  actions?: RowAction[];
+};
 
 const TYPE_LABEL: Record<string, string> = { receive: 'รับเข้า', sale: 'ขายออก', waste: 'ของเสีย', adjust: 'ปรับยอด' };
 const TYPE_ICON: Record<string, string> = { receive: 'inventory', sale: 'point_of_sale', waste: 'delete_sweep', adjust: 'tune' };
@@ -18,16 +22,26 @@ const STATUS_LABEL: Record<string, string> = { ordered: 'สั่งแล้�
   template: `
     @if (data.kind === 'ledger') {
       @let row = data.row;
-      <h2 mat-dialog-title class="detail-title">
-        <mat-icon>{{ icon[row.type] }}</mat-icon>
-        <span>{{ typeLabel[row.type] }} <small>{{ row.ref_code }}</small></span>
-      </h2>
-      <mat-dialog-content>
-        <div class="big-qty" [class.qty-in]="row.quantity > 0" [class.qty-out]="row.quantity < 0">
-          {{ row.quantity > 0 ? '+' : '' }}{{ row.quantity | number:'1.0-2' }} <small>ตัว</small>
+      <header class="slip-head">
+        <span class="slip-icon"><mat-icon aria-hidden="true">{{ icon[row.type] }}</mat-icon></span>
+        <div class="slip-title">
+          <h2 mat-dialog-title>{{ typeLabel[row.type] }}</h2>
+          <p>{{ row.ref_code }}</p>
         </div>
-        <dl class="detail-list">
-          <dt>วันที่</dt><dd>{{ row.ledger_date | date:(row.type === 'waste' || row.type === 'adjust' ? 'dd/MM/yyyy HH:mm' : 'dd/MM/yyyy'):'UTC' }}</dd>
+        <button mat-icon-button type="button" mat-dialog-close aria-label="ปิด"><mat-icon>close</mat-icon></button>
+      </header>
+      <mat-dialog-content class="slip-body">
+        <div class="slip">
+        <div class="slip-total">
+          <span>จำนวนไก่</span>
+          <strong [class.positive]="row.quantity > 0" [class.negative]="row.quantity < 0">
+            {{ row.quantity > 0 ? '+' : '' }}{{ row.quantity | number:'1.0-2' }} <small>ตัว</small>
+          </strong>
+        </div>
+        <div class="slip-perf" aria-hidden="true"></div>
+        <dl class="slip-lines">
+          <!-- a 00:00 time means only the date was recorded, so don't print it -->
+          <dt>วันที่</dt><dd>{{ row.ledger_date | date:((row.type === 'waste' || row.type === 'adjust') && row.ledger_date.slice(11, 16) !== '00:00' ? 'dd/MM/yyyy HH:mm' : 'dd/MM/yyyy'):'UTC' }}</dd>
           <dt>คงเหลือหลังรายการนี้</dt><dd>{{ row.balance_after | number:'1.0-2' }} ตัว</dd>
           @if (row.event_at) {
             <dt>{{ row.type === 'receive' ? 'เวลาที่รับ' : 'บันทึกล่าสุดเมื่อ' }}</dt><dd>{{ row.event_at | date:'dd/MM/yyyy HH:mm':'UTC' }} น.</dd>
@@ -56,7 +70,7 @@ const STATUS_LABEL: Record<string, string> = { ordered: 'สั่งแล้�
           <h3 class="sub-title">รายการขายไก่ของวันนี้</h3>
           <div class="lines-wrap">
             <table class="lines">
-              <thead><tr><th>เมนู</th><th>จำนวน</th><th>ใช้ไก่ (ตัว)</th><th>ยอดขาย</th></tr></thead>
+              <thead><tr><th>สินค้า</th><th>จำนวน</th><th>ใช้ไก่ (ตัว)</th><th>ยอดขาย</th></tr></thead>
               <tbody>
                 @for (line of lines; track line.code) {
                   <tr>
@@ -72,21 +86,39 @@ const STATUS_LABEL: Record<string, string> = { ordered: 'สั่งแล้�
             </table>
           </div>
         }
+        </div>
+        @if (row.type === 'sale') {
+          <p class="slip-meta">ยอดรวมการขายของวันนี้ แก้ไขจากหน้าสต็อกไม่ได้</p>
+        }
       </mat-dialog-content>
     } @else {
       @let po = data.po;
-      <h2 mat-dialog-title class="detail-title">
-        <mat-icon>local_shipping</mat-icon>
-        <span>ใบสั่งซื้อ <small>{{ po.code }}</small></span>
-        <span class="po-badge" [ngClass]="'po-' + po.status">{{ statusLabel[po.status] }}</span>
-      </h2>
-      <mat-dialog-content>
-        <div class="big-qty">{{ po.quantity | number:'1.0-2' }} <small>ตัว</small></div>
-        <dl class="detail-list">
+      <header class="slip-head">
+        <span class="slip-icon"><mat-icon aria-hidden="true">local_shipping</mat-icon></span>
+        <div class="slip-title">
+          <h2 mat-dialog-title>ใบสั่งซื้อ</h2>
+          <p>{{ po.code }}</p>
+        </div>
+        <button mat-icon-button type="button" mat-dialog-close aria-label="ปิด"><mat-icon>close</mat-icon></button>
+      </header>
+      <mat-dialog-content class="slip-body">
+        <div class="slip">
+        <div class="slip-total">
+          <span>รวมเป็นเงิน</span>
+          <strong>{{ po.total_cost | currency:'THB ':'symbol':'1.0-2' }}</strong>
+          <span class="po-badge" [ngClass]="'po-' + po.status">{{ statusLabel[po.status] }}</span>
+        </div>
+        <div class="slip-perf" aria-hidden="true"></div>
+        <dl class="slip-lines">
+          <dt>จำนวน</dt><dd>{{ po.quantity | number:'1.0-2' }} ตัว</dd>
           <dt>ผู้ขาย</dt><dd>{{ po.supplier_name || '-' }}</dd>
           <dt>วันที่สั่ง</dt><dd>{{ po.order_date | date:'dd/MM/yyyy':'UTC' }}</dd>
           <dt>ราคาต่อตัว</dt><dd>{{ po.unit_cost | currency:'THB ':'symbol':'1.0-2' }}</dd>
-          <dt>รวมเป็นเงิน</dt><dd>{{ po.total_cost | currency:'THB ':'symbol':'1.0-2' }}</dd>
+          @if (po.contract_code) { <dt>ข้อตกลง</dt><dd>{{ po.contract_code }}</dd> }
+          @if (po.status === 'received') {
+            <dt>การจ่ายเงิน</dt>
+            <dd>{{ po.paid_date ? 'จ่ายแล้ว ' + (po.paid_date | date:'dd/MM/yyyy':'UTC') : (po.due_date ? 'ครบกำหนด ' + (po.due_date | date:'dd/MM/yyyy':'UTC') + (po.is_overdue ? ' (เกินกำหนด)' : '') : 'ยังไม่จ่าย') }}</dd>
+          }
           @if (po.status === 'received') {
             <dt>วันที่รับ</dt><dd>{{ po.received_date | date:'dd/MM/yyyy':'UTC' }}</dd>
             <dt>เวลาที่รับ</dt><dd>{{ po.received_at ? (po.received_at | date:'dd/MM/yyyy HH:mm':'UTC') + ' น.' : '-' }}</dd>
@@ -95,36 +127,33 @@ const STATUS_LABEL: Record<string, string> = { ordered: 'สั่งแล้�
           <dt>หมายเหตุ</dt><dd>{{ po.note || '-' }}</dd>
           <dt>แก้ไขล่าสุด</dt><dd>{{ po.updated_at ? (po.updated_at | date:'dd/MM/yyyy HH:mm':'UTC') + ' น.' : '-' }} โดย {{ po.updated_by_name || '-' }}</dd>
         </dl>
+        </div>
       </mat-dialog-content>
     }
-    <mat-dialog-actions align="end">
-      <button mat-flat-button color="primary" mat-dialog-close>ปิด</button>
+    <mat-dialog-actions class="slip-actions">
+      @for (a of data.actions ?? []; track a.label) {
+        @if (a.kind === 'primary') {
+          <button mat-flat-button class="is-primary" type="button" (click)="run(a)"><mat-icon>{{ a.icon }}</mat-icon> {{ a.label }}</button>
+        } @else {
+          <button mat-stroked-button [class.is-warn]="a.kind === 'warn'" type="button" (click)="run(a)"><mat-icon>{{ a.icon }}</mat-icon> {{ a.label }}</button>
+        }
+      } @empty {
+        <button mat-flat-button class="is-primary" type="button" mat-dialog-close>ปิด</button>
+      }
     </mat-dialog-actions>
   `,
   styles: `
-    .detail-title { display: flex; align-items: center; gap: 0.6rem; }
-    .detail-title small { font-size: 0.85rem; opacity: 0.7; margin-left: 0.25rem; }
-    .po-badge { margin-left: auto; padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
+    .po-badge { margin-top: 0.4rem; padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; }
     .po-ordered { background: #fff3cd; color: #8a5a00; }
     .po-received { background: #e6f4ea; color: #2e7d32; }
     .po-cancelled { background: #eeeeee; color: #616161; }
-    .big-qty { font-size: 2.4rem; font-weight: 800; text-align: center; padding: 0.25rem 0 0.75rem; }
-    .big-qty small { font-size: 1rem; font-weight: 600; opacity: 0.8; }
-    .qty-in { color: #2e7d32; }
-    .qty-out { color: #b91c1c; }
-    .detail-list { display: grid; grid-template-columns: max-content 1fr; gap: 0.5rem 1.25rem; margin: 0; }
-    .detail-list dt { color: #7c6a5e; }
-    .detail-list dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
-    .sub-title { margin: 1.25rem 0 0.5rem; font-size: 1rem; }
-    .lines-wrap { overflow-x: auto; }
+    .sub-title { margin: 1rem 1.25rem 0.5rem; font-size: 1rem; }
+    .lines-wrap { overflow-x: auto; padding: 0 0.75rem 0.75rem; }
     .lines { width: 100%; border-collapse: collapse; }
     .lines th, .lines td { padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(124, 45, 18, 0.2); text-align: left; white-space: nowrap; }
     .lines th { color: #7c6a5e; font-weight: 600; }
     .lines .empty { text-align: center; opacity: 0.7; }
-    :host-context(html.dark-theme) .detail-list dt,
     :host-context(html.dark-theme) .lines th { color: #b9a79b; }
-    :host-context(html.dark-theme) .qty-in { color: #81c784; }
-    :host-context(html.dark-theme) .qty-out { color: #fca5a5; }
     :host-context(html.dark-theme) .po-ordered { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
     :host-context(html.dark-theme) .po-received { background: rgba(76, 175, 80, 0.2); color: #81c784; }
     :host-context(html.dark-theme) .po-cancelled { background: #3a3a3a; color: #bdbdbd; }
@@ -133,6 +162,7 @@ const STATUS_LABEL: Record<string, string> = { ordered: 'สั่งแล้�
 export class StockDetailDialog implements OnInit {
   readonly data = inject<StockDetailData>(MAT_DIALOG_DATA);
   private api = inject(ApiService);
+  private ref = inject<MatDialogRef<StockDetailDialog>>(MatDialogRef);
 
   readonly typeLabel = TYPE_LABEL;
   readonly icon = TYPE_ICON;
@@ -140,6 +170,11 @@ export class StockDetailDialog implements OnInit {
 
   lines: SalesOfDayLine[] = [];
   loadingLines = false;
+
+  run(action: RowAction): void {
+    this.ref.afterClosed().subscribe(() => action.run());
+    this.ref.close();
+  }
 
   ngOnInit(): void {
     if (this.data.kind === 'ledger' && this.data.row.type === 'sale') {

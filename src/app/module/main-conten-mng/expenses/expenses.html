@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h3>จัดการค่าใช้จ่าย</h3>
-      <p class="subtitle">เพิ่มค่าใช้จ่ายร้านอาหาร ให้วัตถุดิบและต้นทุนถูกตรวจสอบง่าย</p>
+      <p class="subtitle">บันทึกค่าใช้จ่ายของร้าน เพื่อให้ต้นทุนและค่าใช้จ่ายตรวจสอบง่าย</p>
     </div>
   </div>
 
@@ -31,6 +31,7 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>รายละเอียด</mat-label>
               <input matInput formControlName="description" placeholder="เช่น ซื้อผักสด, บิลแก๊ส" />
+              <app-clear-button matSuffix />
               <mat-error>กรุณากรอกรายละเอียด</mat-error>
             </mat-form-field>
           </div>
@@ -45,7 +46,8 @@
           <div class="form-row small-row">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>จำนวนเงิน (บาท)</mat-label>
-              <input matInput type="number" formControlName="amount" min="0" />
+              <input matInput appThousands formControlName="amount" min="0" />
+              <app-clear-button matSuffix />
               <mat-error>จำนวนเงินต้องมากกว่า 0</mat-error>
             </mat-form-field>
           </div>
@@ -120,12 +122,12 @@
             </ng-container>
             <ng-container matColumnDef="action" stickyEnd>
               <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let expense">
+              <td mat-cell *matCellDef="let expense" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
                 <button mat-icon-button type="button" (click)="edit(expense)" aria-label="แก้ไขรายการค่าใช้จ่าย"><mat-icon aria-hidden="true">edit</mat-icon></button>
               </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" tabindex="0" title="กดเพื่อดูรายละเอียด" (click)="openRow(row)" (keydown.enter)="openRow(row)"></tr>
             <tr class="mat-mdc-row no-data-row" *matNoDataRow>
               <td class="mat-mdc-cell" [attr.colspan]="displayedColumns.length">
                 <app-no-data></app-no-data>
