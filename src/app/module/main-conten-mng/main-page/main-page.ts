@@ -45,6 +45,8 @@ export class MainPage implements AfterViewInit {
     is_active: true
   };
   isEditing = false;
+  /** phones only: the entry form stays folded until asked for (or until a row is being edited) */
+  formOpen = false;
 
   displayedColumns = ['No', 'product_id', 'product_code', 'product_name', 'category_name', 'price', 'updated_at', 'updated_by_name', 'action'];
   isLoading = false;
@@ -183,6 +185,7 @@ export class MainPage implements AfterViewInit {
           next: () => {
             this.resetForm();
             this.loadItems();
+            this.formOpen = false;
             DialogSuccess('เพิ่มรายการสำเร็จ');
           },
           error: (err) => {
@@ -213,6 +216,7 @@ export class MainPage implements AfterViewInit {
   }
 
   resetForm() {
+    if (this.isEditing) this.formOpen = false; // leaving edit mode folds the form again
     this.newItem = {
       product_name: '',
       category_id: null,
@@ -234,6 +238,7 @@ export class MainPage implements AfterViewInit {
       category_id: item.category_id ?? null,
       is_active: item.is_active
     };
+    this.formOpen = true;
     ScrollToEditForm('.form-card');
   }
 

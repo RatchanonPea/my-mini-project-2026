@@ -8,13 +8,15 @@
 
   <mat-card class="filter-card">
     <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="generateReport()">
-        <div class="filter-row">
+      <form [formGroup]="form" (ngSubmit)="generateReport(); filterOpen = false">
+        <div class="filter-row" [class.m-folded]="!filterOpen">
           <mat-button-toggle-group formControlName="groupBy" class="group-toggle">
             @for (key of ['day', 'week', 'month', 'year']; track key) {
               <mat-button-toggle [value]="key">{{ groupByLabel[key] }}</mat-button-toggle>
             }
           </mat-button-toggle-group>
+
+          <app-filter-fold [summary]="rangeText" [(open)]="filterOpen" />
 
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>{{ form.controls.groupBy.value === 'year' ? 'ปีเริ่ม' : form.controls.groupBy.value === 'month' ? 'เดือนเริ่ม' : 'วันที่เริ่ม' }}</mat-label>

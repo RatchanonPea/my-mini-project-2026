@@ -1707,7 +1707,7 @@ $m-cards: (
 
 @media (max-width: 600px) {
   table.mat-mdc-table.m-card tr.mat-mdc-row:not(.no-data-row) {
-    grid-template-columns: minmax(0, 1fr) auto 1.25rem;
+    grid-template-columns: 2.6rem minmax(0, 1fr) auto 1rem;
     align-items: center;
     column-gap: 0.5rem;
     row-gap: 0.15rem;
@@ -1717,7 +1717,7 @@ $m-cards: (
     // the chevron says the card opens
     &::after {
       content: '\203A';
-      grid-column: 3;
+      grid-column: 4;
       grid-row: 1 / span 2;
       justify-self: end;
       font-size: 1.6rem;
@@ -1747,7 +1747,7 @@ $m-cards: (
 
     #{$row}.mat-column-#{$title} {
       display: flex;
-      grid-column: 1;
+      grid-column: 2;
       grid-row: 1;
       font-size: 1.05rem;
       font-weight: 700;
@@ -1756,7 +1756,7 @@ $m-cards: (
 
     #{$row}.mat-column-#{$figure} {
       display: flex;
-      grid-column: 2;
+      grid-column: 3;
       grid-row: 1;
       align-items: flex-end;
       font-size: 1.1rem;
@@ -1768,7 +1768,7 @@ $m-cards: (
 
     #{$row}.mat-column-#{$detail} {
       display: flex;
-      grid-column: 1;
+      grid-column: 2;
       grid-row: 2;
       font-size: 0.9375rem;
       font-weight: 400;
@@ -1779,7 +1779,7 @@ $m-cards: (
     @if $second {
       #{$row}.mat-column-#{$second} {
         display: flex;
-        grid-column: 2;
+        grid-column: 3;
         grid-row: 2;
         align-items: flex-end;
         font-size: 0.9375rem;
@@ -1873,7 +1873,8 @@ $m-cards: (
 
   .content-body .m-fold-bar {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     gap: 8px;
 
     .mat-mdc-button-base {
@@ -1892,10 +1893,15 @@ $m-cards: (
   }
 
   .content-body .m-fold.m-fold.m-closed {
-    display: none;
+    display: none !important; // the pages give some of these cards a display of their own
   }
 
-  .content-body mat-card.m-fold.m-fold {
+  // keeps a card scrolled to for editing clear of the top bar
+  .content-body .m-fold.m-fold {
+    scroll-margin-top: 80px;
+  }
+
+  .content-body .m-fold.m-fold {
     padding: 0.75rem 0.6rem 0.6rem !important;
   }
 
@@ -2027,25 +2033,29 @@ $ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
       transition-duration: 0.06s;
     }
 
-    // folding form: grows open and folds away
-    .content-body mat-card.m-fold.m-fold {
-      overflow: hidden;
-      max-height: 60rem;
+    // folding form: grows open and folds away. Where the browser cannot animate to "auto" height it still fades.
+    .content-body .m-fold.m-fold {
+      interpolate-size: allow-keywords;
+      height: auto;
+      overflow: clip;
       opacity: 1;
-      transition: max-height 0.38s $ease-out, opacity 0.25s ease, padding 0.3s $ease-out, display 0.38s allow-discrete !important;
+      transform: none;
+      transition: height 0.38s $ease-out, opacity 0.28s ease, transform 0.38s $ease-out, padding 0.3s $ease-out, display 0.38s allow-discrete !important;
     }
 
-    .content-body mat-card.m-fold.m-fold.m-closed {
-      max-height: 0;
+    .content-body .m-fold.m-fold.m-closed {
+      height: 0;
       padding-top: 0 !important;
       padding-bottom: 0 !important;
       opacity: 0;
+      transform: translateY(-8px);
     }
 
     @starting-style {
-      .content-body mat-card.m-fold.m-fold:not(.m-closed) {
-        max-height: 0;
+      .content-body .m-fold.m-fold:not(.m-closed) {
+        height: 0;
         opacity: 0;
+        transform: translateY(-8px);
       }
     }
 
@@ -2074,6 +2084,39 @@ $ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 }
 
+// Phone search bars: the text search gets a full line, the other filters share one, buttons share the last.
+@media (max-width: 600px) {
+  .content-body form.filter-bar.filter-bar {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    gap: 8px;
+
+    > .mat-mdc-form-field {
+      flex: 1 1 calc(50% - 4px);
+      width: auto;
+      min-width: 0;
+    }
+
+    > .mat-mdc-form-field:has(input[formcontrolname='keyword']) {
+      flex-basis: 100%;
+    }
+
+    > .filter-actions {
+      display: flex;
+      flex: 1 1 100%;
+      flex-wrap: nowrap;
+      gap: 8px;
+      margin: 0;
+
+      > .mat-mdc-button-base {
+        flex: 1;
+        min-width: 0;
+        padding: 0 0.5rem;
+      }
+    }
+  }
+}
 
 // Phone period selector (day / week / month / year): the four share the width, so there is nothing to scroll and
 // no scrollbar. The orange fill already marks the chosen one, so the tick is dropped to save room.
@@ -2527,6 +2570,245 @@ $ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 // ============================================================================
+// Phone search: folded behind a button; the line beside it always says what the list is filtered by.
+// ============================================================================
+app-filter-fold {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .content-body app-filter-fold {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+
+    .summary {
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+
+      span {
+        color: var(--app-text-muted);
+      }
+    }
+
+    .mat-mdc-button-base {
+      flex: none;
+      min-height: 44px;
+
+      &.on {
+        color: #fff;
+        border-color: transparent;
+        background: var(--app-accent-strong);
+      }
+    }
+  }
+
+  // the explanation under the list's title repeats what the search fields already say
+  .content-body mat-card:has(> mat-card-content > app-filter-fold) mat-card-subtitle {
+    display: none;
+  }
+
+  .content-body form.filter-bar.m-filter.m-closed {
+    display: none !important;
+  }
+}
+
+@media (max-width: 600px) and (prefers-reduced-motion: no-preference) {
+  .content-body form.filter-bar.m-filter {
+    interpolate-size: allow-keywords;
+    height: auto;
+    opacity: 1;
+    // clips only while folding: padding keeps the fields' floating labels inside
+    overflow: clip;
+    padding-top: 6px;
+    transition: height 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.22s ease, display 0.32s allow-discrete !important;
+  }
+
+  .content-body form.filter-bar.m-filter.m-closed {
+    height: 0;
+    padding-top: 0;
+    opacity: 0;
+  }
+
+  @starting-style {
+    .content-body form.filter-bar.m-filter:not(.m-closed) {
+      height: 0;
+      opacity: 0;
+    }
+  }
+}
+
+// ============================================================================
+// Phone card finish: a round pastel icon says what kind of row it is before a word is read, the hard orange edge
+// gives way to a soft card, and the second figure sits in a small pill.
+// ============================================================================
+//        table: (Material icon, pastel family)
+$m-icons: (
+  products: (restaurant, peach),
+  sales: (point_of_sale, mint),
+  expenses: (receipt_long, rose),
+  ledger: (inventory_2, sand),
+  purchases: (local_shipping, sky),
+  suppliers: (storefront, butter),
+  users: (person, lilac),
+  periods: (bar_chart, sky),
+  top: (emoji_events, butter),
+  contracts: (description, sand),
+  orders: (local_shipping, sky),
+);
+//          stock movement: (Material icon, pastel family)
+$m-moves: (
+  receive: (south_west, mint),
+  sale: (point_of_sale, peach),
+  waste: (delete, rose),
+  adjust: (tune, lilac),
+);
+
+@media (max-width: 600px) {
+  .content-body table.mat-mdc-table.m-card tr.mat-mdc-row:not(.no-data-row) {
+    column-gap: 0.65rem;
+    margin-bottom: 10px;
+    padding: 0.8rem 0.55rem 0.8rem 0.75rem;
+    border: 1px solid var(--app-hairline);
+    border-radius: 18px;
+    background: var(--app-surface);
+    box-shadow: 0 6px 16px -10px rgba(124, 45, 18, 0.35);
+
+    &::before {
+      content: 'article';
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      display: grid;
+      place-items: center;
+      width: 2.6rem;
+      height: 2.6rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--sand-a), var(--sand-b));
+      color: var(--sand-ink);
+      // the icon font draws the word above as a picture
+      font-family: 'Material Icons';
+      font-size: 1.35rem;
+      line-height: 1;
+      overflow: hidden;
+    }
+
+    > td.mat-mdc-cell {
+      background: transparent;
+    }
+  }
+
+  @each $table, $look in $m-icons {
+    .content-body table.mat-mdc-table.m-card.m-#{$table} tr.mat-mdc-row:not(.no-data-row)::before {
+      content: '#{nth($look, 1)}';
+      background: linear-gradient(135deg, var(--#{nth($look, 2)}-a), var(--#{nth($look, 2)}-b));
+      color: var(--#{nth($look, 2)}-ink);
+    }
+  }
+
+  // the stock history says which way the chickens went
+  @each $move, $look in $m-moves {
+    .content-body table.mat-mdc-table.m-card.m-ledger tr.mat-mdc-row:not(.no-data-row):has(.lt-#{$move})::before {
+      content: '#{nth($look, 1)}';
+      background: linear-gradient(135deg, var(--#{nth($look, 2)}-a), var(--#{nth($look, 2)}-b));
+      color: var(--#{nth($look, 2)}-ink);
+    }
+  }
+
+  // the kind of movement is the card's title: plain text, the icon already carries the colour
+  .content-body table.mat-mdc-table.m-card.m-ledger tr.mat-mdc-row td.mat-column-type .ledger-type {
+    padding: 0;
+    background: none;
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  // second figure: a quiet pill, so it is not mistaken for the main one
+  @each $table, $slots in $m-cards {
+    $second: nth($slots, 4);
+
+    @if $second {
+      .content-body table.mat-mdc-table.m-card.m-#{$table} tr.mat-mdc-row:not(.no-data-row) > td.mat-mdc-cell.mat-column-#{$second} {
+        justify-self: end;
+        width: auto;
+        padding: 0.05rem 0.55rem;
+        border-radius: 999px;
+        background: var(--app-surface-alt);
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+// Phone list footer: page numbers on one slim line, totals in two short lines.
+@media (max-width: 600px) {
+  .content-body app-pager .pager {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    padding: 0.35rem 0.15rem 0;
+
+    .pager-info {
+      white-space: nowrap;
+    }
+
+    .pager-buttons {
+      gap: 0;
+      justify-content: flex-end;
+    }
+
+    .pager-btn {
+      min-width: 34px;
+      height: 34px;
+    }
+
+    .pager-gap {
+      min-width: 16px;
+    }
+  }
+
+  .content-body .summary-row.summary-row,
+  .content-body .total-box.total-box {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0 0.75rem;
+    margin-top: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    border: 0;
+    border-radius: 14px;
+    background: var(--app-surface-alt);
+    font-size: 0.875rem;
+    line-height: 1.6;
+
+    > * {
+      font-size: 0.875rem;
+      text-align: left;
+    }
+
+    // the money total: its own weight, pushed to the right
+    > strong,
+    .total-value {
+      margin-left: auto;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+  }
+
+  .content-body .owed-row.owed-row {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+}
+
+// ============================================================================
 // Phone calendar: all seven days fit the screen; a day shows coloured dots (names were cut to a few letters) and
 // the list under the grid gives the details of the day that is tapped.
 // ============================================================================
@@ -2694,6 +2976,52 @@ $ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 }
 
+// Phone field notes: the space under a field is a fixed single line by default, so a hint or error that wraps spilt
+// onto whatever came next. Letting it take its own height pushes the next control down instead.
+@media (max-width: 600px) {
+  .content-body .mat-mdc-form-field-subscript-wrapper .mat-mdc-form-field-hint-wrapper,
+  .content-body .mat-mdc-form-field-subscript-wrapper .mat-mdc-form-field-error-wrapper {
+    position: static;
+    padding-bottom: 2px;
+    line-height: 1.45;
+  }
+
+  .content-body .form-actions {
+    margin-top: 0.5rem;
+  }
+}
+
+// Phone entry fields: the sale form forced three fields onto one line. The product gets its own line, quantity and
+// unit price share the next. Page columns may also shrink to the screen ("1fr" alone lets wide content stretch them).
+@media (max-width: 600px) {
+  .content-body .sales-page .sales-card .form-row.form-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 8px;
+
+    > .full-width {
+      grid-column: 1 / -1;
+    }
+
+    > .mat-mdc-form-field {
+      min-width: 0;
+    }
+  }
+
+  .content-body .sales-grid.sales-grid,
+  .content-body .expenses-grid.expenses-grid,
+  .content-body .purchases-grid.purchases-grid,
+  .content-body .suppliers-grid.suppliers-grid,
+  .content-body .inventory-grid.inventory-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  // the inventory frame hands its two columns to the page (see the folding forms), so it stays "contents"
+  .content-body .inventory-page.inventory-page > .inventory-grid.inventory-grid {
+    display: contents;
+  }
+}
+
 // Phone "that day" list under the calendar: room to breathe, the amount at the top right where amounts line up.
 //   kind                    amount
 //   title
@@ -2773,5 +3101,132 @@ $ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
         color: var(--app-text-muted);
       }
     }
+  }
+}
+
+// ============================================================================
+// Phone report filters: period buttons always showing, dates and buttons unfold in two columns.
+// ============================================================================
+@media (max-width: 600px) {
+  .content-body .reports-page.reports-page {
+    .filter-card {
+      padding: 0.5rem;
+
+      mat-card-content {
+        padding: 0;
+      }
+    }
+
+    .filter-row.filter-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+
+      > .group-toggle,
+      > app-filter-fold {
+        grid-column: 1 / -1;
+      }
+
+      > app-filter-fold {
+        margin: 0;
+      }
+
+      > .mat-mdc-form-field,
+      > .mat-mdc-button-base {
+        width: auto;
+        min-width: 0;
+        margin: 0;
+      }
+
+      > .year-jump {
+        grid-column: 1 / -1;
+      }
+
+      > .mat-mdc-button-base {
+        padding: 0 0.5rem;
+      }
+    }
+
+    .filter-row.filter-row.m-folded > :not(.group-toggle):not(app-filter-fold) {
+      display: none;
+    }
+
+    .chart-card,
+    .periods-card {
+      padding: 0.8rem 0.6rem;
+    }
+  }
+
+  // the calendar's month name was cut to a few letters
+  .content-body .cal-page.cal-page .cal-toolbar {
+    > .mat-mdc-icon-button {
+      width: 30px;
+    }
+
+    .year-field {
+      width: 4.9rem;
+    }
+
+    .jump-field .mat-mdc-form-field-infix {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .jump-field .mat-mdc-text-field-wrapper {
+      padding: 0 0.4rem;
+    }
+
+    > .mdc-button {
+      padding: 0 0.3rem;
+    }
+  }
+
+  // one column forms may not be wider than the screen (the supplier map pushed past it on small phones)
+  .content-body .supplier-profile-page .form-row.form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .content-body app-location-picker {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+// ============================================================================
+// Finger-sized targets: on phones and other touch screens nothing to tap is under 44px.
+// ============================================================================
+@media (max-width: 600px), (pointer: coarse) and (max-width: 1024px) {
+  .content-body mat-button-toggle-group .mat-button-toggle-label-content {
+    line-height: 44px !important;
+  }
+
+  .content-body app-pager .pager {
+    flex-wrap: wrap;
+    row-gap: 4px;
+
+    .pager-buttons {
+      gap: 2px;
+      justify-content: flex-end;
+    }
+
+    .pager-btn {
+      min-width: 44px;
+      height: 44px;
+    }
+
+    .pager-gap {
+      min-width: 14px;
+    }
+  }
+
+  .content-body .mat-mdc-icon-button .mat-mdc-button-touch-target {
+    width: 48px;
+    height: 48px;
+  }
+
+  .content-body mat-slide-toggle {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
   }
 }

@@ -6,7 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject, catchError, of, switchMap } from 'rxjs';
+import { Subject, catchError, of, switchMap, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -26,11 +26,12 @@ import { EditLedgerDialog } from './edit-ledger-dialog/edit-ledger-dialog';
 import { ClearButton } from '../../../shared/clear-button/clear-button';
 import { CharCount } from '../../../shared/char-count/char-count';
 import { RowAction, openDrawer } from '../../../shared/row-drawer/row-drawer';
+import { FilterFold, filterSummary, datePart } from '../../../shared/filter-fold/filter-fold';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CharCount, ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, AppDateModule, MatDialogModule, Pager],
+  imports: [FilterFold, CharCount, ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, AppDateModule, MatDialogModule, Pager],
   templateUrl: './inventory.html',
   styleUrls: ['./inventory.scss'],
 })
@@ -85,10 +86,20 @@ export class Inventory implements OnInit {
     return this.adjustForm.valid && (this.isWaste ? q > 0 : q !== 0);
   }
 
+  /** phones only: the search fields stay folded; this line says what the list is filtered by */
+  filterOpen = false;
+  filterText = '';
+
+  private describeFilter(): string {
+    const v = this.filterForm.getRawValue();
+    return filterSummary([v.type ? this.typeLabel[v.type] : 'ทุกประเภท', datePart(v.date) ?? 'ทุกวัน']);
+  }
+
   ngOnInit(): void {
     this.loadSummary();
 
     this.reload$.pipe(
+      tap(() => (this.filterText = this.describeFilter())),
       switchMap(() => this.api.getInventoryLedger({
         type: this.filterForm.controls.type.value ?? '',
         date: this.filterForm.controls.date.value ? toYmd(this.filterForm.controls.date.value) : null,

@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ReplaySubject, Subject, catchError, firstValueFrom, of, switchMap } from 'rxjs';
+import { ReplaySubject, Subject, catchError, firstValueFrom, of, switchMap, tap } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,11 +25,12 @@ import { PrintService } from '../../../services/print';
 import { ClearButton } from '../../../shared/clear-button/clear-button';
 import { RowDrawer, RowDrawerData, dateText, money, openDrawer } from '../../../shared/row-drawer/row-drawer';
 import { MatDialog } from '@angular/material/dialog';
+import { FilterFold, filterSummary, datePart, keywordPart } from '../../../shared/filter-fold/filter-fold';
 
 @Component({
   selector: 'app-sales',
   standalone: true,
-  imports: [ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule, Pager, MatDatepickerModule, AppDateModule, NgxMatSelectSearchModule],
+  imports: [FilterFold, ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatTableModule, Pager, MatDatepickerModule, AppDateModule, NgxMatSelectSearchModule],
   templateUrl: './sales.html',
   styleUrls: ['./sales.scss']
 })
@@ -56,6 +57,8 @@ export class Sales implements OnInit {
   private formDateItems: SaleItem[] = [];
   editingId: number | null = null;
   saving = false;
+  /** phones only: the entry form stays folded until asked for (or until a row is being edited) */
+  formOpen = false;
   printing = false;
 
   filterForm = this.fb.group({
@@ -94,6 +97,15 @@ export class Sales implements OnInit {
     this.filteredProducts$.next(list);
   }
 
+  /** phones only: the search fields stay folded; this line says what the list is filtered by */
+  filterOpen = false;
+  filterText = '';
+
+  private describeFilter(): string {
+    const v = this.filterForm.getRawValue();
+    return filterSummary([datePart(v.date) ?? 'ทุกวัน', keywordPart(v.keyword)]);
+  }
+
   ngOnInit(): void {
     this.productFilterCtrl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.filterProducts());
 
@@ -103,6 +115,7 @@ export class Sales implements OnInit {
     });
 
     this.reload$.pipe(
+      tap(() => (this.filterText = this.describeFilter())),
       switchMap(() => this.api.searchSales({
         keyword: this.filterForm.controls.keyword.value ?? '',
         date: this.filterForm.controls.date.value ? toYmd(this.filterForm.controls.date.value) : null,
@@ -192,6 +205,7 @@ export class Sales implements OnInit {
     this.editingId = item.item_id;
     this.loadFormDateItems(item.sale_date.slice(0, 10));
     this.form.setValue({ product_id: item.product_id, quantity: item.quantity });
+    this.formOpen = true;
     ScrollToEditForm('.sales-card');
   }
 
@@ -216,6 +230,7 @@ export class Sales implements OnInit {
         this.saving = false;
         DialogSuccess(editing ? 'อัปเดตยอดขายเรียบร้อยแล้ว' : 'บันทึกยอดขายเรียบร้อยแล้ว', editing ? 'อัปเดตสำเร็จ' : 'บันทึกสำเร็จ');
         this.resetForm();
+        this.formOpen = false;
         this.reload$.next();
       },
       error: (err) => {
@@ -243,6 +258,7 @@ export class Sales implements OnInit {
   }
 
   private resetForm(): void {
+    if (this.editingId !== null) this.formOpen = false; // leaving edit mode folds the form again
     this.editingId = null;
     this.loadFormDateItems(toYmd(new Date()));
     this.form.reset({ product_id: 0, quantity: 1 });

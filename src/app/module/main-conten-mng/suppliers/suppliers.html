@@ -7,7 +7,12 @@
   </div>
 
   <div class="suppliers-grid">
-    <mat-card class="supplier-entry-card">
+    <div class="m-fold-bar">
+      <button mat-stroked-button type="button" [class.on]="formOpen" (click)="formOpen = !formOpen" [attr.aria-expanded]="formOpen">
+        <mat-icon aria-hidden="true">{{ formOpen ? 'expand_less' : 'add_business' }}</mat-icon> เพิ่มร้านค้าใหม่
+      </button>
+    </div>
+    <mat-card class="supplier-entry-card m-fold" [class.m-closed]="!formOpen">
       <mat-card-header>
         <mat-card-title>เพิ่มร้านค้าใหม่</mat-card-title>
       </mat-card-header>
@@ -66,7 +71,8 @@
         <mat-card-subtitle>ค้นหาด้วยชื่อร้าน เบอร์โทร หรือรหัส</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <form class="filter-bar" [formGroup]="filterForm" (ngSubmit)="search()">
+        <app-filter-fold [summary]="filterText" [(open)]="filterOpen" />
+        <form class="filter-bar m-filter" [class.m-closed]="!filterOpen" [formGroup]="filterForm" (ngSubmit)="search(); filterOpen = false">
           <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
             <mat-label>ค้นหาชื่อร้าน / เบอร์ / รหัส</mat-label>
             <input matInput formControlName="keyword" />

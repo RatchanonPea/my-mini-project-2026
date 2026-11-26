@@ -8,7 +8,12 @@
     </div>
   </div>
 
-  <div class="card form-card" [class.edit-mode]="isEditing">
+  <div class="m-fold-bar" *ngIf="canManageProducts">
+    <button mat-stroked-button type="button" [class.on]="formOpen" (click)="formOpen = !formOpen" [attr.aria-expanded]="formOpen">
+      <mat-icon aria-hidden="true">{{ formOpen ? 'expand_less' : 'add_circle' }}</mat-icon> {{ isEditing ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่' }}
+    </button>
+  </div>
+  <div class="card form-card m-fold" [class.edit-mode]="isEditing" [class.m-closed]="!formOpen">
 
     <!-- 🔹 FORM -->
     <div class="card-body inline-add-row" fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="start center" fxLayoutWrap>

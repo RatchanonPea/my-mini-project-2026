@@ -158,7 +158,8 @@
         <mat-card-subtitle>รับเข้า ขายออก (รวมรายวัน) ของเสีย และปรับยอด</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <form class="filter-bar" [formGroup]="filterForm" (ngSubmit)="search()">
+        <app-filter-fold [summary]="filterText" [(open)]="filterOpen" />
+        <form class="filter-bar m-filter" [class.m-closed]="!filterOpen" [formGroup]="filterForm" (ngSubmit)="search(); filterOpen = false">
           <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
             <mat-label>ประเภท</mat-label>
             <mat-select formControlName="type">

@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject, catchError, of, switchMap } from 'rxjs';
+import { Subject, catchError, of, switchMap, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -22,11 +22,12 @@ import { ClearButton } from '../../../shared/clear-button/clear-button';
 import { CharCount } from '../../../shared/char-count/char-count';
 import { RowDrawer, RowDrawerData, openDrawer } from '../../../shared/row-drawer/row-drawer';
 import { MatDialog } from '@angular/material/dialog';
+import { FilterFold, filterSummary, keywordPart } from '../../../shared/filter-fold/filter-fold';
 
 @Component({
   selector: 'app-suppliers',
   standalone: true,
-  imports: [CharCount, ClearButton, SupplierContractFields, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, Pager, LocationPicker],
+  imports: [FilterFold, CharCount, ClearButton, SupplierContractFields, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, Pager, LocationPicker],
   templateUrl: './suppliers.html',
   styleUrls: ['./suppliers.scss'],
 })
@@ -49,6 +50,8 @@ export class Suppliers implements OnInit {
   total = 0;
 
   saving = false;
+  /** phones only: the entry form stays folded until asked for (or until a row is being edited) */
+  formOpen = false;
 
   lat: number | null = null;
   lng: number | null = null;
@@ -63,8 +66,18 @@ export class Suppliers implements OnInit {
     ...contractControls(),
   });
 
+  /** phones only: the search fields stay folded; this line says what the list is filtered by */
+  filterOpen = false;
+  filterText = '';
+
+  private describeFilter(): string {
+    const v = this.filterForm.getRawValue();
+    return filterSummary([keywordPart(v.keyword)]);
+  }
+
   ngOnInit(): void {
     this.reload$.pipe(
+      tap(() => (this.filterText = this.describeFilter())),
       switchMap(() => this.api.searchSuppliers({
         keyword: this.filterForm.controls.keyword.value,
         page: this.pageIndex + 1,
@@ -132,6 +145,7 @@ export class Suppliers implements OnInit {
       next: () => {
         this.saving = false;
         DialogSuccess('เพิ่มร้านค้าเรียบร้อยแล้ว');
+        this.formOpen = false;
         this.form.reset({ name: '', phone: '', address: '', note: '', entity_type: 'individual', legal_name: '', contact_position: '', tax_id: '', contact_name: '', bank_name: '', bank_account_no: '', bank_account_name: '', credit_days: null });
         this.lat = null;
         this.lng = null;

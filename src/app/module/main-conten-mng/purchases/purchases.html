@@ -7,7 +7,12 @@
   </div>
 
   <div class="purchases-grid">
-    <mat-card class="purchase-entry-card">
+    <div class="m-fold-bar">
+      <button mat-stroked-button type="button" [class.on]="formOpen" (click)="formOpen = !formOpen" [attr.aria-expanded]="formOpen">
+        <mat-icon aria-hidden="true">{{ formOpen ? 'expand_less' : 'add_circle' }}</mat-icon> {{ editingId ? 'แก้ไขใบสั่งซื้อ' : 'สร้างใบสั่งซื้อ' }}
+      </button>
+    </div>
+    <mat-card class="purchase-entry-card m-fold" [class.m-closed]="!formOpen">
       <mat-card-header>
         <mat-card-title>{{ editingId ? 'แก้ไขใบสั่งซื้อ' : 'สร้างใบสั่งซื้อ' }}</mat-card-title>
       </mat-card-header>
@@ -102,7 +107,8 @@
         <mat-card-subtitle>ค้นหาตามผู้ขาย รหัส หรือหมายเหตุ กรองตามวันที่สั่งและสถานะได้</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <form class="filter-bar" [formGroup]="filterForm" (ngSubmit)="search()">
+        <app-filter-fold [summary]="filterText" [(open)]="filterOpen" />
+        <form class="filter-bar m-filter" [class.m-closed]="!filterOpen" [formGroup]="filterForm" (ngSubmit)="search(); filterOpen = false">
           <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
             <mat-label>ค้นหาผู้ขาย / รหัส / หมายเหตุ</mat-label>
             <input matInput formControlName="keyword" />

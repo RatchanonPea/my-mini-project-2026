@@ -20,6 +20,7 @@ import { DialogErrorHtmlConfirm, toYmd } from '../../../common/helper';
 import { buildReportDoc } from '../../../common/print-docs';
 import { PrintService } from '../../../services/print';
 import { Pager } from '../../../shared/pager/pager';
+import { FilterFold } from '../../../shared/filter-fold/filter-fold';
 import { ReportChart, ReportChartSeries } from '../../../shared/report-chart/report-chart';
 import { RowDrawer, RowDrawerData, money, openDrawer } from '../../../shared/row-drawer/row-drawer';
 import { MatDialog } from '@angular/material/dialog';
@@ -28,7 +29,7 @@ import { formatNumber } from '@angular/common';
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [TodayButton, NoData, 
+  imports: [FilterFold, TodayButton, NoData, 
     CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule,
     MatIconModule, MatSelectModule, MatDatepickerModule, AppDateModule, MatTableModule, MatButtonToggleModule, Pager, ReportChart,
   ],
@@ -61,6 +62,9 @@ export class Reports implements OnInit {
   periods: ReportPeriod[] = [];
   pagedPeriods: ReportPeriod[] = [];
   loading = false;
+  /** phones only: the date fields stay folded; rangeText says which dates the figures are for */
+  filterOpen = false;
+  rangeText = '';
 
   // Plain properties, computed once when periods loads — not getters. A getter returning a fresh
   // array on every change-detection pass makes Angular see a "new" input on every check, which
@@ -172,6 +176,8 @@ export class Reports implements OnInit {
     const to = toYmd(v.dateEnd);
     this.loading = true;
     this.generated = { from, to, groupBy: v.groupBy };
+    const shown = (ymd: string) => ymd.split('-').reverse().join('/');
+    this.rangeText = `${shown(from)} – ${shown(to)}`;
 
     this.api.getReportSummary(from, to).subscribe((r) => (this.summary = r));
     this.api.getReportBreakdown(from, to, v.groupBy).subscribe({

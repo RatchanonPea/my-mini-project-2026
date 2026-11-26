@@ -6,7 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { ReplaySubject, Subject, catchError, of, switchMap } from 'rxjs';
+import { ReplaySubject, Subject, catchError, of, switchMap, tap } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -27,6 +27,7 @@ import { StockDetailDialog } from '../inventory/stock-detail-dialog/stock-detail
 import { ClearButton } from '../../../shared/clear-button/clear-button';
 import { CharCount } from '../../../shared/char-count/char-count';
 import { RowAction, openDrawer } from '../../../shared/row-drawer/row-drawer';
+import { FilterFold, filterSummary, datePart, keywordPart } from '../../../shared/filter-fold/filter-fold';
 
 /** Chickens are counted in whole chickens, in steps of 0.5. */
 export function halfStep(control: AbstractControl): ValidationErrors | null {
@@ -39,7 +40,7 @@ const CUSTOM_PRICE = 'custom';
 @Component({
   selector: 'app-purchases',
   standalone: true,
-  imports: [CharCount, ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, AppDateModule, MatDialogModule, Pager, NgxMatSelectSearchModule],
+  imports: [FilterFold, CharCount, ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatSelectModule, MatDatepickerModule, AppDateModule, MatDialogModule, Pager, NgxMatSelectSearchModule],
   templateUrl: './purchases.html',
   styleUrls: ['./purchases.scss'],
 })
@@ -75,6 +76,8 @@ export class Purchases implements OnInit {
 
   editingId: number | null = null;
   saving = false;
+  /** phones only: the entry form stays folded until asked for (or until a row is being edited) */
+  formOpen = false;
 
   filterForm = this.fb.group({
     keyword: [''],
@@ -122,6 +125,21 @@ export class Purchases implements OnInit {
     this.filteredSuppliers$.next(list);
   }
 
+  /** phones only: the search fields stay folded; this line says what the list is filtered by */
+  filterOpen = false;
+  filterText = '';
+
+  private describeFilter(): string {
+    const v = this.filterForm.getRawValue();
+    const paymentText: Record<string, string> = { unpaid: 'ค้างจ่าย', overdue: 'เกินกำหนดจ่าย', paid: 'จ่ายแล้ว' };
+    return filterSummary([
+      datePart(v.date) ?? 'ทุกวัน',
+      v.status ? this.statusLabel[v.status] : null,
+      v.payment ? paymentText[v.payment] : null,
+      keywordPart(v.keyword),
+    ]);
+  }
+
   ngOnInit(): void {
     this.supplierFilterCtrl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.filterSuppliers());
 
@@ -155,6 +173,7 @@ export class Purchases implements OnInit {
     });
 
     this.reload$.pipe(
+      tap(() => (this.filterText = this.describeFilter())),
       switchMap(() => this.api.searchPurchases({
         keyword: this.filterForm.controls.keyword.value ?? '',
         date: this.filterForm.controls.date.value ? toYmd(this.filterForm.controls.date.value) : null,
@@ -258,10 +277,12 @@ export class Purchases implements OnInit {
       custom_cost: known ? null : Number(item.unit_cost),
       note: item.note ?? '',
     });
+    this.formOpen = true;
     ScrollToEditForm('.purchase-entry-card');
   }
 
   reset(): void {
+    if (this.editingId !== null) this.formOpen = false; // leaving edit mode folds the form again
     this.editingId = null;
     this.form.reset({
       order_date: new Date(),
@@ -295,6 +316,7 @@ export class Purchases implements OnInit {
         this.saving = false;
         DialogSuccess(editing ? 'แก้ไขใบสั่งซื้อเรียบร้อยแล้ว' : 'สร้างใบสั่งซื้อเรียบร้อยแล้ว');
         this.reset();
+        this.formOpen = false;
         this.reload$.next();
         this.refreshPrices();
       },

@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject, catchError, of, switchMap } from 'rxjs';
+import { Subject, catchError, of, switchMap, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -24,11 +24,12 @@ import { DialogErrorHtmlConfirm, DialogSuccess, toYmd, ScrollToEditForm } from '
 import { ClearButton } from '../../../shared/clear-button/clear-button';
 import { RowDrawer, RowDrawerData, dateText, money, openDrawer } from '../../../shared/row-drawer/row-drawer';
 import { MatDialog } from '@angular/material/dialog';
+import { FilterFold, filterSummary, datePart, keywordPart } from '../../../shared/filter-fold/filter-fold';
 
 @Component({
   selector: 'app-expenses',
   standalone: true,
-  imports: [ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, Pager, MatSelectModule, MatDatepickerModule, AppDateModule, NgxMatSelectSearchModule],
+  imports: [FilterFold, ClearButton, ThousandsInput, TodayButton, NoData, CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, Pager, MatSelectModule, MatDatepickerModule, AppDateModule, NgxMatSelectSearchModule],
   templateUrl: './expenses.html',
   styleUrls: ['./expenses.scss']
 })
@@ -55,6 +56,8 @@ export class Expenses implements OnInit {
 
   editingId: number | null = null;
   saving = false;
+  /** phones only: the entry form stays folded until asked for (or until a row is being edited) */
+  formOpen = false;
 
   filterForm = this.fb.group({
     keyword: [''],
@@ -68,6 +71,15 @@ export class Expenses implements OnInit {
     amount: [0, [Validators.required, Validators.min(0.01)]],
   });
 
+  /** phones only: the search fields stay folded; this line says what the list is filtered by */
+  filterOpen = false;
+  filterText = '';
+
+  private describeFilter(): string {
+    const v = this.filterForm.getRawValue();
+    return filterSummary([datePart(v.date) ?? 'ทุกวัน', keywordPart(v.keyword)]);
+  }
+
   ngOnInit(): void {
     this.api.getCategories('expense').subscribe((c) => {
       this.categories = c;
@@ -75,6 +87,7 @@ export class Expenses implements OnInit {
     });
 
     this.reload$.pipe(
+      tap(() => (this.filterText = this.describeFilter())),
       switchMap(() => this.api.searchExpenses({
         keyword: this.filterForm.controls.keyword.value ?? '',
         date: this.filterForm.controls.date.value ? toYmd(this.filterForm.controls.date.value) : null,
@@ -132,10 +145,12 @@ export class Expenses implements OnInit {
       expense_date: new Date(item.expense_date),
       amount: item.amount,
     });
+    this.formOpen = true;
     ScrollToEditForm('.expense-entry-card');
   }
 
   reset(): void {
+    if (this.editingId !== null) this.formOpen = false; // leaving edit mode folds the form again
     this.editingId = null;
     this.form.reset({ category_id: 0, description: '', expense_date: new Date(), amount: 0 });
   }
@@ -162,6 +177,7 @@ export class Expenses implements OnInit {
         this.saving = false;
         DialogSuccess();
         this.reset();
+        this.formOpen = false;
         this.reload$.next();
       },
       error: (err) => {

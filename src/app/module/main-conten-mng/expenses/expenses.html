@@ -7,7 +7,12 @@
   </div>
 
   <div class="expenses-grid">
-    <mat-card class="expense-entry-card">
+    <div class="m-fold-bar">
+      <button mat-stroked-button type="button" [class.on]="formOpen" (click)="formOpen = !formOpen" [attr.aria-expanded]="formOpen">
+        <mat-icon aria-hidden="true">{{ formOpen ? 'expand_less' : 'add_circle' }}</mat-icon> {{ editingId ? 'แก้ไขค่าใช้จ่าย' : 'บันทึกค่าใช้จ่าย' }}
+      </button>
+    </div>
+    <mat-card class="expense-entry-card m-fold" [class.m-closed]="!formOpen">
       <mat-card-header>
         <mat-card-title>{{ editingId ? 'แก้ไขค่าใช้จ่าย' : 'บันทึกค่าใช้จ่าย' }}</mat-card-title>
       </mat-card-header>
@@ -69,7 +74,8 @@
         <mat-card-subtitle>ดูค่าใช้จ่ายทั้งหมดและรวมยอดรายวัน</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <form class="filter-bar" [formGroup]="filterForm" (ngSubmit)="search()">
+        <app-filter-fold [summary]="filterText" [(open)]="filterOpen" />
+        <form class="filter-bar m-filter" [class.m-closed]="!filterOpen" [formGroup]="filterForm" (ngSubmit)="search(); filterOpen = false">
           <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
             <mat-label>ค้นหารายละเอียด หรือหมวด</mat-label>
             <input matInput formControlName="keyword" />
