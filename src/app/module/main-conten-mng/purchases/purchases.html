@@ -1,7 +1,7 @@
 <section class="purchases-page">
   <div class="page-header">
     <div>
-      <h3>สั่งซื้อไก่ (Purchases)</h3>
+      <h3>สั่งซื้อไก่</h3>
       <p class="subtitle">บันทึกใบสั่งซื้อไก่ (นับเป็นตัว ทีละ 0.5) เลือกราคารับต่อตัวได้ หรือกรอกเองถ้าราคาไม่ตรง กดรับของเมื่อไก่มาถึงเพื่อเพิ่มสต็อก</p>
     </div>
   </div>
@@ -139,7 +139,7 @@
         </form>
 
         <div class="table-wrapper">
-          <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+          <table mat-table [dataSource]="dataSource" class="mat-elevation-z2 m-card m-purchases">
             <ng-container matColumnDef="code">
               <th mat-header-cell *matHeaderCellDef> รหัส </th>
               <td mat-cell *matCellDef="let po">{{ po.code }}</td>

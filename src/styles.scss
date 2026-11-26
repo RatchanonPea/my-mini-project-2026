@@ -1683,3 +1683,394 @@ html.dark-theme .cdk-overlay-pane.row-drawer {
 .cdk-overlay-container {
   z-index: 1050;
 }
+
+// ============================================================================
+// Phone summary cards (tables marked .m-card): a card shows only what is needed to find a row and judge it;
+// tapping it opens the row panel with everything else and the actions.
+//   title                 figure   >
+//   detail                detail
+// ============================================================================
+$m-cards: (
+  // table:   (title,        figure,       detail,        second detail)
+  products: (product_name, price, category_name, null),
+  sales: (product, total, date, quantity),
+  expenses: (description, amount, category, date),
+  ledger: (type, quantity, ledger_date, balance_after),
+  purchases: (supplier, total, order_date, status),
+  suppliers: (name, is_active, phone, null),
+  users: (fullname, status, username, role),
+  periods: (period, profit, sales_total, expense_total),
+  top: (name, revenue, sold, null),
+  contracts: (code, status, quantity, unit_price),
+  orders: (code, total_cost, order_date, status),
+);
+
+@media (max-width: 600px) {
+  table.mat-mdc-table.m-card tr.mat-mdc-row:not(.no-data-row) {
+    grid-template-columns: minmax(0, 1fr) auto 1.25rem;
+    align-items: center;
+    column-gap: 0.5rem;
+    row-gap: 0.15rem;
+    margin-bottom: 8px;
+    padding: 0.7rem 0.5rem 0.7rem 0.85rem;
+
+    // the chevron says the card opens
+    &::after {
+      content: '\203A';
+      grid-column: 3;
+      grid-row: 1 / span 2;
+      justify-self: end;
+      font-size: 1.6rem;
+      line-height: 1;
+      color: var(--app-text-muted);
+    }
+
+    > td.mat-mdc-cell {
+      display: none;
+      padding: 0;
+      border: 0 !important; // no table rules inside a card
+      min-height: 0;
+      height: auto;
+
+      &::before {
+        display: none;
+      }
+    }
+  }
+
+  @each $table, $slots in $m-cards {
+    $title: nth($slots, 1);
+    $figure: nth($slots, 2);
+    $detail: nth($slots, 3);
+    $second: nth($slots, 4);
+    $row: 'table.mat-mdc-table.m-card.m-#{$table} tr.mat-mdc-row:not(.no-data-row) > td.mat-mdc-cell';
+
+    #{$row}.mat-column-#{$title} {
+      display: flex;
+      grid-column: 1;
+      grid-row: 1;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    #{$row}.mat-column-#{$figure} {
+      display: flex;
+      grid-column: 2;
+      grid-row: 1;
+      align-items: flex-end;
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.45;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #{$row}.mat-column-#{$detail} {
+      display: flex;
+      grid-column: 1;
+      grid-row: 2;
+      font-size: 0.9375rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--app-text-muted);
+    }
+
+    @if $second {
+      #{$row}.mat-column-#{$second} {
+        display: flex;
+        grid-column: 2;
+        grid-row: 2;
+        align-items: flex-end;
+        font-size: 0.9375rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--app-text-muted);
+        white-space: nowrap;
+      }
+    }
+  }
+
+  // numbers that mean nothing without their name get it written in front
+  $named: ('.m-ledger' balance_after 'เหลือ '), ('.m-periods' sales_total 'ขาย '), ('.m-periods' expense_total 'จ่าย '),
+    ('.m-top' sold 'ขายแล้ว '), ('.m-sales' quantity 'จำนวน '), ('.m-contracts' unit_price 'ตัวละ ');
+
+  @each $item in $named {
+    table.mat-mdc-table.m-card#{nth($item, 1)} tr.mat-mdc-row:not(.no-data-row) > td.mat-mdc-cell.mat-column-#{nth($item, 2)} {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 0.25rem;
+
+      &::before {
+        display: inline;
+        content: nth($item, 3);
+        font-size: inherit;
+        font-weight: 400;
+      }
+    }
+  }
+
+  // an agreement keeps its buttons: ending it is not offered inside its panel
+  table.mat-mdc-table.m-card.m-contracts tr.mat-mdc-row:not(.no-data-row) > td.mat-mdc-cell.mat-column-action {
+    display: flex;
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  // less banner, more list
+  .content-body .page-header.page-header {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: 14px;
+
+    h3,
+    h4 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .subtitle {
+      display: none;
+    }
+  }
+}
+
+// Phone folding forms: two buttons side by side at the top of the page; the chosen form opens right under them.
+// On wider screens the buttons do not exist and both forms show as before.
+.m-fold-bar {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .content-body .inventory-page.inventory-page {
+    display: flex;
+    flex-direction: column;
+
+    > * {
+      order: 2;
+      min-width: 0;
+    }
+
+    > .page-header {
+      order: 0;
+    }
+
+    // lets the forms move up past the summary figures without moving the history
+    > .inventory-grid {
+      display: contents;
+    }
+
+    .side-forms {
+      order: 1;
+      gap: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .ledger-card {
+      order: 3;
+    }
+  }
+
+  .content-body .m-fold-bar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+
+    .mat-mdc-button-base {
+      min-width: 0;
+      min-height: 52px;
+      padding: 0 0.5rem;
+      border-radius: 14px;
+      background: var(--app-surface);
+
+      &.on {
+        color: #fff;
+        border-color: transparent;
+        background: var(--app-accent-strong);
+      }
+    }
+  }
+
+  .content-body .m-fold.m-fold.m-closed {
+    display: none;
+  }
+
+  .content-body mat-card.m-fold.m-fold {
+    padding: 0.75rem 0.6rem 0.6rem !important;
+  }
+
+  // the button already carries the title
+  .content-body .m-fold.m-fold > mat-card-header {
+    display: none;
+  }
+
+  .content-body .m-fold.m-fold .form-row {
+    gap: 0;
+    margin-bottom: 0.1rem;
+  }
+
+  .content-body .m-fold.m-fold .form-actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+}
+
+// only phones have the button that unfolds the other stock figures
+.m-more-stats.mat-mdc-button-base {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .content-body .m-more-stats.mat-mdc-button-base {
+    display: inline-flex;
+    flex: none;
+    min-height: 44px;
+    margin: -4px 0 0.5rem;
+  }
+
+  .content-body .inventory-page .inventory-cards.m-brief {
+    margin-bottom: 4px;
+
+    .stat-card:not(.inv-balance) {
+      display: none;
+    }
+  }
+}
+
+// Phone summary figures: two per row instead of one tall block each. The first stock figure (what is left)
+// is the one people open the page for, so it keeps the full width.
+@media (max-width: 600px) {
+  .content-body .inventory-page .inventory-cards,
+  .content-body .report-summary-grid.report-summary-grid,
+  .content-body .profile-stats.profile-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 0.75rem;
+  }
+
+  // the first card, and the last one so it is not left alone in its row
+  .content-body .inventory-page .inventory-cards .stat-card.inv-balance,
+  .content-body .inventory-page .inventory-cards .stat-card.inv-waste {
+    grid-column: 1 / -1;
+  }
+
+  .content-body .inventory-page .inventory-cards .stat-card .card-stats.card-stats,
+  .content-body .profile-stats.profile-stats .stat-card .card-stats.card-stats,
+  .content-body .report-summary-grid.report-summary-grid .summary-card mat-card-content {
+    justify-content: center;
+    min-height: 0;
+    padding: 0.65rem 0.5rem !important;
+    text-align: center;
+  }
+
+  .content-body .report-summary-grid.report-summary-grid .summary-card {
+    padding: 0;
+  }
+
+  .content-body .inventory-page .inventory-cards .stat-card .stat-number,
+  .content-body .profile-stats.profile-stats .stat-card .stat-number,
+  .content-body .report-summary-grid.report-summary-grid .summary-value {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+
+    small {
+      font-size: 0.875rem;
+    }
+  }
+
+  .content-body .inventory-page .inventory-cards .stat-card.inv-balance .stat-number {
+    font-size: 2rem;
+  }
+
+  .content-body .inventory-page .inventory-cards .stat-card .stat-label,
+  .content-body .profile-stats.profile-stats .stat-card .stat-label,
+  .content-body .report-summary-grid.report-summary-grid .summary-title {
+    margin: 0.1rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+}
+
+// ============================================================================
+// Smooth feedback. Pressing something answers at once; what opens or closes slides, so the eye can follow where it
+// went. Browsers without "allow-discrete" simply switch instantly, as before.
+// ============================================================================
+$ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+@media (prefers-reduced-motion: no-preference) {
+  // press: a slight give under the finger
+  .content-body .mat-mdc-button-base:not(.mat-mdc-icon-button) {
+    transition: transform 0.18s $ease-out, background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .content-body .mat-mdc-button-base:not(.mat-mdc-icon-button):not(:disabled):active {
+    transform: scale(0.96);
+    transition-duration: 0.06s;
+  }
+
+  .content-body tr.mat-mdc-row.clickable-row > td {
+    transition: background-color 0.2s ease;
+  }
+
+  @media (max-width: 600px) {
+    // a phone card is one big button
+    .content-body table.mat-mdc-table tr.mat-mdc-row.clickable-row {
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.18s $ease-out, box-shadow 0.2s ease;
+    }
+
+    .content-body table.mat-mdc-table tr.mat-mdc-row.clickable-row:active {
+      transform: scale(0.975);
+      transition-duration: 0.06s;
+    }
+
+    // folding form: grows open and folds away
+    .content-body mat-card.m-fold.m-fold {
+      overflow: hidden;
+      max-height: 60rem;
+      opacity: 1;
+      transition: max-height 0.38s $ease-out, opacity 0.25s ease, padding 0.3s $ease-out, display 0.38s allow-discrete !important;
+    }
+
+    .content-body mat-card.m-fold.m-fold.m-closed {
+      max-height: 0;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      opacity: 0;
+    }
+
+    @starting-style {
+      .content-body mat-card.m-fold.m-fold:not(.m-closed) {
+        max-height: 0;
+        opacity: 0;
+      }
+    }
+
+    // the other stock figures, the same way
+    .content-body .inventory-page .inventory-cards .stat-card:not(.inv-balance) {
+      overflow: hidden;
+      max-height: 14rem;
+      opacity: 1;
+      transform: none;
+      transition: max-height 0.34s $ease-out, opacity 0.25s ease, transform 0.34s $ease-out, display 0.34s allow-discrete !important;
+    }
+
+    .content-body .inventory-page .inventory-cards.m-brief .stat-card:not(.inv-balance) {
+      max-height: 0;
+      opacity: 0;
+      transform: scale(0.96);
+    }
+
+    @starting-style {
+      .content-body .inventory-page .inventory-cards:not(.m-brief) .stat-card:not(.inv-balance) {
+        max-height: 0;
+        opacity: 0;
+        transform: scale(0.96);
+      }
+    }
+  }
+}
+

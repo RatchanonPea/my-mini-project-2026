@@ -117,7 +117,7 @@
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
             <div class="table-wrapper">
-              <table mat-table [dataSource]="filteredContracts" class="mat-elevation-z2">
+              <table mat-table [dataSource]="filteredContracts" class="mat-elevation-z2 m-card m-contracts">
                 <ng-container matColumnDef="code">
                   <th mat-header-cell *matHeaderCellDef> เลขที่ </th>
                   <td mat-cell *matCellDef="let c">{{ c.code }}</td>
@@ -174,7 +174,7 @@
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
             <div class="table-wrapper">
-              <table mat-table [dataSource]="pagedOrders" class="mat-elevation-z2">
+              <table mat-table [dataSource]="pagedOrders" class="mat-elevation-z2 m-card m-orders">
                 <ng-container matColumnDef="code">
                   <th mat-header-cell *matHeaderCellDef> รหัส </th>
                   <td mat-cell *matCellDef="let o">{{ o.code }}</td>

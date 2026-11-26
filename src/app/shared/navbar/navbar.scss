@@ -586,3 +586,19 @@
   color: #7c2d12;
   text-shadow: none;
 }
+
+// phones: span the screen under the top bar instead of hanging from the bell, which pushed it off the left edge
+@media (max-width: 575.98px) {
+  .alerts-panel {
+    position: fixed;
+    top: 68px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-width: none;
+  }
+
+  .alerts-list {
+    max-height: calc(100dvh - 230px);
+  }
+}

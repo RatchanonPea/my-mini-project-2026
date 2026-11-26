@@ -54,6 +54,10 @@ export class Inventory implements OnInit {
 
   saving = false;
   savingSettings = false;
+  /** phones only: which form is unfolded (both stay folded until asked for, so the history is within reach) */
+  openForm: 'adjust' | 'settings' | null = null;
+  /** phones only: the figures besides what is left */
+  showAllStats = false;
 
   filterForm = this.fb.group({
     type: ['' as LedgerType | ''],
@@ -172,6 +176,7 @@ export class Inventory implements OnInit {
       next: () => {
         this.saving = false;
         DialogSuccess(v.type === 'waste' ? 'บันทึกของเสียเรียบร้อยแล้ว' : 'ปรับยอดสต็อกเรียบร้อยแล้ว');
+        this.openForm = null;
         this.adjustForm.reset({ type: 'waste', adjust_date: toLocalDatetimeInput(new Date()), quantity: 0.5, note: '' });
         this.loadSummary();
         this.reload$.next();
@@ -181,6 +186,10 @@ export class Inventory implements OnInit {
         DialogErrorHtmlConfirm(err?.error?.message ?? 'บันทึกไม่สำเร็จ');
       },
     });
+  }
+
+  toggleForm(form: 'adjust' | 'settings'): void {
+    this.openForm = this.openForm === form ? null : form;
   }
 
   saveSettings(): void {

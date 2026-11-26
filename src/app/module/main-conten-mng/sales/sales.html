@@ -1,7 +1,7 @@
 <section class="sales-page">
   <div class="page-header">
     <div>
-      <h3>บันทึกยอดขาย (Sales / POS)</h3>
+      <h3>บันทึกยอดขาย</h3>
       <p class="subtitle">เลือกสินค้า แล้วบันทึกยอดขาย ประวัติการขายวันนี้สามารถแก้ไขหรือยกเลิกได้</p>
     </div>
   </div>
@@ -82,7 +82,7 @@
           </div>
         </form>
         <div class="table-wrapper">
-          <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+          <table mat-table [dataSource]="dataSource" class="mat-elevation-z2 m-card m-sales">
             <ng-container matColumnDef="id">
               <th mat-header-cell *matHeaderCellDef> No. </th>
               <td mat-cell *matCellDef="let item">{{ item.item_id }}</td>
