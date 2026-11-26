@@ -3278,3 +3278,100 @@ $m-moves: (
     box-shadow: none;
   }
 }
+
+// Print preview on phones (built by PrintService). The paper stays white in dark mode, like the real sheet.
+.print-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  background: #3b332f;
+  font-family: inherit;
+}
+
+.print-preview-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+
+  .pp-zoom {
+    flex: none;
+    min-height: 44px;
+    padding: 0 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 12px;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+}
+
+.print-preview-title {
+  flex: 1;
+  min-width: 0;
+  color: #fff;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.print-preview-page {
+  flex: 1;
+  overflow: auto;
+  padding: 0 8px 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.print-preview-sheet {
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 6px;
+}
+
+// nothing in the paper is tappable, so touches pass through to the scroller
+.print-preview-frame {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  transform-origin: 0 0;
+  background: #fff;
+}
+
+.print-preview-bar {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: #241a15;
+
+  button {
+    min-height: 52px;
+    border: 0;
+    border-radius: 14px;
+    font: inherit;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .pp-close {
+    flex: 1;
+    background: #4a3b33;
+    color: #fff;
+  }
+
+  .pp-print {
+    flex: 2.4;
+    background: #c2410c;
+    color: #fff;
+
+    &:disabled { opacity: 0.5; }
+  }
+}

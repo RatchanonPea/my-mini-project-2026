@@ -42,9 +42,13 @@ export const dateTimeTh = (value: string | Date | null | undefined): string =>
   value ? `${dateTh(value)} ${new Date(value).toLocaleTimeString('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' })}` : '-';
 
 /**
- * Prints a document in a hidden iframe, so the app's own layout/theme/dark mode never leaks into the
+ * Prints a document in its own iframe, so the app's own layout/theme/dark mode never leaks into the
  * paper copy and the user does not need to hide anything. The browser's print dialog lets them pick a
  * printer or "Save as PDF".
+ *
+ * On a computer the iframe is hidden and the dialog opens by itself. Phone browsers may ignore print()
+ * from a hidden frame, or once the tap that asked for it is long past, so there the document is shown
+ * full screen and printed straight from the tap on its own button.
  */
 @Injectable({ providedIn: 'root' })
 export class PrintService {
@@ -60,6 +64,12 @@ export class PrintService {
     const showBranchName = settings.branches.filter((b) => b.is_active).length > 1;
     const owner = settings.owner;
 
+    const html = this.render(doc, profile, branch, showBranchName, owner);
+    if (window.matchMedia('(pointer: coarse), (max-width: 768px)').matches) {
+      this.preview(doc, html);
+      return;
+    }
+
     const frame = this.document.createElement('iframe');
     frame.setAttribute('aria-hidden', 'true');
     frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
@@ -69,7 +79,7 @@ export class PrintService {
     try {
       await new Promise<void>((resolve) => {
         frame.onload = () => resolve();
-        frame.srcdoc = this.render(doc, profile, branch, showBranchName, owner);
+        frame.srcdoc = html;
       });
       const win = frame.contentWindow!;
       // fonts and the logo must be ready, or the first page prints with fallback glyphs / a blank logo
@@ -89,6 +99,89 @@ export class PrintService {
       throw error;
     }
   }
+
+  /** Full-screen look at the paper, shrunk to the screen's width, with the print button under the thumb. */
+  private preview(doc: PrintDocument, html: string): void {
+    this.closePreview?.();
+    const el = <K extends keyof HTMLElementTagNameMap>(tag: K, className: string, text = '') => {
+      const node = this.document.createElement(tag);
+      node.className = className;
+      node.textContent = text;
+      return node;
+    };
+    const overlay = el('div', 'print-preview');
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', `ตัวอย่างก่อนพิมพ์ ${doc.title}`);
+
+    const bar = el('div', 'print-preview-bar');
+    const shut = el('button', 'pp-close', 'ปิด');
+    const go = el('button', 'pp-print', 'พิมพ์ / บันทึก PDF');
+    const zoom = el('button', 'pp-zoom', 'ขยายอ่าน');
+    shut.type = go.type = zoom.type = 'button';
+    let enlarged = false;
+    go.disabled = true;
+    bar.append(shut, go);
+
+    // the frame keeps the paper's real width so lines break as they will on paper; only the view is scaled
+    const paperWidth = doc.paper === 'a4-landscape' ? 1123 : 794;
+    const page = el('div', 'print-preview-page');
+    const sheet = el('div', 'print-preview-sheet');
+    const frame = el('iframe', 'print-preview-frame');
+    frame.title = doc.title;
+    frame.style.width = `${paperWidth}px`;
+    sheet.append(frame);
+    page.append(sheet);
+    const head = el('div', 'print-preview-head');
+    head.append(el('div', 'print-preview-title', doc.title), zoom);
+    overlay.append(head, page, bar);
+
+    const fit = () => {
+      // the whole width of the paper, or large enough to read and swiped sideways (screen only, never the print)
+      const scale = enlarged ? 0.9 : Math.min(1, (page.clientWidth - 16) / paperWidth);
+      const height = Math.max(frame.contentDocument?.body?.scrollHeight ?? 0, Math.round(paperWidth * 0.7));
+      frame.style.height = `${height}px`;
+      frame.style.transform = `scale(${scale})`;
+      sheet.style.width = `${paperWidth * scale}px`;
+      sheet.style.height = `${height * scale}px`;
+    };
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && close();
+    const close = () => {
+      window.removeEventListener('resize', fit);
+      window.removeEventListener('popstate', close);
+      this.document.removeEventListener('keydown', onKey);
+      overlay.remove();
+      this.closePreview = null;
+    };
+
+    frame.onload = () => {
+      fit();
+      go.disabled = false;
+      void frame.contentDocument?.fonts?.ready.then(fit);
+    };
+    go.addEventListener('click', () => {
+      // nothing may be awaited here: the phone only opens its print sheet for the tap itself
+      frame.contentWindow?.focus();
+      frame.contentWindow?.print();
+    });
+    shut.addEventListener('click', close);
+    zoom.addEventListener('click', () => {
+      enlarged = !enlarged;
+      zoom.textContent = enlarged ? 'ดูทั้งหน้า' : 'ขยายอ่าน';
+      // the frame would swallow the swipe that scrolls the enlarged sheet
+      page.classList.toggle('is-enlarged', enlarged);
+      fit();
+    });
+    window.addEventListener('resize', fit);
+    window.addEventListener('popstate', close); // the phone's back button leaves the preview
+    this.document.addEventListener('keydown', onKey);
+
+    frame.srcdoc = html;
+    this.document.body.appendChild(overlay);
+    this.closePreview = close;
+  }
+
+  private closePreview: (() => void) | null = null;
 
   private render(doc: PrintDocument, shop: ShopProfile, branch: Branch | null, showBranchName: boolean, owner: ShopOwner | null): string {
     const assets = (path: string) => new URL(`assets/${path}`, this.document.baseURI).href;
