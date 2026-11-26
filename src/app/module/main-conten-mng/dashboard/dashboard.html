@@ -56,16 +56,16 @@
 
     <mat-card class="money-panel">
       <h5>ผลประกอบการ {{ periodLabel }}</h5>
-      <div class="profit-hero" [class.is-loss]="stats[2].amount < 0">
-        <span class="orb-icon"><mat-icon aria-hidden="true">{{ stats[2].amount < 0 ? 'trending_down' : stats[2].icon }}</mat-icon></span>
+      <div class="profit-hero" [class.is-loss]="stats[3].amount < 0">
+        <span class="orb-icon"><mat-icon aria-hidden="true">{{ stats[3].amount < 0 ? 'trending_down' : stats[3].icon }}</mat-icon></span>
         <div>
-          <div class="tile-label">{{ stats[2].title }}</div>
-          <div class="hero-value">{{ stats[2].value }}</div>
+          <div class="tile-label">{{ stats[3].title }}</div>
+          <div class="hero-value">{{ stats[3].value }}</div>
         </div>
       </div>
 
       <dl class="money-pair">
-        @for (stat of stats.slice(0, 2); track stat.title) {
+        @for (stat of stats.slice(0, 3); track stat.title) {
           <div class="money-tile">
             <dt><span class="orb-icon"><mat-icon aria-hidden="true">{{ stat.icon }}</mat-icon></span>{{ stat.title }}</dt>
             <dd>{{ stat.value }}</dd>
@@ -75,11 +75,11 @@
 
       <button mat-button class="m-more-stats" type="button" (click)="showMore = !showMore" [attr.aria-expanded]="showMore">
         <mat-icon aria-hidden="true">{{ showMore ? 'expand_less' : 'expand_more' }}</mat-icon>
-        {{ showMore ? 'ซ่อนรายละเอียด' : 'ดูต้นทุนและกำไรจากไก่' }}
+        {{ showMore ? 'ซ่อนรายละเอียด' : 'ดูรายการขายและกำไรจากไก่' }}
       </button>
 
       <dl class="money-sub" [class.m-brief]="!showMore">
-        @for (stat of stats.slice(3); track stat.title) {
+        @for (stat of stats.slice(4); track stat.title) {
           <div>
             <dt><span class="orb-icon"><mat-icon aria-hidden="true">{{ stat.icon }}</mat-icon></span>{{ stat.title }}</dt>
             <dd>{{ stat.value }}</dd>

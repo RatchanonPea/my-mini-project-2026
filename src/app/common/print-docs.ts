@@ -1,6 +1,7 @@
-import type { Branch, PurchaseOrder, PurchaseStatus, ReportPeriod, SaleItem, ShopOwner, ShopProfile, Supplier, SummaryTotals } from '../services/api';
+import type { Branch, PurchaseOrder, PurchaseStatus, SaleItem, ShopOwner, ShopProfile, Supplier, SummaryTotals } from '../services/api';
 import { PrintDocument, dateTh, dateTimeTh, esc, money } from '../services/print';
 import { formatThaiId } from './thai-id';
+import { NetPeriod, netOf } from './profit';
 
 const sum = <T>(rows: T[], pick: (row: T) => number): number => rows.reduce((total, row) => total + Number(pick(row) || 0), 0);
 
@@ -11,7 +12,7 @@ export function buildReportDoc(args: {
   from: string;
   to: string;
   summary: SummaryTotals;
-  periods: ReportPeriod[];
+  periods: NetPeriod[];
   periodLabel: (period: string) => string;
 }): PrintDocument {
   const { summary, periods } = args;
@@ -26,19 +27,22 @@ export function buildReportDoc(args: {
         <td class="num">${money(p.chicken_sold, 2)}</td>
         <td class="num">${money(p.purchase_cost)}</td>
         <td class="num">${money(p.chicken_received, 2)}</td>
+        <td class="num">${money(p.chicken_cost)}</td>
         <td class="num">${money(p.expense_total)}</td>
-        <td class="num${p.profit < 0 ? ' neg' : ''}">${money(p.profit)}</td>
+        <td class="num${p.net_profit < 0 ? ' neg' : ''}">${money(p.net_profit)}</td>
       </tr>`
     )
     .join('');
 
-  const totalProfit = sum(periods, (p) => p.profit);
+  const totalProfit = sum(periods, (p) => p.net_profit);
+  const net = netOf(summary.profit, summary.chicken_cost);
   const foot = `<tr>
       <td>รวมทั้งหมด</td>
       <td class="num">${money(sum(periods, (p) => p.sales_total))}</td>
       <td class="num">${money(sum(periods, (p) => p.chicken_sold), 2)}</td>
       <td class="num">${money(sum(periods, (p) => p.purchase_cost))}</td>
       <td class="num">${money(sum(periods, (p) => p.chicken_received), 2)}</td>
+      <td class="num">${money(sum(periods, (p) => p.chicken_cost))}</td>
       <td class="num">${money(sum(periods, (p) => p.expense_total))}</td>
       <td class="num${totalProfit < 0 ? ' neg' : ''}">${money(totalProfit)}</td>
     </tr>`;
@@ -54,16 +58,16 @@ export function buildReportDoc(args: {
     body: `
       <div class="boxes">
         ${box('ยอดขายรวม (บาท)', money(summary.sales_total))}
-        ${box('ค่าใช้จ่ายดำเนินงาน (บาท)', money(summary.expense_total))}
         ${box('ต้นทุนไก่ที่ขายไป (บาท)', money(summary.chicken_cost))}
-        ${box('กำไรก่อนหักต้นทุนไก่ (บาท)', money(summary.profit), summary.profit < 0)}
+        ${box('ค่าใช้จ่ายดำเนินงาน (บาท)', money(summary.expense_total))}
+        ${box('กำไรหลังหักต้นทุนไก่ (บาท)', money(net), net < 0)}
       </div>
       <table class="grid">
         <thead><tr>
           <th>ช่วงเวลา</th><th>ยอดขาย (บาท)</th><th>ขายได้ (ตัว)</th><th>ซื้อไก่เข้า (บาท)</th>
-          <th>รับไก่เข้า (ตัว)</th><th>ค่าใช้จ่ายดำเนินงาน (บาท)</th><th>กำไรก่อนหักต้นทุนไก่ (บาท)</th>
+          <th>รับไก่เข้า (ตัว)</th><th>ต้นทุนไก่ (บาท)</th><th>ค่าใช้จ่ายดำเนินงาน (บาท)</th><th>กำไรหลังหักต้นทุนไก่ (บาท)</th>
         </tr></thead>
-        <tbody>${rows || '<tr><td colspan="7" class="c">ไม่มีข้อมูลในช่วงนี้</td></tr>'}</tbody>
+        <tbody>${rows || '<tr><td colspan="8" class="c">ไม่มีข้อมูลในช่วงนี้</td></tr>'}</tbody>
         <tfoot>${foot}</tfoot>
       </table>`,
   };

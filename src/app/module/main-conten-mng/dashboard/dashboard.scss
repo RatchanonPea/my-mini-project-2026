@@ -483,8 +483,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+// sales takes the whole row, the two things taken off it sit side by side underneath
 .money-pair {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  > :first-child {
+    grid-column: 1 / -1;
+  }
 
   dd {
     font-size: 1.75rem;
@@ -494,15 +499,15 @@
 
 .money-tile {
   &:nth-child(1) { --fill-a: var(--mint-a); --fill-b: var(--mint-b); --ink: var(--mint-ink); }
-  &:nth-child(2) { --fill-a: var(--rose-a); --fill-b: var(--rose-b); --ink: var(--rose-ink); }
+  &:nth-child(2) { --fill-a: var(--peach-a); --fill-b: var(--peach-b); --ink: var(--peach-ink); }
+  &:nth-child(3) { --fill-a: var(--rose-a); --fill-b: var(--rose-b); --ink: var(--rose-ink); }
 }
 
 .money-sub {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
   > div:nth-child(1) { --fill-a: var(--lilac-a); --fill-b: var(--lilac-b); --ink: var(--lilac-ink); }
   > div:nth-child(2) { --fill-a: var(--sky-a); --fill-b: var(--sky-b); --ink: var(--sky-ink); }
-  > div:nth-child(3) { --fill-a: var(--peach-a); --fill-b: var(--peach-b); --ink: var(--peach-ink); }
 
   dt {
     font-size: 0.9375rem;

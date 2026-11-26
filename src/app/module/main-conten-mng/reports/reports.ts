@@ -15,7 +15,9 @@ import { AppDateModule } from '../../../shared/app-date/app-date';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
-import { ApiService, ReportGroupBy, ReportPeriod, SummaryTotals } from '../../../services/api';
+import { ApiService, ReportGroupBy, SummaryTotals } from '../../../services/api';
+import { NetPeriod, netOf, withChickenCost } from '../../../common/profit';
+import { forkJoin } from 'rxjs';
 import { DialogErrorHtmlConfirm, toYmd } from '../../../common/helper';
 import { buildReportDoc } from '../../../common/print-docs';
 import { PrintService } from '../../../services/print';
@@ -37,6 +39,7 @@ import { formatNumber } from '@angular/common';
   styleUrls: ['./reports.scss'],
 })
 export class Reports implements OnInit {
+  readonly netOf = netOf;
   private api = inject(ApiService);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
@@ -44,7 +47,7 @@ export class Reports implements OnInit {
   private dialog = inject(MatDialog);
 
   readonly groupByLabel: Record<string, string> = { day: 'รายวัน', week: 'รายสัปดาห์', month: 'รายเดือน', year: 'รายปี' };
-  displayedColumns = ['period', 'sales_total', 'sale_qty', 'purchase_cost', 'chicken_received', 'expense_total', 'profit'];
+  displayedColumns = ['period', 'sales_total', 'sale_qty', 'chicken_cost', 'expense_total', 'profit', 'purchase_cost', 'chicken_received'];
 
   // Jumping to an old year one date-picker click at a time is tedious — offer a direct dropdown
   // that fills the whole year (Jan 1 - Dec 31) into the date range instead.
@@ -59,8 +62,8 @@ export class Reports implements OnInit {
   summary: SummaryTotals | null = null;
   // the range/grouping the shown numbers were generated for (the form may have been edited since)
   private generated: { from: string; to: string; groupBy: ReportGroupBy } | null = null;
-  periods: ReportPeriod[] = [];
-  pagedPeriods: ReportPeriod[] = [];
+  periods: NetPeriod[] = [];
+  pagedPeriods: NetPeriod[] = [];
   loading = false;
   /** phones only: the date fields stay folded; rangeText says which dates the figures are for */
   filterOpen = false;
@@ -145,8 +148,8 @@ export class Reports implements OnInit {
     this.chartLabels = chronological.map((p) => this.periodLabel(p.period));
     this.chartSeries = [
       { label: 'ยอดขาย', data: chronological.map((p) => p.sales_total), color: '#16a34a' },
-      { label: 'ค่าใช้จ่ายอื่น', data: chronological.map((p) => p.expense_total), color: '#b91c1c' },
-      { label: 'กำไร', data: chronological.map((p) => p.profit), color: '#ea580c' },
+      { label: 'ต้นทุนไก่และค่าใช้จ่าย', data: chronological.map((p) => p.chicken_cost + p.expense_total), color: '#b91c1c' },
+      { label: 'กำไรหลังหักต้นทุนไก่', data: chronological.map((p) => p.net_profit), color: '#ea580c' },
     ];
   }
 
@@ -180,9 +183,9 @@ export class Reports implements OnInit {
     this.rangeText = `${shown(from)} – ${shown(to)}`;
 
     this.api.getReportSummary(from, to).subscribe((r) => (this.summary = r));
-    this.api.getReportBreakdown(from, to, v.groupBy).subscribe({
-      next: (r) => {
-        this.periods = r.periods;
+    forkJoin([this.api.getReportBreakdown(from, to, v.groupBy), this.api.getInventorySummary()]).subscribe({
+      next: ([r, stock]) => {
+        this.periods = withChickenCost(r.periods, stock.unit_cost);
         this.pageIndex = 0;
         this.updatePage();
         this.updateChartData();
@@ -263,15 +266,16 @@ export class Reports implements OnInit {
     picker.close();
   }
 
-  openRow(row: ReportPeriod): void {
+  openRow(row: NetPeriod): void {
     const groupBy = this.generated?.groupBy ?? this.form.controls.groupBy.value;
     openDrawer<RowDrawer, RowDrawerData>(this.dialog, RowDrawer, {
       title: `สรุป${this.groupByLabel[groupBy]}`,
       subtitle: this.periodLabelFor(row.period, groupBy),
       icon: 'bar_chart',
-      highlight: { label: 'กำไรก่อนหักต้นทุนไก่', value: money(row.profit), negative: row.profit < 0 },
+      highlight: { label: 'กำไรหลังหักต้นทุนไก่', value: money(row.net_profit), negative: row.net_profit < 0 },
       fields: [
         { label: 'ยอดขาย', value: money(row.sales_total) },
+        { label: 'ต้นทุนไก่ที่ขายไป', value: money(row.chicken_cost) },
         { label: 'ค่าใช้จ่ายดำเนินงาน', value: money(row.expense_total) },
         { label: 'ขายได้', value: `${formatNumber(row.chicken_sold, 'en-US', '1.0-2')} ตัว` },
         { label: 'รับไก่เข้า', value: `${formatNumber(row.chicken_received, 'en-US', '1.0-2')} ตัว` },

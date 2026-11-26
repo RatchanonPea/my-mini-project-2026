@@ -15,6 +15,8 @@ import { FormsModule } from '@angular/forms';
 import { ApiService, InventorySummary, ReportGroupBy, ReportPeriod } from '../../../services/api';
 import { RouterLink } from '@angular/router';
 import { toYmd } from '../../../common/helper';
+import { netOf, withChickenCost } from '../../../common/profit';
+import { forkJoin } from 'rxjs';
 import { ReportChart, ReportChartSeries } from '../../../shared/report-chart/report-chart';
 import { RowDrawer, RowDrawerData, money, openDrawer } from '../../../shared/row-drawer/row-drawer';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -27,11 +29,12 @@ export interface DashboardTopProduct {
 }
 
 const STAT_DEFS = [
+  // the first three read as a sum: sales, less the chickens, less the running expenses
   { title: 'ยอดขาย', color: 'primary', icon: 'payments', prefix: '฿ ' },
-  { title: 'ค่าใช้จ่ายดำเนินงาน', color: 'warn', icon: 'receipt_long', prefix: '฿ ' },
-  { title: 'กำไรก่อนหักต้นทุนไก่', color: 'accent', icon: 'trending_up', prefix: '฿ ' },
+  { title: 'หักต้นทุนไก่', color: 'accent', icon: 'egg_alt', prefix: '฿ ' },
+  { title: 'หักค่าใช้จ่าย', color: 'warn', icon: 'receipt_long', prefix: '฿ ' },
+  { title: 'กำไรหลังหักต้นทุนไก่', color: 'accent', icon: 'trending_up', prefix: '฿ ' },
   { title: 'รายการขาย', color: 'info', icon: 'shopping_bag', prefix: '' },
-  { title: 'ต้นทุนไก่', color: 'accent', icon: 'egg_alt', prefix: '฿ ' },
   { title: 'กำไรจากไก่', color: 'primary', icon: 'savings', prefix: '฿ ' },
 ];
 
@@ -99,7 +102,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   private loadSummary(): void {
     this.api.getDashboardSummary(toYmd(this.selectedDate), this.groupBy).subscribe((s) => {
-      [s.sales_total, s.expense_total, s.profit, s.sale_item_count, s.chicken_cost, s.chicken_profit].forEach((amount, i) => this.countUp(i, amount));
+      [s.sales_total, s.chicken_cost, s.expense_total, netOf(s.profit, s.chicken_cost), s.sale_item_count, s.chicken_profit].forEach((amount, i) => this.countUp(i, amount));
       this.dataSource.data = s.top_products.map((t, i) => ({ id: i + 1, name: t.product_name, sold: t.sold, revenue: t.revenue }));
       this.periodLabel = this.formatPeriod(s.period.from, s.period.to);
     });
@@ -116,16 +119,19 @@ export class Dashboard implements OnInit, OnDestroy {
     else if (this.groupBy === 'week') from.setDate(from.getDate() - (span - 1) * 7);
     else from.setDate(from.getDate() - (span - 1));
 
-    this.api.getReportBreakdown(toYmd(from), toYmd(this.selectedDate), this.groupBy).subscribe({
-      next: (r) => {
+    forkJoin([
+      this.api.getReportBreakdown(toYmd(from), toYmd(this.selectedDate), this.groupBy),
+      this.api.getInventorySummary(),
+    ]).subscribe({
+      next: ([r, stock]) => {
         // periods arrives newest-first — reversed here so the trend reads left-to-right in
         // chronological order, same as the Reports page's chart.
-        const chronological = this.withEmptyPeriods([...r.periods].reverse(), from, span);
+        const chronological = withChickenCost(this.withEmptyPeriods([...r.periods].reverse(), from, span), stock.unit_cost);
         this.chartLabels = chronological.map((p) => this.trendLabel(p.period));
         this.chartSeries = [
           { label: 'ยอดขาย', data: chronological.map((p) => p.sales_total), color: '#16a34a' },
-          { label: 'ค่าใช้จ่ายดำเนินงาน', data: chronological.map((p) => p.expense_total), color: '#b91c1c' },
-          { label: 'กำไรก่อนหักต้นทุนไก่', data: chronological.map((p) => p.profit), color: '#ea580c' },
+          { label: 'ต้นทุนไก่และค่าใช้จ่าย', data: chronological.map((p) => p.chicken_cost + p.expense_total), color: '#b91c1c' },
+          { label: 'กำไรหลังหักต้นทุนไก่', data: chronological.map((p) => p.net_profit), color: '#ea580c' },
         ];
       },
       error: () => {
