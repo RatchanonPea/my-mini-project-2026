@@ -137,17 +137,9 @@
   .slider-item {
     min-width: 180px;
   }
-
-  .calendar-card mat-calendar {
-    transform: scale(0.72);
-  }
 }
 
-// On very narrow phones (≤400px) the 4-way groupby toggle (รายวัน/รายสัปดาห์/รายเดือน/รายปี) is
-// wider than the viewport even on its own row — flex-wrap moves it to a new line, but can't shrink
-// a mat-button-toggle-group's own intrinsic width. Giving that one element horizontal scroll (kept
-// full-width, letting the stepper/year-select wrap normally above it) keeps every option reachable
-// instead of the tail end ("รายปี") being silently clipped off-screen.
+// very narrow phones: the header stacks (the period selector shrinks to fit, see styles.scss)
 @media (max-width: 400px) {
   .dashboard-header {
     flex-direction: column;
@@ -160,8 +152,6 @@
 
   .groupby-toggle {
     max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
   }
 
   .main-panel {

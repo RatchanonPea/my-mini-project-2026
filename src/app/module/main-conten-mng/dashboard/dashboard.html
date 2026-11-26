@@ -24,6 +24,11 @@
           }
         </mat-select>
       </mat-form-field>
+      <button mat-stroked-button class="m-cal-btn" type="button" (click)="openCalendar(calendarPop)"
+              aria-haspopup="dialog" aria-label="เลือกวันจากปฏิทิน" title="เลือกวันจากปฏิทิน">
+        <mat-icon aria-hidden="true">calendar_month</mat-icon>
+      </button>
+
       <mat-button-toggle-group class="groupby-toggle" [value]="groupBy" (change)="onGroupByChange($event.value)">
         @for (key of groupByOptions; track key) {
           <mat-button-toggle [value]="key">{{ groupByLabel[key] }}</mat-button-toggle>
@@ -68,7 +73,12 @@
         }
       </dl>
 
-      <dl class="money-sub">
+      <button mat-button class="m-more-stats" type="button" (click)="showMore = !showMore" [attr.aria-expanded]="showMore">
+        <mat-icon aria-hidden="true">{{ showMore ? 'expand_less' : 'expand_more' }}</mat-icon>
+        {{ showMore ? 'ซ่อนรายละเอียด' : 'ดูต้นทุนและกำไรจากไก่' }}
+      </button>
+
+      <dl class="money-sub" [class.m-brief]="!showMore">
         @for (stat of stats.slice(3); track stat.title) {
           <div>
             <dt><span class="orb-icon"><mat-icon aria-hidden="true">{{ stat.icon }}</mat-icon></span>{{ stat.title }}</dt>
@@ -149,3 +159,15 @@
     </div>
   </div>
 </section>
+
+<!-- phones: the calendar pops up over the page and closes as soon as a day is picked -->
+<ng-template #calendarPop let-ref="dialogRef">
+  <h2 mat-dialog-title>เลือกวัน</h2>
+  <mat-dialog-content>
+    <mat-calendar [selected]="selectedDate" [startAt]="selectedDate" (selectedChange)="onDateSelected($event); ref.close()"></mat-calendar>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>ปิด</button>
+    <button mat-flat-button color="primary" type="button" (click)="pickToday(); ref.close()">วันนี้</button>
+  </mat-dialog-actions>
+</ng-template>

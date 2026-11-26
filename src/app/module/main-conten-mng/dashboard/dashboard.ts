@@ -1,5 +1,5 @@
 import { NoData } from '../../../shared/no-data/no-data';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { TemplateRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -17,7 +17,7 @@ import { RouterLink } from '@angular/router';
 import { toYmd } from '../../../common/helper';
 import { ReportChart, ReportChartSeries } from '../../../shared/report-chart/report-chart';
 import { RowDrawer, RowDrawerData, money, openDrawer } from '../../../shared/row-drawer/row-drawer';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 export interface DashboardTopProduct {
   id: number;
@@ -38,7 +38,7 @@ const STAT_DEFS = [
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NoData, 
+  imports: [MatDialogModule, NoData, 
     CommonModule,
     MatCardModule,
     MatTableModule,
@@ -79,6 +79,8 @@ export class Dashboard implements OnInit, OnDestroy {
   stats = STAT_DEFS.map((def) => ({ ...def, value: def.prefix + '0', amount: 0 }));
 
   private dialog = inject(MatDialog);
+  /** phones only: the supporting figures stay folded until asked for */
+  showMore = false;
   displayedColumns: string[] = ['id', 'name', 'sold', 'revenue'];
   dataSource = new MatTableDataSource<DashboardTopProduct>([]);
 
@@ -230,6 +232,14 @@ export class Dashboard implements OnInit, OnDestroy {
 
   get menuCount(): number {
     return this.dataSource.data.length;
+  }
+
+  openCalendar(content: TemplateRef<unknown>): void {
+    this.dialog.open(content, { width: '360px', maxWidth: '94vw', autoFocus: 'dialog', panelClass: 'calendar-pop' });
+  }
+
+  pickToday(): void {
+    this.onDateSelected(new Date());
   }
 
   onDateSelected(date: Date) {
