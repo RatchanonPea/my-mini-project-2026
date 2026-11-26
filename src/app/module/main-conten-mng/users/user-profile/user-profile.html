@@ -41,7 +41,7 @@
             <div class="form-grid">
               <mat-form-field appearance="outline">
                 <mat-label>Username</mat-label>
-                <input matInput formControlName="username" maxlength="100" />
+                <input matInput formControlName="username" maxlength="100" autocomplete="off" />
                 <app-clear-button matSuffix />
                 <mat-hint align="end" appCharCount />
                 <mat-error>กรุณากรอก Username</mat-error>
@@ -49,7 +49,7 @@
 
               <mat-form-field appearance="outline">
                 <mat-label>Password {{ isNew ? '' : '(เว้นว่างถ้าไม่เปลี่ยน)' }}</mat-label>
-                <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" maxlength="100" />
+                <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" maxlength="100" autocomplete="new-password" />
                 <mat-hint align="end" appCharCount />
                 <mat-icon matSuffix class="eye-icon" (click)="hidePassword = !hidePassword">
                   {{ hidePassword ? 'visibility_off' : 'visibility' }}

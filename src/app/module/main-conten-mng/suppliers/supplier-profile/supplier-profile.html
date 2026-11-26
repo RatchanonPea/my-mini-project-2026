@@ -4,7 +4,7 @@
       <mat-icon>arrow_back</mat-icon> กลับ
     </button>
     <div>
-      <h3>โปรไฟล์ร้านค้า @if (profile) { <small>({{ profile.supplier.code }})</small> }</h3>
+      <h3><span class="title-page">โปรไฟล์ร้านค้า</span> @if (profile) { <span class="title-shop">{{ profile.supplier.name }}</span> <small>({{ profile.supplier.code }})</small> }</h3>
       <p class="subtitle">ข้อมูลติดต่อและประวัติการสั่งซื้อไก่ทั้งหมดของร้านนี้</p>
     </div>
   </div>
@@ -40,7 +40,7 @@
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>ที่อยู่</mat-label>
-                <textarea matInput formControlName="address" maxlength="300" rows="2"></textarea>
+                <textarea matInput formControlName="address" maxlength="300" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
                 <app-clear-button matSuffix />
                 <mat-hint align="end" appCharCount />
               </mat-form-field>
@@ -48,7 +48,7 @@
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>หมายเหตุ</mat-label>
-                <textarea matInput formControlName="note" maxlength="500" rows="2"></textarea>
+                <textarea matInput formControlName="note" maxlength="500" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
                 <app-clear-button matSuffix />
                 <mat-hint align="end" appCharCount />
               </mat-form-field>

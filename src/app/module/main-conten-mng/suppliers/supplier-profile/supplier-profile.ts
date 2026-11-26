@@ -1,3 +1,4 @@
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { SupplierContractFields, contractControls } from '../contract-fields/contract-fields';
 import { NoData } from '../../../../shared/no-data/no-data';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
@@ -28,7 +29,7 @@ import { openDrawer } from '../../../../shared/row-drawer/row-drawer';
 @Component({
   selector: 'app-supplier-profile',
   standalone: true,
-  imports: [CharCount, ClearButton, SupplierContractFields, NoData, CommonModule, RouterModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSlideToggleModule, MatTableModule, Pager, LocationPicker],
+  imports: [TextFieldModule, CharCount, ClearButton, SupplierContractFields, NoData, CommonModule, RouterModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSlideToggleModule, MatTableModule, Pager, LocationPicker],
   templateUrl: './supplier-profile.html',
   styleUrls: ['./supplier-profile.scss'],
 })

@@ -3002,6 +3002,15 @@ $m-moves: (
     line-height: 1.45;
   }
 
+  // with the note in the flow, the fixed spacer under it would be a second empty line; keep only a small gap
+  .content-body .mat-mdc-form-field-subscript-wrapper:not(.mat-mdc-form-field-subscript-dynamic-size) {
+    min-height: 10px;
+
+    &::before {
+      display: none;
+    }
+  }
+
   .content-body .form-actions {
     margin-top: 0.5rem;
   }

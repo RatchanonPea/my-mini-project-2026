@@ -171,3 +171,47 @@
 .owner-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.92); color: #7c2d12; font-weight: 700; }
 .owner-chip mat-icon { font-size: 16px; width: 16px; height: 16px; color: #ea580c; }
 .wide { grid-column: 1 / -1; }
+
+// Phone: the banner is a card of identity, not a poster. The title bar already names the page.
+@media (max-width: 600px) {
+  .user-profile-page { padding: 0.75rem; }
+
+  .profile-banner {
+    padding: 0.9rem 1rem 1rem;
+    margin-bottom: 0.9rem;
+    border-radius: 18px;
+  }
+
+  .banner-tag { display: none; }
+
+  .banner-main {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-top: 0.8rem;
+  }
+
+  .avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 1.25rem;
+  }
+
+  .banner-info {
+    min-width: 0;
+
+    h2 {
+      margin-bottom: 0.4rem;
+      font-size: 1.25rem;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .banner-chips { gap: 0.4rem; }
+
+  .profile-body { gap: 0.9rem; }
+  .profile-form-card, .account-summary-card, .activity-card { padding: 1.1rem 0.9rem; }
+  .form-grid { grid-template-columns: minmax(0, 1fr); gap: 0.45rem; }
+  .form-actions > button { flex: 1 1 100%; min-height: 48px; }
+}

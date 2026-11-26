@@ -74,3 +74,17 @@
 .table-search { width: 100%; max-width: 360px; margin-bottom: 0.75rem; }
 .clickable-row { cursor: pointer; transition: background-color 0.12s ease; }
 .clickable-row:hover, .clickable-row:focus-visible { background: rgba(234, 88, 12, 0.1); outline: none; }
+
+.title-shop { display: none; }
+
+@media (max-width: 600px) {
+  .supplier-profile-page { padding: 0.75rem; }
+  .page-header.page-header { align-items: center; gap: 0.75rem; margin-bottom: 0.9rem; }
+  .page-header > div { min-width: 0; }
+  .page-header h3 { flex-wrap: wrap; row-gap: 0; line-height: 1.4; overflow-wrap: anywhere; }
+  .title-page { display: none; }
+  .title-shop { display: inline; }
+  .profile-form-card { padding: 1.1rem 0.9rem; }
+  .form-row { grid-template-columns: minmax(0, 1fr); gap: 0.45rem; margin-bottom: 0.45rem; }
+  .form-actions > button { flex: 1 1 100%; min-height: 48px; }
+}
