@@ -13,8 +13,15 @@
       <h4 class="mb-0">{{ pageTitle() }}</h4>
     </div>
 
-    <div class="content-body">
+    <div class="content-body" #scroller (scroll)="onContentScroll(scroller)">
       <router-outlet></router-outlet>
     </div>
+
+    @if (showToTop()) {
+      <button class="to-top" type="button" (click)="scrollToTop(scroller)" aria-label="เลื่อนขึ้นบนสุด">
+        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+        <span>ขึ้นบน</span>
+      </button>
+    }
   </div>
 </div>

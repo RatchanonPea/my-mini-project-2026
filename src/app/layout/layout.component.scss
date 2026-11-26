@@ -92,6 +92,41 @@
   }
 }
 
+// back to the top of a long page: bottom right, within thumb's reach, labelled so its job is obvious
+.to-top {
+  position: fixed;
+  right: 14px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 998; // under the phone menu and its backdrop
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #c2410c;
+  color: #fff;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  box-shadow: 0 8px 20px rgba(67, 20, 7, 0.35);
+  cursor: pointer;
+  animation: to-top-in 0.22s ease-out;
+
+  &:active {
+    transform: scale(0.94);
+  }
+}
+
+@keyframes to-top-in {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .to-top { animation: none; }
+}
+
 // thin indeterminate bar pinned to the very top while any API request is running
 .global-loader {
   position: fixed;

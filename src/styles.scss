@@ -2074,3 +2074,16 @@ $ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 }
 
+
+// Phone page frame: held to the visible screen so only the page content scrolls and the title bar with the menu
+// button stays put. (With a height in vh the whole page could still scroll, taking that bar with it.)
+@media (max-width: 768px) {
+  // the doubled class outweighs the layout's own ".main-content" (which carries Angular's scoping attribute);
+  // otherwise its margin-top and vh height stay, leaving a blank band under the top bar
+  app-layout > .main-content.main-content {
+    position: fixed;
+    inset: 64px 0 0;
+    height: auto;
+    margin-top: 0;
+  }
+}

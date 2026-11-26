@@ -602,3 +602,19 @@
     max-height: calc(100dvh - 230px);
   }
 }
+
+// narrow phones: everything must stay on screen, so the shop name gives way before any button does
+@media (max-width: 480px) {
+  .navbar .container-fluid { flex-wrap: nowrap; gap: 6px; padding-right: 8px; padding-left: 8px; }
+  .navbar-chicken { display: none; }
+  .navbar-brand { flex: 1 1 0; min-width: 0; margin: 0; overflow: hidden; }
+  .brand-label { min-width: 0; overflow: hidden; }
+  .navbar .container-fluid > .d-flex { flex: none; }
+  .btn-user-toggle { padding: 0.25rem 0.35rem; }
+  .btn-user-toggle .fa-chevron-down { display: none; }
+}
+
+@media (max-width: 380px) {
+  .brand-subtitle { display: none; }
+  .navbar-brand .brand-title { font-size: 1.05rem; }
+}

@@ -26,6 +26,17 @@ export class LayoutComponent {
   sidebarCollapsed = false;
   mobileMenuOpen = false;
   pageTitle = signal('ภาพรวม');
+  /** shown as soon as the page has been scrolled a little */
+  showToTop = signal(false);
+
+  onContentScroll(el: HTMLElement): void {
+    this.showToTop.set(el.scrollTop > 80);
+  }
+
+  scrollToTop(el: HTMLElement): void {
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    el.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
 
   get isPhone(): boolean {
     return this.phoneQuery.matches;
@@ -38,6 +49,7 @@ export class LayoutComponent {
       takeUntilDestroyed(),
     ).subscribe(() => {
       this.pageTitle.set(this.currentBreadcrumb());
+      this.showToTop.set(false);
       this.mobileMenuOpen = false; // picking a menu item should reveal the page, not leave the drawer over it
     });
   }
