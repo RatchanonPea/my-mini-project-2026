@@ -51,6 +51,12 @@ export interface Role {
   status?: string;
 }
 
+export interface UserLegal {
+  user_id: number;
+  national_id: string | null;
+  address: string | null;
+}
+
 export interface CreateUserPayload {
   username: string;
   first_name: string;
@@ -60,6 +66,8 @@ export interface CreateUserPayload {
   phone?: string;
   role_id?: number;
   status?: number;
+  national_id?: string | null;
+  address?: string | null;
 }
 
 export interface UpdateUserPayload {
@@ -73,6 +81,8 @@ export interface UpdateUserPayload {
   role_id?: number;
   status?: number;
   password_hash?: string;
+  national_id?: string | null;
+  address?: string | null;
 }
 
 export interface Category {
@@ -160,6 +170,10 @@ export interface PagedResult<T> {
   total_quantity?: number;
   page: number;
   pageSize: number;
+  /** purchases only: received orders not yet paid, and how many of those are past their due date */
+  unpaid_count?: number;
+  unpaid_amount?: number;
+  overdue_count?: number;
 }
 
 export interface InventorySummary {
@@ -238,11 +252,75 @@ export interface PurchaseOrder {
   received_date: string | null;
   received_at?: string | null;
   received_by_name?: string | null;
+  /** the supplier's agreement in force when the order was made */
+  contract_id?: number | null;
+  contract_code?: string | null;
+  /** days of credit copied from the agreement; due_date = received date + credit_days (set on receive) */
+  credit_days?: number | null;
+  due_date?: string | null;
+  paid_date?: string | null;
+  is_overdue?: number | boolean;
   note: string | null;
   edit_note?: string | null;
   approved_by_name?: string | null;
   updated_at?: string;
   updated_by_name?: string | null;
+}
+
+export type CalendarEventType = 'sale' | 'expense' | 'po_order' | 'po_receive' | 'po_due' | 'po_paid' | 'stock_adjust' | 'contract_start' | 'contract_end';
+
+export interface CalendarEvent {
+  type: CalendarEventType;
+  /** YYYY-MM-DD */
+  date: string;
+  title: string;
+  subtitle: string | null;
+  amount: number | null;
+  /** po_id / expense_id / adjust_id / contract_id; null for the daily sales total */
+  ref_id: number | null;
+  supplier_id: number | null;
+  /** purchase: ordered/received/cancelled, or unpaid/overdue/paid on a payment; stock_adjust: waste/adjust; contract: active/ended */
+  status: string | null;
+}
+
+export type PurchasePayment = 'unpaid' | 'overdue' | 'paid';
+
+/** A supply agreement printed for a supplier; the one with status 'active' sets the default price and credit of new orders. */
+export interface SupplyContract {
+  contract_id: number;
+  code: string;
+  supplier_id: number;
+  branch_id: number | null;
+  quantity: number;
+  per: 'month' | 'year';
+  unit_price: number | null;
+  credit_days: number | null;
+  status: 'active' | 'ended';
+  created_at: string;
+  created_by_name?: string | null;
+  ended_at: string | null;
+}
+
+/** What the printed document used (kept so a reprint never changes when the shop or supplier is edited later). */
+export interface SupplyContractSnapshot {
+  profile: ShopProfile;
+  owner: ShopOwner | null;
+  branch: Branch | null;
+  supplier: Supplier;
+}
+
+export interface SupplyContractDetail extends SupplyContract {
+  snapshot: SupplyContractSnapshot | null;
+}
+
+export interface SupplyContractPayload {
+  supplier_id: number;
+  quantity: number;
+  per: 'month' | 'year';
+  unit_price: number | null;
+  credit_days: number | null;
+  branch_id: number | null;
+  snapshot: SupplyContractSnapshot;
 }
 
 export interface PurchasePayload {
@@ -272,6 +350,17 @@ export interface Supplier {
   is_active: boolean;
   latitude: number | null;
   longitude: number | null;
+  // contract details (printed on the supply agreement)
+  entity_type?: ShopEntityType;
+  /** juristic: company name; individual: full name as on the ID card */
+  legal_name?: string | null;
+  contact_position?: string | null;
+  tax_id?: string | null;
+  contact_name?: string | null;
+  bank_name?: string | null;
+  bank_account_no?: string | null;
+  bank_account_name?: string | null;
+  credit_days?: number | null;
   created_at?: string;
   updated_at?: string;
   updated_by?: number | null;
@@ -301,7 +390,70 @@ export interface SupplierProfile {
   };
 }
 
-export type SupplierPayload = Pick<Supplier, 'name'> & Partial<Pick<Supplier, 'phone' | 'address' | 'note' | 'is_active' | 'latitude' | 'longitude'>>;
+export type SupplierPayload = Pick<Supplier, 'name'> &
+  Partial<Pick<Supplier, 'phone' | 'address' | 'note' | 'is_active' | 'latitude' | 'longitude' | 'entity_type' | 'legal_name' | 'contact_position' | 'tax_id' | 'contact_name' | 'bank_name' | 'bank_account_no' | 'bank_account_name' | 'credit_days'>>;
+
+// ---------- Shop master data ----------
+
+export type ShopEntityType = 'individual' | 'juristic';
+
+export interface ShopProfile {
+  shop_id: number;
+  shop_name: string;
+  entity_type: ShopEntityType;
+  legal_name: string | null;
+  /** the user flagged as the shop owner / authorised signatory: contracts use their details */
+  owner_user_id: number | null;
+  owner_name: string | null;
+  signatory_position: string | null;
+  tax_id: string | null;
+  is_vat: boolean;
+  bank_name: string | null;
+  bank_account_no: string | null;
+  bank_account_name: string | null;
+  contract_place: string | null;
+  default_credit_days: number | null;
+  late_delivery_hours: number | null;
+  cancel_notice_days: number | null;
+  updated_at?: string | null;
+  updated_by_name?: string | null;
+}
+
+export interface Branch {
+  branch_id: number;
+  code?: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  is_main: boolean;
+  is_active: boolean;
+  updated_at?: string | null;
+  updated_by_name?: string | null;
+}
+
+/** the owner user's details as the contracts use them */
+export interface ShopOwner {
+  user_id: number;
+  full_name_th: string | null;
+  full_name_en: string | null;
+  phone: string | null;
+  email: string | null;
+  /** 13-digit ID card number (null until a manager fills it in on the user's profile) */
+  national_id: string | null;
+  address: string | null;
+  role_id: number;
+  status: boolean | number;
+}
+
+export interface ShopSettings {
+  profile: ShopProfile | null;
+  branches: Branch[];
+  owner: ShopOwner | null;
+}
+
+export type ShopProfilePayload = Partial<Omit<ShopProfile, 'shop_id' | 'updated_at' | 'updated_by_name'>>;
+export type BranchPayload = Partial<Pick<Branch, 'name' | 'address' | 'phone' | 'email' | 'is_main' | 'is_active'>>;
 
 export interface ActivityLogItem {
   log_id: number;
@@ -386,6 +538,11 @@ export class ApiService {
 
   getUsers(): Observable<ApiResponse<User[]>> {
     return this.http.get<ApiResponse<User[]>>(`${this.baseUrl}/users`);
+  }
+
+  /** ID card number + address of a user: managers / admins only (not part of the user list) */
+  getUserLegal(id: number): Observable<UserLegal> {
+    return this.http.get<ApiResponse<UserLegal>>(`${this.baseUrl}/users/${id}/legal`).pipe(map((response) => response.data as UserLegal));
   }
 
   getRoles(status: 'active' | 'inactive' | 'all'): Observable<Role[]> {
@@ -597,13 +754,24 @@ export class ApiService {
     );
   }
 
-  searchPurchases(p: SearchParams & { status?: PurchaseStatus | '' }): Observable<PagedResult<PurchaseOrder>> {
+  searchPurchases(p: SearchParams & { status?: PurchaseStatus | ''; payment?: PurchasePayment | '' }): Observable<PagedResult<PurchaseOrder>> {
     let params = this.toSearchParams(p);
     if (p.status) {
       params = params.set('status', p.status);
     }
+    if (p.payment) {
+      params = params.set('payment', p.payment);
+    }
     return this.http.get<any>(`${this.baseUrl}/purchases/search`, { params }).pipe(
       map((response) => this.extractData<PagedResult<PurchaseOrder>>(response))
+    );
+  }
+
+  /** every dated thing in [from, to] (YYYY-MM-DD, at most 100 days): sales, expenses, purchase orders and payments, stock adjustments, agreements */
+  getCalendarEvents(from: string, to: string): Observable<CalendarEvent[]> {
+    const params = new HttpParams().set('from', from).set('to', to);
+    return this.http.get<any>(`${this.baseUrl}/calendar/events`, { params }).pipe(
+      map((response) => this.extractData<CalendarEvent[]>(response))
     );
   }
 
@@ -628,6 +796,38 @@ export class ApiService {
   receivePurchase(po_id: number, received_date?: string): Observable<PurchaseOrder> {
     return this.http.post<any>(`${this.baseUrl}/purchases/receivePurchase`, { po_id, received_date }).pipe(
       map((response) => this.extractData<PurchaseOrder>(response))
+    );
+  }
+
+  /** records that the supplier was paid for a received order */
+  payPurchase(po_id: number, paid_date?: string): Observable<PurchaseOrder> {
+    return this.http.post<any>(`${this.baseUrl}/purchases/payPurchase`, { po_id, paid_date }).pipe(
+      map((response) => this.extractData<PurchaseOrder>(response))
+    );
+  }
+
+  getSupplierContracts(supplierId: number): Observable<SupplyContract[]> {
+    return this.http.get<any>(`${this.baseUrl}/supply-contracts/supplier/${supplierId}`).pipe(
+      map((response) => this.extractData<SupplyContract[]>(response))
+    );
+  }
+
+  /** one agreement with the buyer / seller details as they were printed */
+  getSupplyContract(contractId: number): Observable<SupplyContractDetail> {
+    return this.http.get<any>(`${this.baseUrl}/supply-contracts/${contractId}`).pipe(
+      map((response) => this.extractData<SupplyContractDetail>(response))
+    );
+  }
+
+  createSupplyContract(item: SupplyContractPayload): Observable<SupplyContract> {
+    return this.http.post<any>(`${this.baseUrl}/supply-contracts/createContract`, item).pipe(
+      map((response) => this.extractData<SupplyContract>(response))
+    );
+  }
+
+  endSupplyContract(contractId: number): Observable<SupplyContract> {
+    return this.http.post<any>(`${this.baseUrl}/supply-contracts/endContract`, { contract_id: contractId }).pipe(
+      map((response) => this.extractData<SupplyContract>(response))
     );
   }
 
@@ -659,6 +859,22 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/suppliers/profile/${supplierId}`).pipe(
       map((response) => this.extractData<SupplierProfile>(response))
     );
+  }
+
+  getShop(): Observable<ShopSettings> {
+    return this.http.get<any>(`${this.baseUrl}/shop`).pipe(map((response) => this.extractData<ShopSettings>(response)));
+  }
+
+  updateShopProfile(item: ShopProfilePayload): Observable<ShopProfile> {
+    return this.http.post<any>(`${this.baseUrl}/shop/updateProfile`, item).pipe(map((response) => this.extractData<ShopProfile>(response)));
+  }
+
+  createBranch(item: BranchPayload & { name: string }): Observable<Branch> {
+    return this.http.post<any>(`${this.baseUrl}/shop/createBranch`, item).pipe(map((response) => this.extractData<Branch>(response)));
+  }
+
+  updateBranch(item: BranchPayload & { branch_id: number }): Observable<Branch> {
+    return this.http.post<any>(`${this.baseUrl}/shop/updateBranch`, item).pipe(map((response) => this.extractData<Branch>(response)));
   }
 
   createSupplier(item: SupplierPayload): Observable<Supplier> {
