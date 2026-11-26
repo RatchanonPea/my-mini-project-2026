@@ -11,11 +11,12 @@ import { LoadingService } from '../../services/loading';
   template: `
     <div class="no-data-message" role="status" aria-live="polite">
       @if (loading.active()) {
-        <mat-spinner diameter="22" aria-hidden="true"></mat-spinner>
-        กำลังโหลดข้อมูล...
+        <span class="no-data-badge"><mat-spinner diameter="28" aria-hidden="true"></mat-spinner></span>
+        <strong>กำลังโหลดข้อมูล...</strong>
       } @else {
-        <mat-icon aria-hidden="true">storage</mat-icon>
-        No Data
+        <span class="no-data-badge"><mat-icon aria-hidden="true">inbox</mat-icon></span>
+        <strong>ยังไม่มีข้อมูล</strong>
+        <small>เมื่อมีรายการ จะแสดงตรงนี้</small>
       }
     </div>
   `,

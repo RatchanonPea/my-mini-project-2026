@@ -104,24 +104,46 @@ tr.mat-mdc-row:nth-child(even) {
   border-color: transparent;
 }
 
+// empty / loading state: a soft round icon over two quiet lines, no box of its own inside the table's
 .no-data-message {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.35rem;
   width: 100%;
-  padding: 1.75rem 0;
-  color: #334155;
-  font-size: 1rem;
-  background: rgba(234, 88, 12, 0.08);
-  border: 1px dashed rgba(194, 65, 12, 0.35);
-  // border-radius: 0.75rem;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  min-height: 220px;
+  padding: 2.25rem 1.25rem;
+  color: var(--app-text);
+  text-align: center;
+  line-height: 1.5;
+
+  strong {
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+
+  small {
+    font-size: 0.9375rem;
+    color: var(--app-text-muted);
+  }
 }
 
-.no-data-message mat-icon {
-  font-size: 1.4rem;
-  color: #c2410c;
+.no-data-badge {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 0.5rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--app-accent) 14%, transparent);
+
+  mat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+    color: var(--app-accent);
+  }
 }
 
 mat-paginator {
@@ -444,12 +466,6 @@ html.dark-theme {
   .cluck-bubble {
     background: #3a2418;
     color: #fdba74;
-  }
-
-  .no-data-message {
-    background: rgba(251, 146, 60, 0.1);
-    color: #f3e8e0;
-    border-color: rgba(251, 146, 60, 0.45);
   }
 
   mat-paginator {
@@ -3238,5 +3254,18 @@ $m-moves: (
 
   .mat-mdc-form-field-subscript-wrapper::before {
     display: none;
+  }
+}
+
+// The empty row is not a record: drop the card edge, stripe and cell lines the other rows wear.
+.content-body table.mat-mdc-table tr.mat-mdc-row.no-data-row.no-data-row {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+
+  > td.mat-mdc-cell {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
   }
 }
