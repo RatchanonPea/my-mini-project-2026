@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "MiniProjectAngular_2024": {
+    "my-mini-project-2026": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -81,10 +81,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "MiniProjectAngular_2024:build:production"
+              "buildTarget": "my-mini-project-2026:build:production"
             },
             "development": {
-              "buildTarget": "MiniProjectAngular_2024:build:development"
+              "buildTarget": "my-mini-project-2026:build:development"
             }
           },
           "defaultConfiguration": "development"
