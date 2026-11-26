@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild, inject } from '@angular/core';
+import { effect, untracked, AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ThemeService } from '../../services/theme';
@@ -9,6 +9,10 @@ export interface ReportChartSeries {
   data: number[];
   color: string;
 }
+
+/** phones are narrow but tall: bars lie sideways there, and this many periods show at first */
+const PHONE = '(max-width: 600px)';
+const PHONE_BAR_PERIODS = 7;
 
 const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
 
@@ -50,6 +54,25 @@ const barValues = (labelColor: string, fontFamily: string): Plugin => ({
   afterDatasetsDraw(chart) {
     if ((chart.config as { type?: ChartType }).type !== 'bar') return;
     const { ctx, data } = chart;
+    if (chart.options.indexAxis === 'y') {
+      // sideways bars: every bar has a row of its own, so every figure fits at its end
+      ctx.save();
+      ctx.font = `700 13px ${fontFamily}`;
+      ctx.fillStyle = labelColor;
+      ctx.textBaseline = 'middle';
+      data.datasets.forEach((set, d) => {
+        if (!chart.isDatasetVisible(d)) return;
+        chart.getDatasetMeta(d).data.forEach((element, i) => {
+          const value = Number((set.data as number[])[i]);
+          if (!value) return;
+          const { x, y } = element.getProps(['x', 'y']) as { x: number; y: number };
+          ctx.textAlign = value < 0 ? 'right' : 'left';
+          ctx.fillText(compact.format(value), value < 0 ? x - 5 : x + 5, y);
+        });
+      });
+      ctx.restore();
+      return;
+    }
     const labels: { text: string; x: number; y: number; below: boolean; width: number }[] = [];
     ctx.save();
     ctx.font = `700 14px ${fontFamily}`;
@@ -95,19 +118,27 @@ const barValues = (labelColor: string, fontFamily: string): Plugin => ({
         <mat-button-toggle value="bar"><i class="fas fa-chart-column"></i> แท่ง</mat-button-toggle>
       </mat-button-toggle-group>
     </div>
-    <div class="chart-wrap" [class.empty]="!labels.length">
+    <div class="chart-wrap" [class.empty]="!labels.length" [style.height.px]="sidewaysHeight">
       @if (labels.length) {
         <canvas #canvas></canvas>
       } @else {
         <p class="no-data">ยังไม่มีข้อมูลสำหรับช่วงนี้</p>
       }
     </div>
+    @if (canShowAll) {
+      <button class="show-all" type="button" (click)="toggleAllPeriods()">
+        {{ showAllPeriods ? 'ดูเฉพาะช่วงล่าสุด' : 'ดูครบทุกช่วง (' + labels.length + ')' }}
+      </button>
+    }
   `,
   styles: `
     :host { display: block; }
     .chart-toolbar { display: flex; justify-content: flex-end; margin-bottom: 0.75rem; }
     .chart-wrap { position: relative; height: 320px; }
+    @media (max-width: 600px) { .chart-wrap { height: 230px; } }
     .chart-wrap.empty { display: grid; place-items: center; }
+    .show-all { display: block; width: 100%; min-height: 48px; margin-top: 0.5rem; border: 0; border-top: 1px solid var(--app-hairline); background: none; color: var(--app-accent-strong); font: inherit; font-weight: 600; cursor: pointer; }
+    @media (max-width: 600px), (pointer: coarse) { ::ng-deep app-report-chart .mat-button-toggle-label-content { line-height: 2.75 !important; } }
     .no-data { margin: 0; opacity: 0.6; font-size: 0.9rem; }
 
     ::ng-deep .mat-button-toggle-group {
@@ -136,11 +167,36 @@ export class ReportChart implements AfterViewInit, OnChanges, OnDestroy {
 
   private theme = inject(ThemeService);
   private chart: Chart | null = null;
+  private readonly phone = window.matchMedia(PHONE);
+  private readonly onScreenChange = () => {
+    if (this.viewReady) this.render();
+  };
+  showAllPeriods = false;
+  /** set while sideways bars are shown: the chart grows with the number of rows */
+  sidewaysHeight: number | null = null;
+  canShowAll = false;
   chartType: ChartType = 'line';
   private viewReady = false;
 
+  constructor() {
+    // the chart's text and grid colours are fixed when it is drawn: draw it again whenever the theme changes
+    effect(() => {
+      this.theme.mode();
+      untracked(() => {
+        if (this.viewReady) this.render();
+      });
+    });
+  }
+
   ngAfterViewInit(): void {
     this.viewReady = true;
+    this.phone.addEventListener('change', this.onScreenChange);
+    // after this change-detection pass: render() sets the height the template binds to
+    queueMicrotask(() => this.render());
+  }
+
+  toggleAllPeriods(): void {
+    this.showAllPeriods = !this.showAllPeriods;
     this.render();
   }
 
@@ -159,6 +215,8 @@ export class ReportChart implements AfterViewInit, OnChanges, OnDestroy {
     if (!this.canvasRef || !this.labels.length) {
       this.chart?.destroy();
       this.chart = null;
+      this.sidewaysHeight = null;
+      this.canShowAll = false;
       return;
     }
     const isDark = this.theme.mode() === 'dark';
@@ -167,6 +225,12 @@ export class ReportChart implements AfterViewInit, OnChanges, OnDestroy {
     const surface = isDark ? '#241a15' : '#ffffff';
     const font = { family: getComputedStyle(document.body).fontFamily, size: 14 };
     const isLine = this.chartType === 'line';
+    const sideways = !isLine && this.phone.matches;
+    this.canShowAll = sideways && this.labels.length > PHONE_BAR_PERIODS;
+    const from = this.canShowAll && !this.showAllPeriods ? this.labels.length - PHONE_BAR_PERIODS : 0;
+    // on a phone the year is dropped from day labels to leave room for the bars
+    const labels = this.labels.slice(from).map((l) => (sideways ? l.replace(/^(\d{2}\/\d{2})\/\d{4}$/, '$1') : l));
+    this.sidewaysHeight = sideways ? Math.max(230, 80 + labels.length * (this.series.length * 22 + 18)) : null;
 
     this.chart?.destroy();
     this.chart = new Chart(this.canvasRef.nativeElement, {
@@ -176,10 +240,10 @@ export class ReportChart implements AfterViewInit, OnChanges, OnDestroy {
         barValues(isDark ? '#f7eee8' : '#1f1410', font.family),
       ],
       data: {
-        labels: this.labels,
+        labels,
         datasets: this.series.map((s) => ({
           label: s.label,
-          data: s.data,
+          data: s.data.slice(from),
           borderColor: s.color,
           backgroundColor: isLine ? areaFill(s.color) : s.color,
           fill: isLine,
@@ -187,9 +251,9 @@ export class ReportChart implements AfterViewInit, OnChanges, OnDestroy {
           cubicInterpolationMode: 'monotone' as const,
           borderWidth: isLine ? 2.5 : 0,
           borderRadius: isLine ? 0 : 4,
-          maxBarThickness: 34,
-          categoryPercentage: 0.72,
-          barPercentage: 0.85,
+          maxBarThickness: sideways ? 22 : 34,
+          categoryPercentage: sideways ? 0.84 : 0.72,
+          barPercentage: sideways ? 0.92 : 0.85,
           // a small dot on every period, ringed in the card colour
           pointRadius: isLine ? 3.5 : 0,
           pointHoverRadius: 6,
@@ -204,9 +268,10 @@ export class ReportChart implements AfterViewInit, OnChanges, OnDestroy {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        // head room for the figures above the bars
-        layout: { padding: { top: 8 } },
+        indexAxis: sideways ? ('y' as const) : ('x' as const),
+        interaction: { mode: 'index', intersect: false, axis: sideways ? 'y' : 'x' },
+        // head room for the figures above the bars (beside them when sideways)
+        layout: { padding: { top: 8, right: sideways ? 44 : 0 } },
         plugins: {
           legend: {
             align: 'start',
@@ -225,24 +290,29 @@ export class ReportChart implements AfterViewInit, OnChanges, OnDestroy {
             titleFont: { ...font, size: 15, weight: 'bold' },
             bodyFont: font,
             callbacks: {
-              label: (ctx) => `${ctx.dataset.label}: ${Number(ctx.parsed.y).toLocaleString('th-TH')} บาท`,
+              label: (ctx) => `${ctx.dataset.label}: ${Number(sideways ? ctx.parsed.x : ctx.parsed.y).toLocaleString('th-TH')} บาท`,
             },
           },
         },
-        scales: {
-          x: { grid: { display: false }, border: { display: false }, ticks: { color: tickColor, font, maxRotation: 0, autoSkipPadding: 16 } },
-          y: {
-            grid: { color: gridColor },
-            border: { display: false },
-            grace: '12%',
-            ticks: { color: tickColor, font, maxTicksLimit: 6, padding: 8, callback: (v) => compact.format(Number(v)) },
-          },
-        },
+        scales: this.scales(sideways, tickColor, gridColor, font),
       },
     });
   }
 
+  /** the category axis and the money axis, swapped when the bars lie sideways */
+  private scales(sideways: boolean, tickColor: string, gridColor: string, font: { family: string; size: number }) {
+    const periods = { grid: { display: false }, border: { display: false }, ticks: { color: tickColor, font, maxRotation: 0, autoSkip: !sideways, autoSkipPadding: 16 } };
+    const amounts = {
+      grid: { color: gridColor },
+      border: { display: false },
+      grace: '12%',
+      ticks: { color: tickColor, font, maxTicksLimit: sideways ? 4 : 6, padding: 8, callback: (v: string | number) => compact.format(Number(v)) },
+    };
+    return sideways ? { x: amounts, y: periods } : { x: periods, y: amounts };
+  }
+
   ngOnDestroy(): void {
+    this.phone.removeEventListener('change', this.onScreenChange);
     this.chart?.destroy();
   }
 }
