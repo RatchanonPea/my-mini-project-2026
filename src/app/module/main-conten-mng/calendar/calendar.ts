@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { ApiService, CalendarEvent, CalendarEventType } from '../../../services/api';
-import { ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess, toYmd } from '../../../common/helper';
+import { ConfirmDialog, DialogErrorHtmlConfirm, DialogSuccess, ScrollToEditForm, toYmd } from '../../../common/helper';
 import { NoData } from '../../../shared/no-data/no-data';
 import { CalendarEventDialog } from './calendar-event-dialog';
 import { META, STATUS_LABEL, openCalendarEvent } from './calendar-meta';
@@ -63,6 +63,8 @@ export class CalendarPage implements OnInit, OnDestroy {
   selected = signal(this.today);
   loading = signal(false);
   hover = signal<HoverState | null>(null);
+  /** phones only: the list of types to show stays folded */
+  legendOpen = false;
   private clickTimer: ReturnType<typeof setTimeout> | null = null;
 
   /** years offered in the jump list: ten back from the shown month (and from this year), two ahead */
@@ -143,6 +145,8 @@ export class CalendarPage implements OnInit, OnDestroy {
 
   selectDay(cell: DayCell): void {
     this.selected.set(cell.ymd);
+    // phones show dots only: bring that day's list, with the names and amounts, into view
+    if (cell.events.length && window.matchMedia('(max-width: 600px)').matches) ScrollToEditForm('app-calendar .side-card');
     if (!cell.inMonth) {
       this.month.set(new Date(Number(cell.ymd.slice(0, 4)), Number(cell.ymd.slice(5, 7)) - 1, 1));
       this.load();

@@ -33,7 +33,12 @@
         <span>ค้างจ่ายผู้ขาย <strong>{{ summary().dueCount }} ใบ · THB {{ summary().dueTotal | number:'1.0-0' }}</strong></span>
       </div>
 
-      <div class="cal-legend" role="group" aria-label="เลือกชนิดที่แสดง">
+      <button mat-button type="button" class="m-legend-toggle" (click)="legendOpen = !legendOpen" [attr.aria-expanded]="legendOpen">
+        <mat-icon aria-hidden="true">{{ legendOpen ? 'expand_less' : 'filter_list' }}</mat-icon>
+        เลือกชนิดที่แสดง{{ hidden().size ? ' (ซ่อนอยู่ ' + hidden().size + ')' : '' }}
+      </button>
+
+      <div class="cal-legend" [class.m-closed]="!legendOpen" role="group" aria-label="เลือกชนิดที่แสดง">
         @for (t of types; track t) {
           <button type="button" class="chip legend-chip" [ngClass]="meta[t].tone" [class.off]="hidden().has(t)"
                   [attr.aria-pressed]="!hidden().has(t)" (click)="toggleType(t)">
@@ -57,7 +62,7 @@
                       (click)="onClick(e); $event.stopPropagation()" (dblclick)="onDblClick(e); $event.stopPropagation()">{{ label(e) }}</button>
             }
             @if (c.events.length > maxChips) {
-              <span class="more">+{{ c.events.length - maxChips }} รายการ</span>
+              <span class="more">+{{ c.events.length - maxChips }}<span class="more-word"> รายการ</span></span>
             }
           </div>
         }
@@ -81,8 +86,14 @@
                   </span>
                   <span class="event-title">{{ e.type === 'sale' ? 'ยอดขายทั้งวัน' : e.title }}</span>
                   <span class="event-meta">
-                    @if (e.subtitle && e.type !== 'sale') { {{ e.subtitle }} }
-                    @if (e.amount !== null && e.type !== 'stock_adjust') { · THB {{ e.amount | number:'1.2-2' }} }
+                    @if (e.subtitle && e.type !== 'sale') {
+                      <span class="ev-sub">{{ e.subtitle }}</span>
+                    }
+                    @if (e.amount !== null && e.type !== 'stock_adjust') {
+                      <!-- the dot only separates: a sale has no note in front of its amount -->
+                      @if (e.subtitle && e.type !== 'sale') { <span class="ev-sep">·</span> }
+                      <span class="ev-amount">THB {{ e.amount | number:'1.2-2' }}</span>
+                    }
                   </span>
                 </button>
                 @if (e.type === 'po_due') {

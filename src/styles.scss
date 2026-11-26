@@ -2087,3 +2087,253 @@ $ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
     margin-top: 0;
   }
 }
+
+// ============================================================================
+// Phone calendar: all seven days fit the screen; a day shows coloured dots (names were cut to a few letters) and
+// the list under the grid gives the details of the day that is tapped.
+// ============================================================================
+.m-legend-toggle.mat-mdc-button-base {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .content-body .cal-page.cal-page {
+    padding: 0.25rem 0;
+
+    // the top bar already names the page
+    .page-header {
+      display: none;
+    }
+
+    // "1fr" let the wide toolbar stretch the column past the screen, cutting off Friday and Saturday
+    .cal-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .cal-card,
+    .side-card {
+      min-width: 0;
+      padding: 0.6rem 0.45rem;
+      border-radius: 18px;
+    }
+
+    .cal-toolbar {
+      gap: 2px;
+
+      // the year has its own list: the jump-a-year arrows only take room here
+      > .mat-mdc-icon-button[title] {
+        display: none;
+      }
+
+      > .mat-mdc-icon-button {
+        flex: none;
+        width: 36px;
+        height: 44px;
+        padding: 6px 0;
+      }
+
+      .jump-field {
+        margin: 0;
+        min-width: 0;
+      }
+
+      .month-field {
+        flex: 1 1 0;
+        width: auto;
+      }
+
+      .year-field {
+        flex: none;
+        width: 5.4rem;
+      }
+
+      .spacer {
+        display: none;
+      }
+
+      > .mdc-button {
+        flex: none;
+        min-width: 0;
+        padding: 0 0.6rem;
+      }
+    }
+
+    .cal-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 0.25rem;
+
+      > span {
+        display: flex;
+        flex-direction: column;
+        padding: 0.35rem 0.3rem;
+        border-radius: 12px;
+        line-height: 1.45;
+        text-align: center;
+      }
+
+      strong {
+        overflow-wrap: anywhere;
+      }
+    }
+
+    .m-legend-toggle.mat-mdc-button-base {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .cal-legend {
+      margin-bottom: 0.6rem;
+
+      &.m-closed {
+        display: none;
+      }
+
+      .legend-chip {
+        min-height: 36px;
+      }
+    }
+
+    .cal-weekdays,
+    .cal-days {
+      gap: 3px;
+    }
+
+    .cal-days .day {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      justify-content: center;
+      gap: 3px;
+      min-height: 3.2rem;
+      padding: 3px 1px;
+      border-radius: 10px;
+
+      .num {
+        flex: 0 0 100%;
+        align-self: auto;
+        max-width: 1.9rem;
+        margin: 0 calc(50% - 0.95rem);
+        font-size: 0.9375rem;
+        line-height: 1.7;
+      }
+
+      // an event is a dot in the colour of its kind; tapping anywhere selects the day
+      .chip {
+        flex: none;
+        width: 9px;
+        height: 9px;
+        min-height: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: currentColor;
+        font-size: 0;
+        pointer-events: none;
+      }
+
+      .more {
+        font-size: 0.75rem;
+        line-height: 9px;
+      }
+
+      .more-word {
+        display: none;
+      }
+    }
+
+    .side-card {
+      position: static;
+      scroll-margin-top: 12px;
+    }
+
+    .event-title {
+      white-space: normal;
+    }
+  }
+}
+
+// Phone "that day" list under the calendar: room to breathe, the amount at the top right where amounts line up.
+//   kind                    amount
+//   title
+//   note
+@media (max-width: 600px) {
+  .content-body .cal-page.cal-page.cal-page {
+    .side-card {
+      padding: 1rem 0.75rem 0.85rem;
+
+      mat-card-header {
+        padding: 0 0.25rem;
+        margin-bottom: 0.85rem;
+      }
+
+      .mat-mdc-card-title {
+        font-size: 1.1rem;
+        line-height: 1.5;
+      }
+    }
+
+    .event-list {
+      gap: 10px;
+    }
+
+    .event-item {
+      gap: 0.5rem;
+      padding: 0.85rem 0.9rem;
+      border: 1px solid var(--app-hairline);
+      border-radius: 16px;
+      background: var(--app-surface);
+    }
+
+    .event-main {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 0.75rem;
+      row-gap: 0.45rem;
+
+      > .chip {
+        grid-column: 1;
+        grid-row: 1;
+        justify-self: start;
+        padding: 0.2rem 0.75rem;
+      }
+
+      > .event-title {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        font-size: 1.05rem;
+        line-height: 1.5;
+      }
+
+      // its two parts join the grid themselves: amount up beside the kind, note under the title
+      > .event-meta {
+        display: contents;
+      }
+
+      .ev-sep {
+        display: none;
+      }
+
+      .ev-amount {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: end;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--app-text);
+        white-space: nowrap;
+      }
+
+      .ev-sub {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        font-size: 0.9375rem;
+        line-height: 1.5;
+        color: var(--app-text-muted);
+      }
+    }
+  }
+}
