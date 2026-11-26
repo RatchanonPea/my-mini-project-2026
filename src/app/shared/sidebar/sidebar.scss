@@ -68,6 +68,18 @@
   }
 }
 
+// the group button looks and measures like the links around it
+button.menu-link {
+  width: calc(100% - 16px);
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+
+  &:hover { background-color: #6b3a24; }
+  &.active { background-color: #ea580c; }
+}
+
 .menu-icon {
   margin-right: 0.75rem;
   width: 20px;
@@ -147,6 +159,16 @@
   .menu-icon {
     margin-right: 0;
   }
+
+  // the narrow menu shows a group's pages as icons
+  .submenu .submenu-item .submenu-link {
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.5rem 0;
+  }
+
+  .submenu-text { display: none; }
+  .submenu .submenu-icon { margin-right: 0; }
 }
 
 @media (max-width: 768px) {

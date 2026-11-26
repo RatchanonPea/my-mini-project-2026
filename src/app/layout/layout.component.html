@@ -3,7 +3,7 @@
 
 <div class="main-content">
   <div class="sidebar-backdrop" *ngIf="mobileMenuOpen" (click)="closeMobileMenu()" aria-hidden="true"></div>
-  <app-sidebar [collapsed]="sidebarCollapsed && !isPhone" [mobileOpen]="mobileMenuOpen"></app-sidebar>
+  <app-sidebar [collapsed]="sidebarCollapsed && !isPhone" [mobileOpen]="mobileMenuOpen" (expandRequest)="sidebarCollapsed = false"></app-sidebar>
 
   <div class="content-wrapper" [class.sidebar-collapsed]="sidebarCollapsed">
     <div class="content-header">

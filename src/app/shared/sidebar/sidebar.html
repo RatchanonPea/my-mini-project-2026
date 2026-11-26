@@ -5,15 +5,21 @@
 
   <ul class="sidebar-menu">
     <li *ngFor="let item of menuItems" class="menu-item" #menuItemEl>
-      <a [routerLink]="item.path" routerLinkActive="active" class="menu-link"
-         [class.has-children]="item.children && item.children.length > 0"
-         (click)="toggleSubmenu(item, menuItemEl)">
-        <i [class]="item.icon" class="menu-icon" aria-hidden="true"></i>
-        <span class="menu-text" *ngIf="!collapsed">{{ item.label }}</span>
-        <i *ngIf="item.children && item.children.length > 0 && !collapsed"
-           class="fas fa-chevron-down submenu-toggle" aria-hidden="true"
-           [class.rotated]="item.expanded"></i>
-      </a>
+      @if (item.children?.length) {
+        <!-- a group only opens its list; it is not a page of its own -->
+        <button type="button" class="menu-link has-children" [class.active]="hasActiveChild(item) && !item.expanded"
+                [attr.aria-expanded]="!!item.expanded && !collapsed" [attr.aria-label]="item.label" [title]="item.label"
+                (click)="toggleSubmenu(item, menuItemEl)">
+          <i [class]="item.icon" class="menu-icon" aria-hidden="true"></i>
+          <span class="menu-text" *ngIf="!collapsed">{{ item.label }}</span>
+          <i *ngIf="!collapsed" class="fas fa-chevron-down submenu-toggle" aria-hidden="true" [class.rotated]="item.expanded"></i>
+        </button>
+      } @else {
+        <a [routerLink]="item.path" routerLinkActive="active" class="menu-link">
+          <i [class]="item.icon" class="menu-icon" aria-hidden="true"></i>
+          <span class="menu-text" *ngIf="!collapsed">{{ item.label }}</span>
+        </a>
+      }
 
       <ul animate.enter="expand-in" *ngIf="item.children && item.children.length > 0 && item.expanded && !collapsed"
           class="submenu">
