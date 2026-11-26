@@ -25,7 +25,7 @@
 .content-header {
   background-color: var(--app-page-bg);
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-hairline);
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -39,7 +39,7 @@
   height: 40px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 12px;
 
   &:hover,
   &:active,

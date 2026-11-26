@@ -16,22 +16,22 @@ export class MenuService {
   private menuItems: MenuItem[] = [
     {
       path: 'main-conten-mng/dashboard',
-      label: 'Dashboard',
+      label: 'ภาพรวม',
       icon: 'fas fa-chart-line'
     },
     {
       path: 'main-conten-mng/sales',
-      label: 'Sales / POS',
+      label: 'ขายสินค้า',
       icon: 'fas fa-cash-register'
     },
     {
       path: 'main-conten-mng/expenses',
-      label: 'Expenses',
+      label: 'ค่าใช้จ่าย',
       icon: 'fas fa-money-bill-wave'
     },
     {
       path: 'main-conten-mng/inventory',
-      label: 'Inventory',
+      label: 'สต็อกไก่',
       icon: 'fas fa-boxes-stacked'
     },
     {
@@ -40,13 +40,18 @@ export class MenuService {
       icon: 'fas fa-truck'
     },
     {
+      path: 'main-conten-mng/calendar',
+      label: 'ปฏิทิน',
+      icon: 'fas fa-calendar-days'
+    },
+    {
       path: 'main-conten-mng/suppliers',
       label: 'ผู้ขาย/ร้านที่สั่ง',
       icon: 'fas fa-store'
     },
     {
       path: 'main-conten-mng/reports',
-      label: 'Reports',
+      label: 'รายงาน',
       icon: 'fas fa-chart-bar'
     },
     {
@@ -66,9 +71,10 @@ export class MenuService {
           roles: ['manager', 'admin']
         },
         {
-          path: 'main-conten-mng/settings',
+          path: 'main-conten-mng/shop',
           label: 'ตั้งค่าร้าน',
-          icon: 'fas fa-store'
+          icon: 'fas fa-store',
+          roles: ['manager', 'admin']
         }
       ]
     }

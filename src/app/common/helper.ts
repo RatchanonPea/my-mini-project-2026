@@ -29,7 +29,7 @@ export function ShowToast(message: string, icon: "success" | "error" | "warning"
     font-size:0.9rem;font-family:inherit;opacity:0;transform:translateX(16px);transition:opacity 200ms ease,transform 200ms ease;
   `);
   el.innerHTML = `
-    <span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:0.75rem;font-weight:700;background:${TOAST_COLOR[icon]}">${TOAST_ICON[icon]}</span>
+    <span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:0.875rem;font-weight:700;background:${TOAST_COLOR[icon]}">${TOAST_ICON[icon]}</span>
     <span style="flex:1;overflow-wrap:anywhere;">${message}</span>
   `;
   toastStack.appendChild(el);
@@ -95,7 +95,7 @@ export function DialogSuccessTimerPromiseResult(htmlText: string = "บันท
       showConfirmButton: false,
       confirmButtonText: "ตกลง",
       showCancelButton: false,
-      timer: 1000,
+      timer: 4000,
       timerProgressBar: true,
       allowOutsideClick: false,
     }).then((result) => {
@@ -112,7 +112,7 @@ export function ToastSuccess(htmlText: string = "Login สำเร็จแล�
     title: titleText,
     text: htmlText,
     showConfirmButton: false,
-    timer: 2000,
+    timer: 5000,
     timerProgressBar: true,
     customClass: {
       popup: 'dc-swal-toast',
@@ -768,12 +768,12 @@ export function toLocalDatetimeInput(date: Date): string {
 
 // After "edit" on a list page that edits in a form above the table (not a dialog): bring the form into
 // view and flash it, so on a phone - where the form is off-screen - it is obvious editing has started.
-export function ScrollToEditForm(selector: string): void {
+export function ScrollToEditForm(selector: string, block: ScrollLogicalPosition = 'nearest'): void {
   setTimeout(() => {
     const el = document.querySelector<HTMLElement>(selector);
     if (!el) return;
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+    el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block });
     if (!reduceMotion && el.animate) {
       el.animate(
         [{ boxShadow: '0 0 0 3px rgba(234, 88, 12, 0.85)' }, { boxShadow: '0 0 0 12px rgba(234, 88, 12, 0)' }],

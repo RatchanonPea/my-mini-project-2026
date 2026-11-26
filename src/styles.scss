@@ -4,11 +4,18 @@
 
 @include mat.core();
 
+// Apple system font first (SF on Mac/iPhone), IBM Plex Sans Thai for Thai text and other platforms
+$app-font: (-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'IBM Plex Sans Thai', 'Segoe UI', sans-serif);
+
 $theme: mat.define-theme((
   color: (
     theme-type: light,
     primary: mat.$orange-palette,
     tertiary: mat.$red-palette,
+  ),
+  typography: (
+    plain-family: $app-font,
+    brand-family: $app-font,
   ),
 ));
 
@@ -19,6 +26,10 @@ $dark-theme: mat.define-theme((
     theme-type: dark,
     primary: mat.$orange-palette,
     tertiary: mat.$red-palette,
+  ),
+  typography: (
+    plain-family: $app-font,
+    brand-family: $app-font,
   ),
 ));
 
@@ -124,7 +135,8 @@ html, body {
 
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: $app-font;
+  -webkit-font-smoothing: antialiased;
 }
 
 
@@ -299,8 +311,8 @@ th.mat-mdc-header-cell.mat-mdc-table-sticky {
   --app-surface-alt: #f8fafc;
   --app-border: #dee2e6;
   --app-text: #111827;
-  --app-text-soft: #475569;
-  --app-text-muted: #6b7280;       // 4.8:1 on --app-surface
+  --app-text-soft: #43342b;
+  --app-text-muted: #5c4a40;       // 8:1 on --app-surface, stays readable on glass
   --app-accent: #ea580c;
   --app-accent-strong: #c2410c;    // 5.2:1 with white: use for small text / filled controls with white text
   --app-focus-ring: #c2410c;
@@ -313,7 +325,7 @@ html.dark-theme {
   --app-border: #4a2e20;
   --app-text: #f3e8e0;
   --app-text-soft: #d4c2b6;
-  --app-text-muted: #b9a79b;
+  --app-text-muted: #cbbbaf;
   --app-accent: #fb923c;
   --app-accent-strong: #fdba74;
   --app-focus-ring: #fdba74;
@@ -646,35 +658,15 @@ html.theme-transition *::after {
   }
 }
 
-// Dashboard stat boxes: lift like a button on hover (springy), press down on click
-.mat-mdc-card.stat-card {
-  cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-  will-change: transform;
-
-  .stat-number {
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  &:hover {
-    transform: translateY(-8px) scale(1.03);
-    box-shadow: 0 18px 32px rgba(185, 28, 28, 0.38);
-    z-index: 2;
-
-    .stat-number {
-      transform: scale(1.08);
-    }
-  }
-
-  &:active {
-    transform: translateY(-3px) scale(0.99);
-    box-shadow: 0 8px 16px rgba(185, 28, 28, 0.3);
-  }
-}
-
 // Dialog surface blended into the page in dark mode (near-identical background colors) —
 // give it a visibly lighter panel + stronger backdrop so it reads as a floating modal.
+// Native scrollbars (arrows + light track) clash with the dark surfaces — use thin themed ones.
 html.dark-theme {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #6b4a35 transparent;
+  }
+
   .mat-mdc-dialog-surface {
     background: #2a1f19 !important;
     border: 1px solid #4a2e20;
@@ -684,10 +676,6 @@ html.dark-theme {
   .cdk-overlay-dark-backdrop {
     background: rgba(0, 0, 0, 0.65);
   }
-}
-
-html.dark-theme .mat-mdc-card.stat-card:hover {
-  box-shadow: 0 18px 34px rgba(251, 146, 60, 0.3);
 }
 
 // Shared colored banner for every page's title block (matches the user-profile page's banner) —
@@ -826,7 +814,7 @@ html.dark-theme .page-header .subtitle {
   // small caption above each value
   table.mat-mdc-table td.mat-mdc-cell::before {
     content: attr(data-label);
-    font-size: 0.68rem;
+    font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.02em;
     color: var(--app-text-muted);
@@ -936,4 +924,762 @@ html.theme-switching *,
 html.theme-switching *::before,
 html.theme-switching *::after {
   transition: none !important;
+}
+
+// Calendar event detail dialog: frosted glass panel
+.glass-dialog .mat-mdc-dialog-surface,
+.glass-dialog .mdc-dialog__surface {
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 20px !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28) !important;
+}
+html.dark-theme .glass-dialog .mat-mdc-dialog-surface,
+html.dark-theme .glass-dialog .mdc-dialog__surface {
+  background: rgba(36, 26, 21, 0.82) !important;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+// Multi-line fields: keep the clear (X) button at the top-right corner instead of floating in the vertical middle
+.mat-mdc-form-field:has(textarea.mat-mdc-input-element) {
+  .mat-mdc-form-field-text-suffix,
+  .mat-mdc-form-field-icon-suffix {
+    align-self: flex-start;
+  }
+
+  app-clear-button {
+    align-self: flex-start;
+    margin-top: 4px;
+  }
+}
+
+// Clear (X) button: the stock icon button is a 48px hit area, too big inside a text field.
+// Fixed square + flex centering + 50% radius on the button and its ripple layers, or it draws as an oval.
+app-clear-button {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  flex: none;
+  line-height: 0;
+}
+
+app-clear-button .mat-mdc-icon-button.mat-mdc-button-base {
+  --mat-icon-button-state-layer-size: 32px;
+  --mat-icon-button-icon-size: 20px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  margin: 0 2px;
+  border-radius: 50%;
+
+  .mat-mdc-button-persistent-ripple,
+  .mat-mdc-button-ripple,
+  .mat-ripple-element,
+  .mat-focus-indicator,
+  .mat-mdc-button-touch-target {
+    border-radius: 50%;
+  }
+
+  .mat-mdc-button-touch-target {
+    width: 44px;
+    height: 44px;
+  }
+
+  .mat-icon {
+    margin: 0;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+}
+
+// ============================================================================
+// Apple-style finish: shape, depth and motion only. Colours are the existing
+// orange / red / brown palette. Delete this section to return to the old look.
+// ============================================================================
+:root {
+  --app-radius-sm: 12px;
+  --app-radius: 22px;
+  --app-radius-lg: 28px;
+  --app-shadow: 0 1px 2px rgba(60, 30, 10, 0.05), 0 8px 24px rgba(60, 30, 10, 0.07);
+  --app-shadow-float: 0 8px 20px rgba(60, 30, 10, 0.1), 0 24px 56px rgba(60, 30, 10, 0.18);
+  --app-hairline: rgba(124, 45, 18, 0.1);
+  --app-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+html.dark-theme {
+  --app-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.28);
+  --app-shadow-float: 0 24px 56px rgba(0, 0, 0, 0.6);
+  --app-hairline: rgba(253, 186, 116, 0.14);
+}
+
+html {
+  // pill buttons, soft fields
+  --mat-button-text-container-shape: 999px;
+  --mat-button-filled-container-shape: 999px;
+  --mat-button-outlined-container-shape: 999px;
+  --mat-button-protected-container-shape: 999px;
+  --mat-form-field-outlined-container-shape: 12px;
+  --mdc-outlined-text-field-container-shape: 12px;
+  --mat-card-elevated-container-shape: var(--app-radius);
+  --mat-card-outlined-container-shape: var(--app-radius);
+  --mat-dialog-container-shape: var(--app-radius-lg);
+  --mat-select-container-shape: 14px;
+  --mat-menu-container-shape: 14px;
+  --mat-autocomplete-container-shape: 14px;
+}
+
+.mat-mdc-card {
+  border-radius: var(--app-radius) !important;
+  border: 1px solid var(--app-hairline);
+  box-shadow: var(--app-shadow);
+}
+
+.mat-mdc-button-base:not(.mat-mdc-icon-button) {
+  letter-spacing: 0;
+  font-weight: 600;
+  transition: transform 0.18s var(--app-ease), box-shadow 0.18s var(--app-ease);
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+}
+
+.mat-button-toggle-group {
+  border-radius: 999px !important;
+}
+
+// floating layers: dialog, menus, select panels
+.mat-mdc-dialog-surface {
+  border-radius: var(--app-radius-lg) !important;
+  box-shadow: var(--app-shadow-float) !important;
+}
+
+.cdk-overlay-dark-backdrop {
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+}
+
+div.mat-mdc-select-panel,
+div.mat-mdc-menu-panel,
+div.mat-mdc-autocomplete-panel {
+  border-radius: 14px !important;
+  border: 1px solid var(--app-hairline);
+  box-shadow: var(--app-shadow-float) !important;
+}
+
+// tables: grouped list look, horizontal hairlines only
+table.mat-mdc-table {
+  box-shadow: none;
+}
+
+.table-wrapper,
+.grid,
+.table-container {
+  border-radius: 14px;
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell,
+  .mat-mdc-cell:first-child,
+  .mat-mdc-header-cell:first-child {
+    border-width: 0 0 1px;
+    border-style: solid;
+    border-color: rgba(253, 186, 116, 0.45);
+  }
+}
+
+th.mat-mdc-header-cell {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.875rem;
+}
+
+// title banner: same gradient, calmer (no moving shine, plain subtitle)
+.page-header {
+  border-radius: var(--app-radius-lg);
+  box-shadow: 0 10px 30px rgba(185, 28, 28, 0.18);
+}
+
+.page-header::after {
+  content: none;
+}
+
+.page-header .subtitle {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 500;
+  opacity: 0.92;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-header {
+    animation: none;
+  }
+
+  .mat-mdc-button-base:not(.mat-mdc-icon-button) {
+    transition: none;
+  }
+}
+
+// ============================================================================
+// Frosted glass, whole app. Same orange / red / brown palette. Panels stay mostly
+// opaque so text keeps its contrast; tables and form controls stay solid.
+// Delete this section to return to flat panels.
+// ============================================================================
+:root {
+  --glass-fill: rgba(255, 255, 255, 0.76);
+  --glass-fill-strong: rgba(255, 255, 255, 0.93);
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 10px 34px rgba(124, 45, 18, 0.12);
+
+  --mesh-peach: rgba(255, 176, 130, 0.55);
+  --mesh-butter: rgba(255, 222, 130, 0.45);
+  --mesh-rose: rgba(255, 160, 178, 0.45);
+  --mesh-mint: rgba(150, 226, 196, 0.45);
+  --mesh-lilac: rgba(190, 172, 250, 0.4);
+
+  // pastel tiles: -a to -b is the fill, -ink is the text/icon colour that stays readable on it
+  --peach-a: #ffe4d1; --peach-b: #ffd0b0; --peach-ink: #8a2c05;
+  --rose-a: #ffe0e4;  --rose-b: #ffc8d0;  --rose-ink: #8f1329;
+  --butter-a: #fff2c4; --butter-b: #ffe69a; --butter-ink: #6f4300;
+  --mint-a: #d8f5e7;  --mint-b: #b9ebd4;  --mint-ink: #0d5c3d;
+  --lilac-a: #ebe5ff; --lilac-b: #d9cfff; --lilac-ink: #43278f;
+  --sky-a: #dcefff;   --sky-b: #c2e2ff;   --sky-ink: #0b4a7d;
+  --sand-a: #f1ebe6;  --sand-b: #e4dad2;  --sand-ink: #4a3a31;
+}
+
+html.dark-theme {
+  --glass-fill: rgba(36, 26, 21, 0.8);
+  --glass-fill-strong: rgba(42, 31, 25, 0.95);
+  --glass-edge: rgba(253, 186, 116, 0.18);
+  --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.4);
+
+  --mesh-peach: rgba(234, 88, 12, 0.22);
+  --mesh-butter: rgba(217, 160, 20, 0.12);
+  --mesh-rose: rgba(225, 60, 90, 0.16);
+  --mesh-mint: rgba(40, 160, 115, 0.12);
+  --mesh-lilac: rgba(120, 95, 220, 0.16);
+
+  // same hues at night: deep fill, pale ink
+  --peach-a: #4a2615; --peach-b: #3a1e11; --peach-ink: #ffd0b0;
+  --rose-a: #4a1c26;  --rose-b: #3a161e;  --rose-ink: #ffc8d0;
+  --butter-a: #463611; --butter-b: #362a0e; --butter-ink: #ffe69a;
+  --mint-a: #163b2c;  --mint-b: #112e23;  --mint-ink: #b9ebd4;
+  --lilac-a: #2e2452; --lilac-b: #241c40; --lilac-ink: #d9cfff;
+  --sky-a: #153352;   --sky-b: #102840;   --sky-ink: #c2e2ff;
+  --sand-a: #38302b;  --sand-b: #2d2622;  --sand-ink: #e4dad2;
+}
+
+// glass needs colour behind it: a pastel mesh around the brand's orange and red
+.main-content .content-wrapper .content-body {
+  background:
+    radial-gradient(55% 45% at 0% 0%, var(--mesh-peach), transparent 70%),
+    radial-gradient(45% 40% at 70% 0%, var(--mesh-butter), transparent 70%),
+    radial-gradient(45% 45% at 100% 25%, var(--mesh-rose), transparent 70%),
+    radial-gradient(50% 45% at 5% 85%, var(--mesh-mint), transparent 70%),
+    radial-gradient(55% 50% at 90% 100%, var(--mesh-lilac), transparent 70%),
+    var(--app-page-bg);
+}
+
+.content-body .mat-mdc-card.mat-mdc-card {
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+  color: var(--app-text);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+.content-body .table-wrapper,
+.content-body .table-container,
+.content-body .grid:has(> table) {
+  background: var(--app-surface);
+}
+
+// floating layers sit over busy content, so they are nearly solid
+.cdk-overlay-pane:not(.glass-dialog) .mat-mdc-dialog-container .mat-mdc-dialog-surface.mdc-dialog__surface {
+  background: var(--glass-fill-strong) !important;
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+}
+
+div.mat-mdc-select-panel.mat-mdc-select-panel,
+div.mat-mdc-menu-panel.mat-mdc-menu-panel,
+div.mat-mdc-autocomplete-panel.mat-mdc-autocomplete-panel {
+  background: var(--glass-fill-strong);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+// no blur support, or the user asks for less transparency: solid panels
+@mixin solid-panels {
+  .content-body .mat-mdc-card.mat-mdc-card,
+  div.mat-mdc-select-panel.mat-mdc-select-panel,
+  div.mat-mdc-menu-panel.mat-mdc-menu-panel,
+  div.mat-mdc-autocomplete-panel.mat-mdc-autocomplete-panel {
+    background: var(--app-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  @include solid-panels;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  @include solid-panels;
+}
+
+// ============================================================================
+// Easy reading (many users are older): everything in rem grows together, so the
+// layout keeps its proportions. Bold is kept for page titles, card titles, table
+// headings and key numbers only: if everything is bold, nothing stands out.
+// ============================================================================
+html {
+  font-size: 106.25%; // 17px at the browser's default, and still follows the user's own setting
+
+  --mat-button-text-container-height: 44px;
+  --mat-button-filled-container-height: 44px;
+  --mat-button-outlined-container-height: 44px;
+  --mat-button-protected-container-height: 44px;
+}
+
+.mat-mdc-form-field {
+  --mat-form-field-container-height: 46px;
+  --mat-form-field-container-vertical-padding: 11px;
+  font-size: 1rem;
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  font-size: 0.875rem;
+}
+
+.mat-mdc-option .mdc-list-item__primary-text,
+.mat-mdc-select,
+.mat-mdc-input-element,
+.mat-mdc-button-base:not(.mat-mdc-icon-button),
+.mat-button-toggle-label-content {
+  font-size: 1rem !important;
+}
+
+td.mat-mdc-cell {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+th.mat-mdc-header-cell {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.content-header h4,
+.page-header h3,
+.page-header h4,
+.mat-mdc-card-title {
+  font-weight: 700;
+}
+
+.page-header .subtitle {
+  line-height: 1.6;
+}
+
+// clearer edges: older eyes lose pale borders first
+:root {
+  --app-hairline: rgba(124, 45, 18, 0.2);
+  --glass-fill: rgba(255, 255, 255, 0.86);
+  --mat-form-field-outlined-outline-color: rgba(67, 20, 7, 0.55);
+  --mat-form-field-outlined-label-text-color: #43342b;
+}
+
+html.dark-theme {
+  --app-hairline: rgba(253, 186, 116, 0.26);
+  --glass-fill: rgba(36, 26, 21, 0.9);
+  --mat-form-field-outlined-outline-color: rgba(243, 232, 224, 0.55);
+  --mat-form-field-outlined-label-text-color: #d4c2b6;
+}
+
+.content-body .mat-mdc-card.mat-mdc-card {
+  border-color: var(--app-hairline);
+}
+
+// phones: keep 16px so tables and button rows still fit
+@media (max-width: 600px) {
+  html {
+    font-size: 100%;
+  }
+}
+
+
+// landing here from the calendar: keep the card heading clear of the top bar
+.history-card,
+.expense-history-card {
+  scroll-margin-top: 88px;
+}
+
+// ============================================================================
+// Row overview panel: a MatDialog docked to the right edge (see shared/row-drawer).
+// The older detail dialogs opened from tables use the same panel.
+// ============================================================================
+.clickable-row {
+  cursor: pointer;
+}
+
+.mat-mdc-table tr.mat-mdc-row.clickable-row:hover > td,
+.mat-mdc-table tr.mat-mdc-row.clickable-row:focus-visible > td,
+.mat-mdc-table tr.mat-mdc-row.row-open > td {
+  background-image: linear-gradient(rgba(234, 88, 12, 0.12), rgba(234, 88, 12, 0.12));
+}
+
+.mat-mdc-table tr.mat-mdc-row.row-open > td:first-of-type {
+  box-shadow: inset 4px 0 0 #ea580c;
+}
+
+// The panel reads like a shop slip: orange-red head, a paper slip with the one figure that matters,
+// a perforation, then the details, and a torn bottom edge.
+.cdk-overlay-pane.row-drawer {
+  --slip-ground: #fdebdd;
+  --slip-paper: #ffffff;
+  --slip-ink: #431407;
+  --slip-soft: #7c5a48;
+  --slip-rule: rgba(124, 45, 18, 0.22);
+  --slip-good: #166534;
+  --slip-bad: #b91c1c;
+
+  animation: row-drawer-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.15s ease-in;
+
+  &:has(.mdc-dialog--closing) {
+    transform: translateX(calc(100% + 12px));
+  }
+
+  .mat-mdc-dialog-container .mat-mdc-dialog-surface.mdc-dialog__surface {
+    background: var(--slip-ground) !important;
+    border: 0;
+    border-radius: 24px !important;
+    overflow: hidden;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .mat-mdc-dialog-component-host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .slip-head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1.25rem 0.9rem 3.5rem 1.25rem;
+    color: #fff;
+    background: linear-gradient(120deg, #c2410c, #b91c1c);
+  }
+
+  .slip-head button {
+    flex: none;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 50%;
+  }
+
+  .slip-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: #fff;
+    color: #c2410c;
+
+    mat-icon {
+      width: 30px;
+      height: 30px;
+      font-size: 30px;
+    }
+  }
+
+  .slip-title {
+    flex: 1;
+    min-width: 0;
+
+    .mat-mdc-dialog-title {
+      margin: 0;
+      padding: 0;
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+
+      &::before {
+        display: none;
+      }
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+
+  // the slip overlaps the head
+  .mat-mdc-dialog-content.slip-body {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    position: relative;
+    z-index: 1;
+    margin-top: -2.5rem;
+    padding: 0 1.1rem 1rem;
+    color: var(--slip-ink);
+  }
+
+  .slip {
+    position: relative;
+    margin-bottom: 14px;
+    border-radius: 18px 18px 0 0;
+    background: var(--slip-paper);
+    filter: drop-shadow(0 10px 18px rgba(67, 20, 7, 0.16));
+    animation: slip-print 0.4s 0.08s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+
+    // torn edge
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background:
+        linear-gradient(135deg, var(--slip-paper) 25%, transparent 25%) -8px 0 / 16px 16px repeat-x,
+        linear-gradient(225deg, var(--slip-paper) 25%, transparent 25%) -8px 0 / 16px 16px repeat-x;
+    }
+  }
+
+  .slip-total {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.35rem 1.25rem 1.2rem;
+    text-align: center;
+
+    > span:first-child {
+      color: var(--slip-soft);
+      font-size: 0.9375rem;
+    }
+
+    strong {
+      font-size: 2.35rem;
+      font-weight: 700;
+      line-height: 1.4;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+
+      small {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      &.positive {
+        color: var(--slip-good);
+      }
+
+      &.negative {
+        color: var(--slip-bad);
+      }
+    }
+  }
+
+  // perforation with a punched hole at each end
+  .slip-perf {
+    position: relative;
+    margin: 0 18px;
+    border-top: 2px dashed var(--slip-rule);
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: -12px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--slip-ground);
+    }
+
+    &::before {
+      left: -29px;
+    }
+
+    &::after {
+      right: -29px;
+    }
+  }
+
+  dl.slip-lines {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    margin: 0;
+    padding: 0.5rem 1.25rem 0.9rem;
+    line-height: 1.55;
+
+    dt,
+    dd {
+      margin: 0;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--slip-rule);
+    }
+
+    dt {
+      padding-right: 1rem;
+      font-weight: 400;
+      color: var(--slip-soft);
+    }
+
+    dd {
+      text-align: right;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+      white-space: pre-line;
+    }
+
+    dt:last-of-type,
+    dd:last-of-type {
+      border-bottom: 0;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+      text-align: left;
+    }
+
+    dt.wide {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    dd.wide {
+      padding-top: 0.15rem;
+    }
+
+    dd.blank {
+      font-weight: 400;
+      color: var(--slip-soft);
+    }
+  }
+
+  .slip-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 0.75rem;
+    margin: 1.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--slip-soft);
+  }
+
+  .mat-mdc-dialog-actions.slip-actions {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 0.75rem 1.1rem calc(1rem + env(safe-area-inset-bottom));
+    border: 0;
+
+    button {
+      flex: 1 1 8.5rem;
+      margin: 0;
+      min-height: 48px;
+      border-radius: 14px;
+    }
+
+    // the main thing to do gets its own full line, closest to the thumb
+    button.is-primary {
+      order: 1;
+      flex-basis: 100%;
+      min-height: 52px;
+      color: #fff;
+      background: #c2410c;
+    }
+
+    button:not(.is-primary) {
+      background: var(--slip-paper);
+      border-color: var(--slip-rule);
+      color: var(--slip-ink);
+    }
+
+    button.is-warn:not(.is-primary) {
+      color: var(--slip-bad);
+    }
+  }
+}
+
+html.dark-theme .cdk-overlay-pane.row-drawer {
+  --slip-ground: #1b130f;
+  --slip-paper: #2d211a;
+  --slip-ink: #f6ece5;
+  --slip-soft: #c9b3a4;
+  --slip-rule: rgba(253, 186, 116, 0.24);
+  --slip-good: #86efac;
+  --slip-bad: #fca5a5;
+}
+
+@media (max-width: 600px) {
+  .cdk-overlay-pane.row-drawer {
+    margin: 0 !important;
+    height: 100dvh !important;
+
+    .mat-mdc-dialog-container .mat-mdc-dialog-surface.mdc-dialog__surface {
+      border-radius: 0 !important;
+    }
+  }
+}
+
+@keyframes row-drawer-in {
+  from {
+    transform: translateX(calc(100% + 12px));
+  }
+}
+
+@keyframes slip-print {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cdk-overlay-pane.row-drawer {
+    animation: none;
+    transition: none;
+
+    .slip {
+      animation: none;
+    }
+  }
+}
+
+// dialogs, panels and menus sit above the top bar (z-index 1030); SweetAlert (1060) stays on top of them
+.cdk-overlay-container {
+  z-index: 1050;
 }

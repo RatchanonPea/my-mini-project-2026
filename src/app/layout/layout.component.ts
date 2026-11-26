@@ -25,7 +25,7 @@ export class LayoutComponent {
 
   sidebarCollapsed = false;
   mobileMenuOpen = false;
-  pageTitle = signal('Dashboard');
+  pageTitle = signal('ภาพรวม');
 
   get isPhone(): boolean {
     return this.phoneQuery.matches;
@@ -66,6 +66,6 @@ export class LayoutComponent {
     while (current?.firstChild) {
       current = current.firstChild;
     }
-    return current?.snapshot?.data?.['breadcrumb'] ?? 'Dashboard';
+    return current?.snapshot?.data?.['breadcrumb'] ?? 'ภาพรวม';
   }
 }

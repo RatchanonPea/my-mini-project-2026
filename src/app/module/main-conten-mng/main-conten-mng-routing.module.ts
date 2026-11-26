@@ -13,19 +13,22 @@ const routes: Routes = [
         pathMatch: 'full'
       },
       {
-        path: 'dashboard', data: { breadcrumb: 'Dashboard' }, loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard)
+        path: 'dashboard', data: { breadcrumb: 'ภาพรวม' }, loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard)
       },
       {
-        path: 'sales', data: { breadcrumb: 'Sales / POS' }, loadComponent: () => import('./sales/sales').then(m => m.Sales)
+        path: 'sales', data: { breadcrumb: 'ขายสินค้า' }, loadComponent: () => import('./sales/sales').then(m => m.Sales)
       },
       {
-        path: 'expenses', data: { breadcrumb: 'Expenses' }, loadComponent: () => import('./expenses/expenses').then(m => m.Expenses)
+        path: 'expenses', data: { breadcrumb: 'ค่าใช้จ่าย' }, loadComponent: () => import('./expenses/expenses').then(m => m.Expenses)
       },
       {
-        path: 'inventory', data: { breadcrumb: 'Inventory' }, loadComponent: () => import('./inventory/inventory').then(m => m.Inventory)
+        path: 'inventory', data: { breadcrumb: 'สต็อกไก่' }, loadComponent: () => import('./inventory/inventory').then(m => m.Inventory)
       },
       {
         path: 'purchases', data: { breadcrumb: 'สั่งซื้อไก่' }, loadComponent: () => import('./purchases/purchases').then(m => m.Purchases)
+      },
+      {
+        path: 'calendar', data: { breadcrumb: 'ปฏิทิน' }, loadComponent: () => import('./calendar/calendar').then(m => m.CalendarPage)
       },
       {
         path: 'suppliers', data: { breadcrumb: 'ผู้ขาย/ร้านที่สั่ง' }, loadComponent: () => import('./suppliers/suppliers').then(m => m.Suppliers)
@@ -34,10 +37,14 @@ const routes: Routes = [
         path: 'suppliers/:id', data: { breadcrumb: 'โปรไฟล์ร้านค้า' }, loadComponent: () => import('./suppliers/supplier-profile/supplier-profile').then(m => m.SupplierProfile)
       },
       {
-        path: 'reports', data: { breadcrumb: 'Reports' }, loadComponent: () => import('./reports/reports').then(m => m.Reports)
+        path: 'reports', data: { breadcrumb: 'รายงาน' }, loadComponent: () => import('./reports/reports').then(m => m.Reports)
       },
       {
         path: 'products', data: { breadcrumb: 'ข้อมูลสินค้า' }, loadComponent: () => import('./main-page/main-page').then(m => m.MainPage)
+      },
+      {
+        path: 'shop', data: { breadcrumb: 'ตั้งค่าร้าน', roles: ['manager', 'admin'] }, canActivate: [RoleGuard],
+        loadComponent: () => import('./shop/shop-settings').then(m => m.ShopSettings)
       },
       {
         path: 'settings', data: { breadcrumb: 'ตั้งค่า' }, loadComponent: () => import('./settings/settings').then(m => m.Settings)
