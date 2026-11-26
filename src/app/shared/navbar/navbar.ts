@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { ThemeService } from '../../services/theme';
 import { Chicken } from '../chicken/chicken';
 import { ConfirmDialog, ShowToast } from '../../common/helper';
+import { playLogoutTransition } from '../../common/logout-transition';
 import { ApiService, InventorySummary, NotificationItem } from '../../services/api';
 
 interface NavTarget {
@@ -22,9 +23,11 @@ const ENTITY_LINK: Record<string, (id: number | null) => NavTarget> = {
   purchase_order: (id) => ({ path: '/main-conten-mng/purchases', queryParams: id ? { openPo: id } : undefined }),
   stock_adjustment: (id) => ({ path: '/main-conten-mng/inventory', queryParams: id ? { openAdjust: id } : undefined }),
   inventory_settings: () => ({ path: '/main-conten-mng/inventory' }),
+  supply_contract: () => ({ path: '/main-conten-mng/suppliers' }),
   product: () => ({ path: '/main-conten-mng/products' }),
   expense: () => ({ path: '/main-conten-mng/expenses' }),
   sale: () => ({ path: '/main-conten-mng/sales' }),
+  shop: () => ({ path: '/main-conten-mng/shop' }),
 };
 
 const ENTITY_STYLE: Record<string, { icon: string; bg: string }> = {
@@ -33,9 +36,11 @@ const ENTITY_STYLE: Record<string, { icon: string; bg: string }> = {
   purchase_order: { icon: 'fa-truck', bg: '#16a34a' },
   stock_adjustment: { icon: 'fa-boxes-stacked', bg: '#ea580c' },
   inventory_settings: { icon: 'fa-sliders', bg: '#64748b' },
+  supply_contract: { icon: 'fa-file-signature', bg: '#7c3aed' },
   product: { icon: 'fa-drumstick-bite', bg: '#d97706' },
   expense: { icon: 'fa-receipt', bg: '#b91c1c' },
   sale: { icon: 'fa-cash-register', bg: '#0f766e' },
+  shop: { icon: 'fa-store', bg: '#be185d' },
 };
 const DEFAULT_STYLE = { icon: 'fa-bell', bg: '#64748b' };
 
@@ -117,6 +122,7 @@ export class Navbar implements OnInit, AfterViewInit, OnDestroy {
     this.letters = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('.brand-letter'));
     this.subtitleLetters = new Set(this.host.nativeElement.querySelectorAll<HTMLElement>('.brand-subtitle .brand-letter'));
     this.zone.runOutsideAngular(() => window.addEventListener('chicken-step', this.onChickenStep));
+    window.addEventListener('pointerdown', this.onOutsidePress, true);
   }
 
   ngOnInit(): void {
@@ -190,16 +196,18 @@ export class Navbar implements OnInit, AfterViewInit, OnDestroy {
     return (ENTITY_LINK[item.entity] ?? (() => ({ path: '/main-conten-mng/dashboard' })))(item.entity_id);
   }
 
-  // Closes the notification panel when a click lands outside it — the bell button itself is
-  // inside this same wrapper, so clicking it to open the panel doesn't immediately re-close it.
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    const target = event.target as Node;
-    if (this.isAlertsOpen && !this.alertsWrap?.nativeElement.contains(target)) {
+  // Closes the notification panel when a press lands outside it, like Facebook. Capture phase on window so
+  // pages that stopPropagation() can't swallow it; the bell and panel live in .navbar-user, so toggling stays intact.
+  private onOutsidePress = (event: Event): void => {
+    if (!this.isAlertsOpen) return;
+    const path = event.composedPath();
+    const wrap = this.alertsWrap?.nativeElement;
+    if (wrap && path.includes(wrap)) return;
+    this.zone.run(() => {
       this.isAlertsOpen = false;
       this.isAlertsMenuOpen = false;
-    }
-  }
+    });
+  };
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
@@ -265,6 +273,7 @@ export class Navbar implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.removeEventListener('chicken-step', this.onChickenStep);
+    window.removeEventListener('pointerdown', this.onOutsidePress, true);
     this.subscription.unsubscribe();
   }
 
@@ -276,7 +285,9 @@ export class Navbar implements OnInit, AfterViewInit, OnDestroy {
      ConfirmDialog('ยืนยันการออกจากระบบ',"คุณต้องการออกจากระบบใช่หรือไม่")
         .then(async emit => {
           if (emit) {
+            const finish = await playLogoutTransition();
             this.authService.logout();
+            finish();
           }
         });
   }

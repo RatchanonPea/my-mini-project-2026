@@ -1,23 +1,40 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<div class="login-page">
+<div class="login-page" [class.is-entering]="isEntering">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="shell" [class.leaving]="isEntering">
+    <aside class="hero">
+      <img class="hero-logo" src="assets/images/Logo/CheckenLogo.jpg" alt="" />
+      <h2 class="hero-title">Arre ไก่หมุน</h2>
+      <p class="hero-desc">จัดการสต็อก ขาย ซื้อ และรายจ่าย ครบในที่เดียว</p>
+      <ul class="hero-chips">
+        <li><mat-icon>inventory_2</mat-icon>สต็อกสินค้า</li>
+        <li><mat-icon>point_of_sale</mat-icon>การขาย</li>
+        <li><mat-icon>insights</mat-icon>รายงาน</li>
+      </ul>
+    </aside>
+
   <mat-card class="login-container">
     <div class="avatar">
       <mat-icon>person</mat-icon>
     </div>
+    <h1 class="title">ยินดีต้อนรับกลับมา</h1>
+    <p class="subtitle">เข้าสู่ระบบเพื่อดำเนินการต่อ</p>
 
     <form (ngSubmit)="login()" #loginForm="ngForm">
       <mat-form-field appearance="outline" class="full-width">
-        <mat-icon matPrefix>mail</mat-icon>
+        <mat-icon matPrefix>person_outline</mat-icon>
         <mat-label>Username</mat-label>
-        <input matInput name="username" [(ngModel)]="datalogin.username" />
+        <input matInput name="username" autocomplete="username" [(ngModel)]="datalogin.username" [disabled]="isEntering" />
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-icon matPrefix>lock</mat-icon>
         <mat-label>Password</mat-label>
-        <input matInput [type]="hidePassword ? 'password' : 'text'" name="password" [(ngModel)]="datalogin.password" />
-        <!-- ปุ่มตา -->
+        <input matInput [type]="hidePassword ? 'password' : 'text'" name="password" autocomplete="current-password" [(ngModel)]="datalogin.password" [disabled]="isEntering" />
         <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword" [attr.aria-label]="hidePassword ? 'แสดงรหัสผ่าน' : 'ซ่อนรหัสผ่าน'" [attr.aria-pressed]="!hidePassword">
           <mat-icon>
             {{ hidePassword ? 'visibility_off' : 'visibility' }}
@@ -26,17 +43,35 @@
       </mat-form-field>
 
       <div class="options">
-        <mat-checkbox>Remember me</mat-checkbox>
-        <a href="#">Forgot Password?</a>
+        <mat-checkbox [(ngModel)]="rememberMe" name="rememberMe" [disabled]="isEntering">จำชื่อผู้ใช้</mat-checkbox>
       </div>
 
-      <div class="error-message" *ngIf="errorMessage">
+      <p class="help-text">ลืมรหัสผ่าน? ติดต่อผู้ดูแลระบบเพื่อตั้งรหัสใหม่</p>
+
+      <div class="error-message" *ngIf="errorMessage" role="alert">
+        <mat-icon>error_outline</mat-icon>
         {{ errorMessage }}
       </div>
 
-      <button class="login-btn" type="submit" [disabled]="isSubmitting">
-        {{ isSubmitting ? 'LOADING...' : 'LOGIN' }}
+      <button class="login-btn" type="submit" [disabled]="isSubmitting || isEntering">
+        <span class="spinner" *ngIf="isSubmitting"></span>
+        {{ isSubmitting ? 'กำลังตรวจสอบ' : 'LOGIN' }}
       </button>
     </form>
   </mat-card>
+  </div>
+
+  <!-- success transition -->
+  <div class="enter-overlay" *ngIf="isEntering" role="status" aria-live="polite">
+    <div class="enter-content">
+      <svg class="check" viewBox="0 0 52 52" aria-hidden="true">
+        <circle class="check-ring" cx="26" cy="26" r="24" fill="none" />
+        <path class="check-mark" fill="none" d="M14 27 l8 8 l16 -17" />
+      </svg>
+      <div class="enter-hello">เข้าสู่ระบบสำเร็จ</div>
+      <div class="enter-name">{{ welcomeName }}</div>
+      <div class="enter-text">กำลังเตรียมระบบ<span class="dots"></span></div>
+      <div class="enter-bar"><span [style.animation-duration.ms]="enterDelayMs"></span></div>
+    </div>
+  </div>
 </div>
