@@ -1,6 +1,14 @@
 .supplier-profile-page { padding: 1.5rem; }
 .page-header { margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 0.5rem; }
 .page-header h3 { display: flex; align-items: baseline; gap: 0.5rem; margin: 0; }
+.back-btn {
+  align-self: center;
+  flex: none;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.12);
+}
+.back-btn mat-icon { margin-right: 0.25rem; }
 .page-header small { font-size: 0.9rem; opacity: 0.7; font-weight: 500; }
 .subtitle { color: var(--app-text-muted); margin: 0.25rem 0 0; }
 
@@ -13,15 +21,17 @@
 .profile-form-card mat-card-content { padding: 0; }
 .form-row { display: grid; gap: 1rem; margin-bottom: 1rem; }
 .full-width { width: 100%; }
-.map-label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem; opacity: 0.75; }
-.form-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+.map-label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.4rem; opacity: 0.75; }
+.form-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; }
+.status-zone { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.12)); }
+.status-caption { font-size: 0.875rem; font-weight: 600; opacity: 0.7; }
 
 .profile-side { display: flex; flex-direction: column; gap: 1.25rem; }
 .profile-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
 .stat-card { border-radius: 16px; }
 .card-stats { display: flex; flex-direction: column; gap: 0.25rem; padding: 1rem !important; height: 100%; }
 .stat-number { font-size: 1.5rem; font-weight: 800; }
-.stat-label { font-size: 0.8rem; opacity: 0.8; }
+.stat-label { font-size: 0.875rem; opacity: 0.8; }
 
 .history-card { padding: 1.5rem; }
 .history-card mat-card-header { padding: 0; margin-bottom: 1rem; }
@@ -33,7 +43,7 @@
   display: inline-block;
   padding: 0.2rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -45,7 +55,7 @@
   display: inline-block;
   padding: 0.2rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -60,3 +70,7 @@
   .po-received { background: rgba(76, 175, 80, 0.2); color: #81c784; }
   .po-cancelled { background: #3a3a3a; color: #bdbdbd; }
 }
+
+.table-search { width: 100%; max-width: 360px; margin-bottom: 0.75rem; }
+.clickable-row { cursor: pointer; transition: background-color 0.12s ease; }
+.clickable-row:hover, .clickable-row:focus-visible { background: rgba(234, 88, 12, 0.1); outline: none; }

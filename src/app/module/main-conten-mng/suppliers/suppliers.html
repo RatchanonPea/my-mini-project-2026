@@ -17,6 +17,8 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>ชื่อร้าน</mat-label>
               <input matInput formControlName="name" maxlength="200" />
+              <app-clear-button matSuffix />
+              <mat-hint align="end" appCharCount />
               <mat-error>กรุณากรอกชื่อร้าน</mat-error>
             </mat-form-field>
           </div>
@@ -24,20 +26,27 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>เบอร์โทร</mat-label>
               <input matInput formControlName="phone" maxlength="30" placeholder="เช่น 08x-xxx-xxxx" />
+              <app-clear-button matSuffix />
+              <mat-hint align="end" appCharCount />
             </mat-form-field>
           </div>
           <div class="form-row">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>ที่อยู่</mat-label>
-              <input matInput formControlName="address" maxlength="300" />
+              <textarea matInput formControlName="address" maxlength="300" rows="2"></textarea>
+              <app-clear-button matSuffix />
+              <mat-hint align="end" appCharCount />
             </mat-form-field>
           </div>
           <div class="form-row">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>หมายเหตุ</mat-label>
-              <input matInput formControlName="note" maxlength="500" />
+              <textarea matInput formControlName="note" maxlength="500" rows="2"></textarea>
+              <app-clear-button matSuffix />
+              <mat-hint align="end" appCharCount />
             </mat-form-field>
           </div>
+          <app-supplier-contract-fields [form]="form"></app-supplier-contract-fields>
           <div class="form-row">
             <label class="map-label">ปักหมุดตำแหน่งร้าน</label>
             <app-location-picker [lat]="lat" [lng]="lng" (locationChange)="onLocationChange($event)" (addressChange)="onAddressChange($event)"></app-location-picker>
@@ -92,8 +101,11 @@
               </td>
             </ng-container>
             <ng-container matColumnDef="action" stickyEnd>
-              <th mat-header-cell *matHeaderCellDef class="text-center"> Action </th>
+              <th mat-header-cell *matHeaderCellDef class="text-center"> จัดการ </th>
               <td mat-cell *matCellDef="let s" class="text-center" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+                <button mat-icon-button type="button" aria-label="พิมพ์ข้อตกลงซื้อขายไก่" title="พิมพ์ข้อตกลงซื้อขายไก่" (click)="printAgreement(s, $event)">
+                  <mat-icon>description</mat-icon>
+                </button>
                 <button mat-icon-button type="button" [color]="s.is_active ? 'warn' : 'primary'"
                   [attr.aria-label]="s.is_active ? 'ไม่รับไก่จากร้านนี้แล้ว' : 'เปิดรับไก่อีกครั้ง'"
                   [title]="s.is_active ? 'ไม่รับไก่จากร้านนี้แล้ว' : 'เปิดรับไก่อีกครั้ง'"
@@ -103,7 +115,7 @@
               </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" tabindex="0" title="กดเพื่อดูโปรไฟล์ร้าน" (click)="openProfile(row)" (keydown.enter)="openProfile(row)"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" tabindex="0" title="กดเพื่อดูรายละเอียด" (click)="openRow(row)" (keydown.enter)="openRow(row)"></tr>
             <tr class="mat-mdc-row no-data-row" *matNoDataRow>
               <td class="mat-mdc-cell" [attr.colspan]="displayedColumns.length">
                 <app-no-data></app-no-data>

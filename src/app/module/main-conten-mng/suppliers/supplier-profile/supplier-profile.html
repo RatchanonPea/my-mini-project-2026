@@ -1,7 +1,7 @@
 <section class="supplier-profile-page">
   <div class="page-header">
-    <button mat-icon-button type="button" (click)="back()" aria-label="กลับ" title="กลับไปรายชื่อร้านค้า">
-      <mat-icon>arrow_back</mat-icon>
+    <button mat-stroked-button type="button" class="back-btn" (click)="back()" title="กลับไปรายชื่อร้านค้า">
+      <mat-icon>arrow_back</mat-icon> กลับ
     </button>
     <div>
       <h3>โปรไฟล์ร้านค้า @if (profile) { <small>({{ profile.supplier.code }})</small> }</h3>
@@ -24,6 +24,8 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>ชื่อร้าน</mat-label>
                 <input matInput formControlName="name" maxlength="200" />
+                <app-clear-button matSuffix />
+                <mat-hint align="end" appCharCount />
                 <mat-error>กรุณากรอกชื่อร้าน</mat-error>
               </mat-form-field>
             </div>
@@ -31,20 +33,27 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>เบอร์โทร</mat-label>
                 <input matInput formControlName="phone" maxlength="30" />
+                <app-clear-button matSuffix />
+                <mat-hint align="end" appCharCount />
               </mat-form-field>
             </div>
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>ที่อยู่</mat-label>
-                <input matInput formControlName="address" maxlength="300" />
+                <textarea matInput formControlName="address" maxlength="300" rows="2"></textarea>
+                <app-clear-button matSuffix />
+                <mat-hint align="end" appCharCount />
               </mat-form-field>
             </div>
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>หมายเหตุ</mat-label>
-                <input matInput formControlName="note" maxlength="500" />
+                <textarea matInput formControlName="note" maxlength="500" rows="2"></textarea>
+                <app-clear-button matSuffix />
+                <mat-hint align="end" appCharCount />
               </mat-form-field>
             </div>
+            <app-supplier-contract-fields [form]="form"></app-supplier-contract-fields>
             <div class="form-row">
               <label class="map-label">ปักหมุดตำแหน่งร้าน</label>
               <app-location-picker [lat]="lat" [lng]="lng" (locationChange)="onLocationChange($event)" (addressChange)="onAddressChange($event)"></app-location-picker>
@@ -53,7 +62,13 @@
               <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving">
                 <mat-icon>save</mat-icon> บันทึก
               </button>
-              <button mat-stroked-button type="button" [color]="form.controls.is_active.value ? 'warn' : 'primary'" (click)="toggleActive()">
+              <button mat-stroked-button type="button" (click)="printAgreement()">
+                <mat-icon>description</mat-icon> พิมพ์ข้อตกลงซื้อขายไก่
+              </button>
+            </div>
+            <div class="status-zone">
+              <span class="status-caption">สถานะร้านนี้</span>
+              <button mat-button type="button" [color]="form.controls.is_active.value ? 'warn' : 'primary'" (click)="toggleActive()">
                 <mat-icon>{{ form.controls.is_active.value ? 'block' : 'check_circle' }}</mat-icon>
                 {{ form.controls.is_active.value ? 'ไม่รับไก่จากร้านนี้แล้ว' : 'เปิดรับไก่อีกครั้ง' }}
               </button>
@@ -92,9 +107,72 @@
 
         <mat-card class="history-card">
           <mat-card-header>
+            <mat-card-title>ข้อตกลงซื้อขายไก่</mat-card-title>
+            <mat-card-subtitle>ข้อตกลงที่ "ใช้อยู่" กำหนดราคาและเครดิตเริ่มต้นของใบสั่งซื้อใหม่ · ทำฉบับใหม่ได้ที่ปุ่ม "พิมพ์ข้อตกลงซื้อขายไก่" (ฉบับเก่าจะสิ้นสุดเอง)</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="table-search" subscriptSizing="dynamic">
+              <mat-label>ค้นหาข้อตกลง</mat-label>
+              <input matInput [formControl]="contractSearch" placeholder="เลขที่ / วันที่ / สถานะ / ราคา" />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+            <div class="table-wrapper">
+              <table mat-table [dataSource]="filteredContracts" class="mat-elevation-z2">
+                <ng-container matColumnDef="code">
+                  <th mat-header-cell *matHeaderCellDef> เลขที่ </th>
+                  <td mat-cell *matCellDef="let c">{{ c.code }}</td>
+                </ng-container>
+                <ng-container matColumnDef="created_at">
+                  <th mat-header-cell *matHeaderCellDef> ทำเมื่อ </th>
+                  <td mat-cell *matCellDef="let c">{{ c.created_at | date:'dd/MM/yyyy':'UTC' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="quantity">
+                  <th mat-header-cell *matHeaderCellDef> จำนวน </th>
+                  <td mat-cell *matCellDef="let c">{{ c.quantity | number:'1.0-0' }} ตัว/{{ c.per === 'month' ? 'เดือน' : 'ปี' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="unit_price">
+                  <th mat-header-cell *matHeaderCellDef> ราคา/ตัว </th>
+                  <td mat-cell *matCellDef="let c">{{ c.unit_price !== null ? (c.unit_price | currency:'THB ':'symbol':'1.0-2') : '-' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="credit_days">
+                  <th mat-header-cell *matHeaderCellDef> เครดิต </th>
+                  <td mat-cell *matCellDef="let c">{{ c.credit_days !== null ? (c.credit_days === 0 ? 'จ่ายสด' : c.credit_days + ' วัน') : '-' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef> สถานะ </th>
+                  <td mat-cell *matCellDef="let c"><span class="po-status" [ngClass]="c.status === 'active' ? 'po-received' : 'po-cancelled'">{{ c.status === 'active' ? 'ใช้อยู่' : 'สิ้นสุดแล้ว' }}</span></td>
+                </ng-container>
+                <ng-container matColumnDef="action">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> จัดการ </th>
+                  <td mat-cell *matCellDef="let c" class="text-center">
+                    <button mat-icon-button type="button" aria-label="พิมพ์ซ้ำ" title="พิมพ์ซ้ำ (ข้อมูลเดิมตอนทำข้อตกลง)" (click)="reprintContract(c); $event.stopPropagation()"><mat-icon>print</mat-icon></button>
+                    @if (c.status === 'active' && canEndContract) {
+                      <button mat-icon-button type="button" color="warn" aria-label="สิ้นสุดข้อตกลง" title="สิ้นสุดข้อตกลง" (click)="endContract(c); $event.stopPropagation()"><mat-icon>event_busy</mat-icon></button>
+                    }
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="contractColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: contractColumns;" class="clickable-row" tabindex="0" (click)="openContract(row)" (keydown.enter)="openContract(row)"></tr>
+                <tr class="mat-mdc-row no-data-row" *matNoDataRow>
+                  <td class="mat-mdc-cell" [attr.colspan]="contractColumns.length">
+                    <app-no-data></app-no-data>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="history-card">
+          <mat-card-header>
             <mat-card-title>ประวัติการสั่งซื้อ</mat-card-title>
           </mat-card-header>
           <mat-card-content>
+            <mat-form-field appearance="outline" class="table-search" subscriptSizing="dynamic">
+              <mat-label>ค้นหาใบสั่งซื้อ</mat-label>
+              <input matInput [formControl]="orderSearch" placeholder="รหัส / วันที่ / สถานะ / ราคา" />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
             <div class="table-wrapper">
               <table mat-table [dataSource]="pagedOrders" class="mat-elevation-z2">
                 <ng-container matColumnDef="code">
@@ -126,7 +204,7 @@
                   <td mat-cell *matCellDef="let o">{{ o.received_date ? (o.received_date | date:'dd/MM/yyyy':'UTC') : '-' }}</td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" tabindex="0" (click)="openOrder(row)" (keydown.enter)="openOrder(row)"></tr>
                 <tr class="mat-mdc-row no-data-row" *matNoDataRow>
                   <td class="mat-mdc-cell" [attr.colspan]="displayedColumns.length">
                     <app-no-data></app-no-data>
@@ -134,7 +212,7 @@
                 </tr>
               </table>
             </div>
-            <app-pager [total]="orders.length" [pageSize]="pageSize" [pageIndex]="pageIndex" (pageChange)="onPageChange($event)"></app-pager>
+            <app-pager [total]="filteredOrders.length" [pageSize]="pageSize" [pageIndex]="pageIndex" (pageChange)="onPageChange($event)"></app-pager>
           </mat-card-content>
         </mat-card>
       </div>

@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import * as L from 'leaflet';
+import { ClearButton } from '../clear-button/clear-button';
 
 // Leaflet's default marker images resolve relative to leaflet.css, which breaks once Angular
 // bundles the CSS. L.Icon.Default always auto-detects and prepends an imagePath from the CSS
@@ -45,7 +46,7 @@ const PIN_ZOOM = 17;
 @Component({
   selector: 'app-location-picker',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
+  imports: [ClearButton, CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
   template: `
     <div class="location-picker">
       @if (!locked) {
@@ -53,6 +54,7 @@ const PIN_ZOOM = 17;
           <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
             <mat-label>ค้นหาสถานที่ / ที่อยู่</mat-label>
             <input matInput [(ngModel)]="query" (keydown.enter)="$event.preventDefault(); search()" placeholder="เช่น ตลาดสดเจ๊แดง หรือ ชื่อถนน" />
+            <app-clear-button matSuffix />
           </mat-form-field>
           <button mat-stroked-button type="button" (click)="search()" [disabled]="searching || !query.trim()">
             <mat-icon>search</mat-icon> ค้นหา
@@ -109,15 +111,15 @@ const PIN_ZOOM = 17;
     .search-results li + li { border-top: 1px solid rgba(124, 45, 18, 0.15); }
     .search-results button {
       display: flex; align-items: center; gap: 0.5rem; width: 100%; padding: 0.5rem 0.75rem;
-      background: none; border: none; text-align: left; cursor: pointer; font-size: 0.85rem;
+      background: none; border: none; text-align: left; cursor: pointer; font-size: 0.875rem;
     }
     .search-results button:hover { background: rgba(234, 88, 12, 0.08); }
-    .my-location-btn { align-self: flex-start; font-size: 0.85rem; }
-    .location-error { font-size: 0.78rem; color: #b91c1c; }
+    .my-location-btn { align-self: flex-start; font-size: 0.875rem; }
+    .location-error { font-size: 0.875rem; color: #b91c1c; }
     .map-canvas { width: 100%; height: 280px; border-radius: 12px; overflow: hidden; }
     .map-canvas.locked { cursor: default; }
     .picker-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
-    .hint { font-size: 0.8rem; opacity: 0.7; }
+    .hint { font-size: 0.875rem; opacity: 0.7; }
 
     :host-context(html.dark-theme) .search-results { border-color: #4a2e20; }
     :host-context(html.dark-theme) .search-results button { color: #f3e8e0; }
